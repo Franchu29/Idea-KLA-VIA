@@ -1,0 +1,23 @@
+<%- include('./partials/header'); %>  
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil del Usuario</title>
+</head>
+<body>
+    <h1>Perfil de <%= user.nombre %> <%= user.apellido %></h1>
+
+    <div>
+        <p><strong>Nombre:</strong> <%= user.nombre %></p>
+        <p><strong>Apellido:</strong> <%= user.apellido %></p>
+        <p><strong>Email:</strong> <%= user.email %></p>
+        <p><strong>Fecha de Nacimiento:</strong> <%= user.fecha_naciemiento.toLocaleDateString() %></p>
+        <p><strong>Edad:</strong> <%= user.edad %> años</p>
+    </div>
+
+    <a href="/edit_user/<%= user.id %>">Editar perfil</a>
+
+</body>
+</html>

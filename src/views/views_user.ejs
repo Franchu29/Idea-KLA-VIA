@@ -19,6 +19,8 @@
                     <th>Fecha de Nacimiento</th>
                     <th>Edad</th>
                     <th>Email</th>
+                    <th>Editar</th>
+                    <th>Eliminar</th>
                 </tr>
             </thead>
             <tbody>
@@ -27,9 +29,19 @@
                         <td><%= user.id %></td>
                         <td><%= user.nombre %></td>
                         <td><%= user.apellido %></td>
-                        <td><%= user.fecha_naciemiento.toLocaleDateString() %></td> <!-- Muestra la fecha en formato legible -->
+                        <td><%= user.fecha_naciemiento.toLocaleDateString() %></td>
                         <td><%= user.edad %></td>
                         <td><%= user.email %></td>
+                        <td>
+                            <form action="/edit_user_render/<%= user.id %>" method="get">
+                                <button type="submit">Editar</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form action="/delete_user/<%= user.id %>" method="post" onsubmit="return confirm('¿Estás seguro que quieres eliminar este usuario?');">
+                                <button type="submit">Eliminar</button>
+                            </form>
+                        </td>
                     </tr>
                 <% }) %>
             </tbody>
