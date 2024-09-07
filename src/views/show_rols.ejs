@@ -7,38 +7,32 @@
     <title>Lista de Usuarios</title>
 </head>
 <body>
-    <h1>Lista de Usuarios</h1>
+    <h1>Lista de Roles</h1>
 
-    <% if (users.length > 0) { %>
+    <% if (roles.length > 0) { %>
         <table border="1">
             <thead>
                 <tr>
                     <th>ID</th>
                     <th>Nombre</th>
-                    <th>Apellido</th>
-                    <th>Fecha de Nacimiento</th>
-                    <th>Edad</th>
-                    <th>Email</th>
+                    <th>Descripción</th>
                     <th>Editar</th>
                     <th>Eliminar</th>
                 </tr>
             </thead>
             <tbody>
-                <% users.forEach(user => { %>
+                <% roles.forEach(rol => { %>
                     <tr>
-                        <td><%= user.id %></td>
-                        <td><%= user.nombre %></td>
-                        <td><%= user.apellido %></td>
-                        <td><%= new Date(user.fecha_nacimeinto).toLocaleDateString('es-ES', { timeZone: 'UTC' }) %></td>            
-                        <td><%= user.edad %></td>
-                        <td><%= user.email %></td>
+                        <td><%= rol.id %></td>
+                        <td><%= rol.nombre %></td>
+                        <td><%= rol.descripcion %></td>
                         <td>
-                            <form action="/edit_user_render/<%= user.id %>" method="get">
+                            <form action="/edit_user_render/<%= rol.id %>" method="get">
                                 <button type="submit">Editar</button>
                             </form>
                         </td>
                         <td>
-                            <form action="/delete_user/<%= user.id %>" method="post" onsubmit="return confirm('¿Estás seguro que quieres eliminar este usuario?');">
+                            <form action="/delete_user/<%= rol.id %>" method="post" onsubmit="return confirm('¿Estás seguro que quieres eliminar este usuario?');">
                                 <button type="submit">Eliminar</button>
                             </form>
                         </td>
@@ -47,7 +41,7 @@
             </tbody>
         </table>
     <% } else { %>
-        <p>No hay usuarios registrados.</p>
+        <p>No hay roles registrados.</p>
     <% } %>
 
 </body>
