@@ -4,6 +4,7 @@ const userController = require('../controllers/user_controller');
 const router = Router();
 
 router.get('/', userController.renderIndex);
+router.post('/login', userController.login);
 
 router.get('/inicio', userController.inicio);
 

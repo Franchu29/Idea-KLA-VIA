@@ -54,9 +54,13 @@
 <body>
     <div class="container">
         <h2>Login</h2>
+        <!-- Muestra el mensaje de error si existe -->
+        <% if (typeof errorMessage !== 'undefined') { %>
+            <p class="error-message"><%= errorMessage %></p>
+        <% } %>
         <form action="/login" method="POST">
-            <input type="text" name="username" placeholder="Username" required>
-            <input type="password" name="password" placeholder="Password" required>
+            <input type="text" name="email" placeholder="Email" required>
+            <input type="password" name="contrasena" placeholder="Contraseña" required>
             <input type="submit" value="Login">
         </form>
     </div>

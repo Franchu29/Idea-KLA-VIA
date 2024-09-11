@@ -1,10 +1,48 @@
 // Importa Prisma Client para interactuar con la base de datos
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
+const JWT_SECRET = "your_secret_key";
 
 exports.renderIndex = (req, res) => {
     console.log('MOSTRANDO LOGIN');
     res.render('index.ejs');
+};
+
+exports.login = async (req, res) => {
+    const { email, contrasena } = req.body;
+    console.log(email, contrasena);
+  
+    try {
+      // Buscar el usuario por email
+      const user = await prisma.user.findUnique({
+        where: { email: email },
+      });
+  
+      if (!user) {
+        return res.render('index.ejs', { errorMessage: 'Usuario no encontrado' });
+      }
+  
+      // Verificar la contraseña
+      const validContrasena = await bcrypt.compare(contrasena, user.contrasena);
+      if (!validContrasena) {
+        return res.render('index.ejs', { errorMessage: 'Contraseña incorrecta' });
+      }
+  
+      // Generar el token JWT
+      const token = jwt.sign(
+        { userId: user.id, email: user.email, role: user.role }, 
+        JWT_SECRET, 
+        { expiresIn: '1h' }
+      );
+  
+      // Enviar el token al cliente
+      res.render('inicio.ejs');
+    } catch (error) {
+      res.status(500).json({ error: 'Error en el servidor' });
+    }
 };
 
 exports.inicio = (req, res) => {
@@ -37,6 +75,9 @@ exports.createUser = async (req, res) => {
             return res.status(400).json({ error: 'Fecha de nacimiento inválida' });
         }
 
+        // Cifrar la contraseña antes de guardarla
+        const hashedPassword = await bcrypt.hash(contrasena, 10); // 10 es el salt rounds (puedes ajustarlo según sea necesario)
+
         const newUser = await prisma.user.create({
             data: {
                 nombre,
@@ -44,7 +85,7 @@ exports.createUser = async (req, res) => {
                 fecha_nacimeinto: fechaNacimiento, // Usa el objeto Date aquí
                 edad: edadInt,
                 email,
-                contrasena,
+                contrasena: hashedPassword, // Guarda la contraseña cifrada
                 rolGeneral: {
                     connect: { id: parseInt(rolGeneralId, 10) }
                 }
