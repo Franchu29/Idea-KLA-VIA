@@ -35,3 +35,53 @@ model Roles {
   // Relación con Usuarios
   usuarios    User[]
 }
+
+model Eventos {
+  id          Int           @id @default(autoincrement())
+  nombre      String        // Nombre del evento (ej: "Maratón Ciudad")
+  descripcion String?       // Descripción opcional del evento
+  fecha       DateTime      // Fecha del evento
+  lugar       String        // Lugar donde se realizará el evento (ej: "Parque Central")
+
+  // Relación con Categorías y Distancias
+  categorias  EventoCategoria[]
+  distancias  EventoDistancia[]
+}
+
+model Categoria {
+  id         Int           @id @default(autoincrement())
+  nombre     String        // e.g., "15-20 años", "21-30 años"
+
+  // Relación con Eventos
+  eventos    EventoCategoria[]
+}
+
+model Distancia {
+  id         Int           @id @default(autoincrement())
+  nombre     String        // e.g., "2 km", "5 km", "10 km"
+
+  // Relación con Eventos
+  eventos    EventoDistancia[]
+}
+
+// Tabla intermedia para la relación muchos a muchos entre Eventos y Categorías
+model EventoCategoria {
+  eventoId    Int
+  categoriaId Int
+
+  evento      Eventos   @relation(fields: [eventoId], references: [id])
+  categoria   Categoria @relation(fields: [categoriaId], references: [id])
+
+  @@id([eventoId, categoriaId])
+}
+
+// Tabla intermedia para la relación muchos a muchos entre Eventos y Distancias
+model EventoDistancia {
+  eventoId    Int
+  distanciaId Int
+
+  evento      Eventos   @relation(fields: [eventoId], references: [id])
+  distancia   Distancia @relation(fields: [distanciaId], references: [id])
+
+  @@id([eventoId, distanciaId])
+}

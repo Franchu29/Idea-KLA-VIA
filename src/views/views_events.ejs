@@ -1,0 +1,52 @@
+<%- include('./partials/header'); %>  
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Eventos</title>
+</head>
+<body>
+    <h1>Lista de Eventos</h1>
+
+    <% if (events.length > 0) { %>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Fecha</th>
+                    <th>Lugar</th>
+                    <th>Editar</th>
+                    <th>Eliminar</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% events.forEach(event => { %>
+                    <tr>
+                        <td><%= event.id %></td>
+                        <td><%= event.nombre %></td>
+                        <td><%= event.descripcion %></td>
+                        <td><%= new Date(event.fecha).toLocaleDateString('es-ES', { timeZone: 'UTC' }) %></td>            
+                        <td><%= event.lugar %></td>
+                        <td>
+                            <form action="/edit_user_render/<%= event.id %>" method="get">
+                                <button type="submit">Editar</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form action="/delete_user/<%= event.id %>" method="post" onsubmit="return confirm('¿Estás seguro que quieres eliminar este usuario?');">
+                                <button type="submit">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    <% } else { %>
+        <p>No hay usuarios registrados.</p>
+    <% } %>
+
+</body>
+</html>

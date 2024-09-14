@@ -1,0 +1,34 @@
+<%- include('./partials/header'); %>
+
+<form action="/events/create_event" method="POST">
+    <label for="nombre">Nombre:</label>
+    <input type="text" id="nombre" name="nombre" required>
+
+    <label for="descripcion">Descripción:</label>
+    <input type="text" id="descripcion" name="descripcion" required>
+
+    <label for="fecha">Fecha:</label>
+    <input type="date" id="fecha" name="fecha" required>
+
+    <label for="lugar">Lugar:</label>
+    <input type="text" id="lugar" name="lugar" required>    
+
+    <label for="categorias">Categorías:</label>
+    <select id="categorias" name="categorias" multiple required>
+        <!-- Ejemplo de opciones, cámbialas según tus datos -->
+        <option value="1">15-20 años</option>
+        <option value="2">21-30 años</option>
+        <!-- Agrega más opciones aquí -->
+    </select>
+
+    <label for="distancias">Distancias:</label>
+    <select id="distancias" name="distancias" multiple required>
+        <!-- Ejemplo de opciones, cámbialas según tus datos -->
+        <option value="1">2 km</option>
+        <option value="2">5 km</option>
+        <option value="3">10 km</option>
+        <!-- Agrega más opciones aquí -->
+    </select>
+
+    <button type="submit">Crear Evento</button>
+</form>
