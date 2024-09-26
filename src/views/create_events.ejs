@@ -1,5 +1,4 @@
 <%- include('./partials/header'); %>
-
 <form action="/events/create_event" method="POST">
     <label for="nombre">Nombre:</label>
     <input type="text" id="nombre" name="nombre" required>
@@ -11,24 +10,26 @@
     <input type="date" id="fecha" name="fecha" required>
 
     <label for="lugar">Lugar:</label>
-    <input type="text" id="lugar" name="lugar" required>    
+    <input type="text" id="lugar" name="lugar" required>
 
     <label for="categorias">Categorías:</label>
-    <select id="categorias" name="categorias" multiple required>
-        <!-- Ejemplo de opciones, cámbialas según tus datos -->
-        <option value="1">15-20 años</option>
-        <option value="2">21-30 años</option>
-        <!-- Agrega más opciones aquí -->
-    </select>
-
+    <div id="categorias">
+      <label><input type="checkbox" name="categorias" value="1"> 15-19 años</label><br>
+      <label><input type="checkbox" name="categorias" value="2"> 20-29 años</label><br>
+      <label><input type="checkbox" name="categorias" value="3"> 30-39 años</label><br>
+      <label><input type="checkbox" name="categorias" value="4"> 40-49 años</label><br>
+      <label><input type="checkbox" name="categorias" value="5"> 50-59 años</label><br>
+      <label><input type="checkbox" name="categorias" value="6"> 60-69 años</label><br>
+      <label><input type="checkbox" name="categorias" value="7"> 70+ años</label><br>
+    </div>
+    
     <label for="distancias">Distancias:</label>
-    <select id="distancias" name="distancias" multiple required>
-        <!-- Ejemplo de opciones, cámbialas según tus datos -->
-        <option value="1">2 km</option>
-        <option value="2">5 km</option>
-        <option value="3">10 km</option>
-        <!-- Agrega más opciones aquí -->
-    </select>
+    <div id="distancias">
+      <label><input type="checkbox" name="distancias" value="1"> 2 km</label><br>
+      <label><input type="checkbox" name="distancias" value="2"> 5 km</label><br>
+      <label><input type="checkbox" name="distancias" value="3"> 10 km</label><br>
+      <label><input type="checkbox" name="distancias" value="4"> 21 km</label><br>
+    </div>    
 
     <button type="submit">Crear Evento</button>
 </form>

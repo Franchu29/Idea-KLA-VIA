@@ -10,6 +10,11 @@ router.get('/render_events', eventosController.renderEvents);
 router.post('/create_event', eventosController.createEvent);
 
 // Ruta para obtener todos los eventos
-router.get('/render_event', eventosController.getEvents);
+router.get('/show_event', eventosController.getEvents);
+
+router.post('/delete_event/:id', eventosController.deleteEvento);
+
+router.get('/edit_event/:id', eventosController.editEventoRender);
+router.post('/edit_event/:id', eventosController.editEvento);
 
 module.exports = router;
