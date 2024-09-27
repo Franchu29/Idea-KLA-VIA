@@ -18,6 +18,7 @@
                     <th>Descripción</th>
                     <th>Fecha</th>
                     <th>Lugar</th>
+                    <th>Precio</th>
                     <th>Editar</th>
                     <th>Eliminar</th>
                 </tr>
@@ -30,6 +31,18 @@
                         <td><%= event.descripcion %></td>
                         <td><%= new Date(event.fecha).toLocaleDateString('es-ES', { timeZone: 'UTC' }) %></td>            
                         <td><%= event.lugar %></td>
+                        
+                        <td>
+                            <% if (event.distancias.length > 0) { %>
+                                <% event.distancias.forEach((ed, index) => { %>
+                                    <span>Distancia: <%= ed.distancia.nombre %> - Precio: $<%= ed.distancia.precio %></span>
+                                    <% if (index < event.distancias.length - 1) { %>, <% } %>
+                                <% }); %>
+                            <% } else { %>
+                                <span>No hay distancias</span>
+                            <% } %>
+                        </td>
+
                         <td>
                             <form action="/events/edit_event/<%= event.id %>" method="get">
                                 <button type="submit">Editar</button>

@@ -58,7 +58,8 @@ model Categoria {
 
 model Distancia {
   id         Int           @id @default(autoincrement())
-  nombre     String        // e.g., "2 km", "5 km", "10 km"
+  nombre     String        //"2 km", "5 km", "10 km"
+  precio    Int           @default(0) // Precio de la inscripción 
 
   // Relación con Eventos
   eventos    EventoDistancia[]

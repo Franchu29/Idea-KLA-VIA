@@ -60,16 +60,25 @@ exports.createEvent = async (req, res) => {
   }
 };
 
+// Obtiene todos los eventos
 exports.getEvents = async (req, res) => {
     console.log('OBTENIENDO EVENTOS');
     try {
-        const events = await prisma.eventos.findMany();
+        const events = await prisma.eventos.findMany({
+            include: {
+                distancias: {  // Ajuste aquí, utilizamos "distancias" en lugar de "EventoDistancia"
+                    include: {
+                        distancia: true,  // Incluye la información de las distancias desde la tabla Distancia
+                    },
+                },
+            },
+        });
         res.render('views_events.ejs', { events });
     } catch (error) {
         console.error(error);
         res.status(500).send('Error al obtener los eventos');
     }
-}
+};
 
 // Elimina un evento
 exports.deleteEvento = async (req, res) => {
@@ -128,6 +137,7 @@ exports.editEventoRender = async (req, res) => {
   }
 };
 
+// Edita un evento
 exports.editEvento = async (req, res) => {
   try {
       const { id } = req.params;
