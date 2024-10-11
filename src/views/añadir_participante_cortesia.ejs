@@ -1,0 +1,68 @@
+<%- include('./partials/header'); %>
+<form action="/events/inscribir" method="POST">
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Añadir</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Email</th>
+                <th>Edad</th>
+                <th>Distancias</th>
+                <th>Categoría</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% usuarios.forEach(usuario => { %>
+                <tr>
+                    <td>
+                        <input type="checkbox" name="usuarioIds" value="<%= usuario.id %>" class="usuario-checkbox" data-usuario-id="<%= usuario.id %>">
+                    </td>
+                    <td><%= usuario.nombre %></td>
+                    <td><%= usuario.apellido %></td>
+                    <td><%= usuario.email %></td>
+                    <td><%= usuario.edad %></td>
+                    <td>
+                        <% if (eventos.distancias && eventos.distancias.length > 0) { %>
+                            <ul>
+                                <% eventos.distancias.forEach(eventoDistancia => { %>
+                                    <li>
+                                        <label>
+                                            <input type="radio" name="distanciaSeleccionada_<%= usuario.id %>" value="<%= eventoDistancia.distancia.nombre %>" class="distancia-radio">
+                                            <%= eventoDistancia.distancia.nombre %>
+                                        </label>
+                                    </li>
+                                <% }) %>
+                            </ul>
+                        <% } else { %>
+                            <p>No se encontraron distancias para este evento.</p>
+                        <% } %>
+                    </td>
+                    <td><%= usuario.categoriaAsignada.nombre %></td>
+                    <input type="hidden" name="categoriaId_<%= usuario.id %>" value="<%= usuario.categoriaAsignada.id %>">
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+
+    <button type="submit">Enviar</button>
+</form>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Obtener todos los checkboxes de usuarios
+        const usuarioCheckboxes = document.querySelectorAll('.usuario-checkbox');
+
+        usuarioCheckboxes.forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                const usuarioId = checkbox.getAttribute('data-usuario-id');
+                const distanciaRadios = document.querySelectorAll('input[name="distanciaSeleccionada_' + usuarioId + '"]');
+                
+                // Si el checkbox de usuario está marcado, habilitar los radio buttons de distancia
+                distanciaRadios.forEach(function(distanciaRadio) {
+                    distanciaRadio.disabled = !checkbox.checked; // Habilitar o deshabilitar
+                });
+            });
+        });
+    });
+</script>

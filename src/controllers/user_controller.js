@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = "your_secret_key";
+const JWT_SECRET = "corre_60";
 
 exports.renderIndex = (req, res) => {
     console.log('MOSTRANDO LOGIN');
@@ -76,7 +76,7 @@ exports.createUser = async (req, res) => {
         }
 
         // Cifrar la contraseña antes de guardarla
-        const hashedPassword = await bcrypt.hash(contrasena, 10); // 10 es el salt rounds (puedes ajustarlo según sea necesario)
+        const hashedPassword = await bcrypt.hash(contrasena, 10);
 
         const newUser = await prisma.user.create({
             data: {
@@ -172,6 +172,9 @@ exports.editUser = async (req, res) => {
             return res.status(400).json({ error: 'Fecha de nacimiento inválida' });
         }
 
+        // Cifrar la contraseña antes de guardarla
+        const hashedPassword = await bcrypt.hash(contrasena, 10);
+
         const user = await prisma.user.update({
             where: {
                 id: parseInt(id, 10)
@@ -182,7 +185,7 @@ exports.editUser = async (req, res) => {
                 fecha_nacimeinto: fechaNacimiento, // Usa el objeto Date directamente
                 edad: edadInt,
                 email,
-                contrasena,
+                contrasena: hashedPassword, // Guarda la contraseña cifrada
                 rolGeneral: {
                     connect: { id: parseInt(rolGeneralId, 10) }
                 }

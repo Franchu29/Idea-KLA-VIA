@@ -1,6 +1,7 @@
 const express = require('express');
 const userRoutes = require('./routes/user.routes.js');
 const eventRoutes = require('./routes/eventos.routes.js');
+const cronometroRoutes = require('./routes/cronometro.routes.js');
 const path = require('path');
 
 const app = express();
@@ -18,8 +19,9 @@ app.use(express.static("public"));
 app.use(express.urlencoded({ extended: false }));
 
 // Rutas
-app.use("", userRoutes); // Rutas de usuario
-app.use("/events", eventRoutes); // Esto hace que las rutas estén bajo /events
+app.use("", userRoutes);
+app.use("/events", eventRoutes);
+app.use("/cronometro", cronometroRoutes);
 
 
 app.listen(3000, () => {

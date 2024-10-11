@@ -1,0 +1,81 @@
+<%- include('./partials/header'); %>  
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="//cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="//cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $('#tabla-corredores_carrera').DataTable();
+        });
+    </script>
+</head>
+<body>
+    <h1>Participantes del Evento: <%= evento.nombre %></h1> <!-- Muestra el nombre del evento -->
+    
+    <!-- Botón para iniciar la carrera -->
+    <button id="btn-iniciar-carrera" onclick="window.location.href='/cronometro/cronometro/<%= evento.id %>'">Comenzar Carrera</button>
+
+    <!-- Botón para añadir Participante de Cortesía -->
+    <button id="btn-anadir-participante" onclick="window.location.href='/events/participantes_cortesia/<%= evento.id %>'">Añadir Participante de Cortesía</button>
+    
+    <table id="tabla-corredores_carrera" class="w3-table-all w3-card-4">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>RUT</th>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>Edad</th>
+            <th>Distancia</th>
+            <th>Categoría</th>
+            <th>N° Emergencia</th>
+            <th>N° Corredor</th>
+            <th>Lugar General</th>
+            <th>Lugar Categoria</th>
+            <th>Tiempo</th>
+            <th>Puntos Carrera</th>
+            <th>Extra</th>
+          </tr>
+        </thead>       
+        <tbody>
+            <% if (evento.inscripciones.length > 0) { %>
+                <% evento.inscripciones.forEach(inscripcion => { %>
+                    <tr>
+                        <td><%= inscripcion.id %></td> <!-- ID de la inscripción -->
+                        <td><%= inscripcion.usuario.rut %></td> <!-- RUT del usuario -->
+                        <td><%= inscripcion.usuario.nombre %></td> <!-- Nombre del usuario -->
+                        <td><%= inscripcion.usuario.apellido %></td> <!-- Apellido del usuario -->
+                        <td><%= inscripcion.usuario.edad %></td> <!-- Edad del usuario -->
+                        <td><%= inscripcion.distancia ? inscripcion.distancia.nombre : 'No definida' %></td> <!-- Distancia seleccionada -->
+                        <td><%= inscripcion.categoria ? inscripcion.categoria.nombre : 'No definida' %></td> <!-- Categoría -->
+                        <td><%= inscripcion.numeroEmergencia || 'No disponible' %></td> <!-- Número de emergencia -->
+                        <td><%= inscripcion.numeroCorredor || 'No disponible' %></td> <!-- Número de corredor -->
+                        <td><%= inscripcion.lugarGeneral || 'No disponible' %></td> <!-- Lugar general -->
+                        <td><%= inscripcion.lugarCategoria || 'No disponible' %></td> <!-- Lugar categoría -->
+                        <td><%= inscripcion.tiempo || 'No disponible' %></td> <!-- Tiempo -->
+                        <td><%= inscripcion.puntosCarrera || 'No disponible' %></td> <!-- Puntos de carrera -->
+                        <td><%= inscripcion.extra || 'No disponible' %></td> <!-- Información extra -->
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <tr>
+                    <td colspan="14">No hay participantes inscritos para este evento.</td>
+                </tr>
+            <% } %>
+        </tbody>               
+    </table>
+
+    <script>
+        function iniciarCarrera() {
+            // Aquí puedes agregar la lógica que necesites para iniciar la carrera
+            alert("¡La carrera ha comenzado!");
+        }
+    </script>
+</body>
+</html>

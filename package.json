@@ -18,6 +18,8 @@
     "@prisma/client": "^5.19.1",
     "bcryptjs": "^2.4.3",
     "express": "^4.19.2",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "mercadopago": "^2.0.15",
+    "transbank-sdk": "^5.0.0"
   }
 }

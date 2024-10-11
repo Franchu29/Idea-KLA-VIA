@@ -21,6 +21,7 @@
                     <th>Precio</th>
                     <th>Editar</th>
                     <th>Eliminar</th>
+                    <th>Inspeccionar</th>
                 </tr>
             </thead>
             <tbody>
@@ -51,6 +52,11 @@
                         <td>
                             <form action="/events/delete_event/<%= event.id %>" method="post" onsubmit="return confirm('¿Estás seguro que quieres eliminar este usuario?');">
                                 <button type="submit">Eliminar</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form action="/events/inspeccionar_evento/<%= event.id %>" method="get">
+                                <button type="submit">Inspeccionar</button>
                             </form>
                         </td>
                     </tr>

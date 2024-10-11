@@ -4,6 +4,9 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+//npx prisma migrate dev --name nombre_migracion
+//npx prisma generate
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -25,6 +28,8 @@ model User {
   // Relación con Roles Generales
   rolGeneralId    Int
   rolGeneral      Roles      @relation(fields: [rolGeneralId], references: [id])
+  inscripciones   Inscripcion[]
+  resultados      Resultados[]
 }
 
 model Roles {
@@ -46,6 +51,8 @@ model Eventos {
   // Relación con Categorías y Distancias
   categorias  EventoCategoria[]
   distancias  EventoDistancia[]
+  inscripciones   Inscripcion[]
+  resultados   Resultados[]
 }
 
 model Categoria {
@@ -54,6 +61,9 @@ model Categoria {
 
   // Relación con Eventos
   eventos    EventoCategoria[]
+
+  // Relación con Inscripciones
+  inscripciones   Inscripcion[]
 }
 
 model Distancia {
@@ -63,6 +73,7 @@ model Distancia {
 
   // Relación con Eventos
   eventos    EventoDistancia[]
+  inscripciones   Inscripcion[]
 }
 
 // Tabla intermedia para la relación muchos a muchos entre Eventos y Categorías
@@ -85,4 +96,39 @@ model EventoDistancia {
   distancia   Distancia @relation(fields: [distanciaId], references: [id])
 
   @@id([eventoId, distanciaId])
+}
+
+model Inscripcion {
+  id               Int      @id @default(autoincrement())  // ID único de inscripción
+  usuarioId       Int
+  eventoId        Int
+  distanciaId     Int
+  categoriaId     Int      // Relación con la tabla Categoria
+  numeroCorredor  Int?     // Nuevo campo para el número de corredor
+
+  usuario         User      @relation(fields: [usuarioId], references: [id])
+  evento          Eventos   @relation(fields: [eventoId], references: [id])
+  distancia       Distancia @relation(fields: [distanciaId], references: [id])
+  categoria       Categoria @relation(fields: [categoriaId], references: [id])
+
+  fechaInscripcion DateTime @default(now()) // Fecha de la inscripción
+
+  @@unique([usuarioId, eventoId])  // Un usuario solo puede inscribirse una vez por evento
+}
+
+model Resultados {
+  id             Int      @id @default(autoincrement()) // ID único del resultado
+  usuarioId      Int
+  eventoId       Int
+  tiempo         Int      // Tiempo en segundos, puedes convertirlo a un formato de HH:MM:SS cuando sea necesario
+  lugarGeneral   Int      // Lugar general entre todos los participantes del evento
+  lugarCategoria Int      // Lugar dentro de su categoría
+  puntaje        Int?     // Puntaje (solo aplica si es la categoría de 10km, por lo tanto es opcional)
+
+  // Relaciones con Usuario y Evento
+  usuario        User     @relation(fields: [usuarioId], references: [id])
+  evento         Eventos  @relation(fields: [eventoId], references: [id])
+
+  // Restricción para que un usuario no tenga más de un resultado por evento
+  @@unique([usuarioId, eventoId])
 }

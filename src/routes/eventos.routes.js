@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const eventosController = require('../controllers/eventos_controller'); // Asegúrate de usar el nombre correcto
+const eventosController = require('../controllers/eventos_controller');
 
 const router = Router();
 
@@ -16,5 +16,11 @@ router.post('/delete_event/:id', eventosController.deleteEvento);
 
 router.get('/edit_event/:id', eventosController.editEventoRender);
 router.post('/edit_event/:id', eventosController.editEvento);
+
+router.get('/inspeccionar_evento/:id', eventosController.inspeccionarEvento);
+router.get('/participantes_cortesia/:id', eventosController.renderParticipantesCortesia);
+
+router.post('/inscribir', eventosController.inscribirParticipantes);
+
 
 module.exports = router;

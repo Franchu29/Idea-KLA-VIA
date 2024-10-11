@@ -13,12 +13,11 @@ exports.createEvent = async (req, res) => {
   console.log("Formulario recibido: ", req.body);
   let { nombre, descripcion, fecha, lugar, categorias, distancias } = req.body;
 
-  // Asegúrate de que categorías y distancias sean arrays
   categorias = Array.isArray(categorias) ? categorias : [categorias];
   distancias = Array.isArray(distancias) ? distancias : [distancias];
 
   try {
-    // Paso 1: Crear el evento
+    //Crea el evento
     const nuevoEvento = await prisma.eventos.create({
       data: {
         nombre,
@@ -28,24 +27,24 @@ exports.createEvent = async (req, res) => {
       },
     });
 
-    const eventoId = nuevoEvento.id; // Obtener el ID del evento recién creado
+    const eventoId = nuevoEvento.id;
 
-    // Paso 2: Insertar en la tabla intermedia EventoCategoria
+    //Inserta en la tabla intermedia EventoCategoria
     const categoriasPromises = categorias.map((categoriaId) => {
       return prisma.eventoCategoria.create({
         data: {
-          eventoId: eventoId, // ID del evento recién creado
-          categoriaId: parseInt(categoriaId), // Asegurarse de que sea un entero
+          eventoId: eventoId,
+          categoriaId: parseInt(categoriaId),
         },
       });
     });
 
-    // Paso 3: Insertar en la tabla intermedia EventoDistancia
+    //Inserta en la tabla intermedia EventoDistancia
     const distanciasPromises = distancias.map((distanciaId) => {
       return prisma.eventoDistancia.create({
         data: {
-          eventoId: eventoId, // ID del evento recién creado
-          distanciaId: parseInt(distanciaId), // Asegurarse de que sea un entero
+          eventoId: eventoId,
+          distanciaId: parseInt(distanciaId),
         },
       });
     });
@@ -66,9 +65,9 @@ exports.getEvents = async (req, res) => {
     try {
         const events = await prisma.eventos.findMany({
             include: {
-                distancias: {  // Ajuste aquí, utilizamos "distancias" en lugar de "EventoDistancia"
+                distancias: {
                     include: {
-                        distancia: true,  // Incluye la información de las distancias desde la tabla Distancia
+                        distancia: true,  // Trae la informacion de la tabla distancia
                     },
                 },
             },
@@ -86,41 +85,42 @@ exports.deleteEvento = async (req, res) => {
       console.log('ELIMINANDO EVENTO:', req.params);
       const { id } = req.params;
 
-      // Eliminar relaciones en EventoCategoria
+      // Elimina relacion en EventoCategoria
       await prisma.eventoCategoria.deleteMany({
           where: {
               eventoId: parseInt(id, 10),
           },
       });
 
-      // Eliminar relaciones en EventoDistancia
+      // Elimina relacion en EventoDistancia
       await prisma.eventoDistancia.deleteMany({
           where: {
               eventoId: parseInt(id, 10),
           },
       });
 
-      // Ahora eliminar el evento
+      // Eliminar el evento
       const evento = await prisma.eventos.delete({
           where: {
               id: parseInt(id, 10)
           }
       });
 
-      res.redirect('/events/show_event');
+      res.redirect('/show_event');
   } catch (error) {
       console.error('Error al eliminar el evento:', error);
       res.status(500).json({ error: 'Error al eliminar el evento' });
   }
 };
 
-//Muestra la vista de editar usuario
+//Muestra la vista de editar evento
 exports.editEventoRender = async (req, res) => {
   try {
       const { id } = req.params;
 
       const evento = await prisma.eventos.findUnique({
           where: { id: parseInt(id, 10) },
+          // Incluye las categorías y distancias del evento
           include: {
               categorias: { include: { categoria: true } },
               distancias: { include: { distancia: true } }
@@ -188,10 +188,235 @@ exports.editEvento = async (req, res) => {
           }
       }
 
-      res.redirect('/events/views_events'); // Redirige después de la edición exitosa
+      res.redirect('/events/views_events');
   } catch (error) {
       console.error('Error al editar el evento:', error);
       res.status(500).json({ error: 'Error al editar el evento' });
   }
 };
 
+// Inspecciona una evento
+exports.inspeccionarEvento = async (req, res) => {
+    console.log("Ruta alcanzada con ID:", req.params.id);
+    const eventoId = parseInt(req.params.id);
+  
+    try {
+        // Obtenemos los detalles del evento y los usuarios inscritos
+        const evento = await prisma.eventos.findUnique({
+            where: {
+                id: eventoId,
+            },
+            include: {
+                inscripciones: { // Incluye las inscripciones relacionadas
+                    include: {
+                        usuario: true, // Incluye los datos del usuario
+                        distancia: true, // Asegúrate de incluir la distancia
+                        categoria: true // Incluye la categoría si la necesitas
+                    },
+                },
+            },
+        });
+  
+        // Verificamos si se encontró el evento
+        if (!evento) {
+            return res.status(404).send('Evento no encontrado');
+        }
+  
+        // Renderizamos la vista inspeccionar_evento.ejs con los detalles del evento y los usuarios inscritos
+        res.render('inspeccionar_evento', {
+            evento
+        });
+  
+    } catch (error) {
+        console.error('Error al obtener los detalles del evento:', error);
+        res.status(500).send('Error interno del servidor');
+    }
+};
+
+exports.renderParticipantesCortesia = async (req, res) => {
+    const { id: eventoId } = req.params; // Obtenemos el ID del evento desde los parámetros
+    console.log("Ruta alcanzada con ID de evento:", eventoId);
+    
+    try {
+        // Obtener todos los usuarios inscritos en el evento
+        const usuariosInscritos = await prisma.inscripcion.findMany({
+            where: { eventoId: parseInt(eventoId) }, // Filtrar por evento
+            select: { usuarioId: true } // Solo obtener el ID del usuario
+        });
+
+        // Obtener los IDs de los usuarios inscritos
+        const usuariosInscritosIds = usuariosInscritos.map(inscripcion => inscripcion.usuarioId);
+
+        // Obtener todos los usuarios que NO están inscritos en el evento
+        const usuarios = await prisma.user.findMany({
+            where: {
+                id: {
+                    notIn: usuariosInscritosIds, // Excluir los usuarios que ya están inscritos
+                }
+            }
+        });
+
+        // Calcular la edad para cada usuario que no esté inscrito
+        for (const usuario of usuarios) {
+            console.log(`Fecha de nacimiento de usuario ${usuario.id}:`, usuario.fecha_nacimeinto);
+
+            if (!usuario.fecha_nacimeinto) {
+                console.log(`El usuario ${usuario.id} no tiene una fecha de nacimiento.`);
+                continue; // Saltar este usuario si no tiene una fecha de nacimiento
+            }
+
+            const fechaNacimiento = new Date(usuario.fecha_nacimeinto);
+            if (isNaN(fechaNacimiento.getTime())) {
+                console.log(`Fecha de nacimiento inválida para el usuario ${usuario.id}`);
+                continue; // Saltar el usuario con fecha inválida y pasar al siguiente
+            }
+
+            const edadCalculada = calcularEdad(fechaNacimiento);
+            console.log(`Edad calculada para el usuario ${usuario.id}:`, edadCalculada);
+
+            // Actualizar la base de datos con la edad calculada
+            await prisma.user.update({
+                where: { id: usuario.id },
+                data: { edad: edadCalculada }, // Asegúrate de que haya un campo 'edad' en tu tabla
+            });
+        }
+
+        const eventos = await prisma.eventos.findUnique({
+            where: { id: parseInt(eventoId) }, // Asegúrate de que el evento existe
+            include: {
+                distancias: {
+                    include: {
+                        distancia: true,
+                    },
+                },
+                categorias: {
+                    include: {
+                        categoria: true,
+                    },
+                },
+            },
+        });
+        
+        if (!eventos) {
+            return res.status(404).send('Evento no encontrado');
+        }
+
+        // Categorías basadas en la edad
+        const categoriasEdad = [
+            { id: 1, nombre: '15 años - 19 años', rangoEdades: [15, 19] },
+            { id: 2, nombre: '20 años - 29 años', rangoEdades: [20, 29] },
+            { id: 3, nombre: '30 años - 39 años', rangoEdades: [30, 39] },
+            { id: 4, nombre: '40 años - 49 años', rangoEdades: [40, 49] },
+            { id: 5, nombre: '50 años - 59 años', rangoEdades: [50, 59] },
+            { id: 6, nombre: '60 años - 69 años', rangoEdades: [60, 69] },
+            { id: 7, nombre: '70 años y más años', rangoEdades: [70, 100] },
+        ];
+
+        // Asignar categoría a cada usuario según su edad
+        for (const usuario of usuarios) {
+            const categoriaAsignada = calcularCategoria(usuario.edad, categoriasEdad);
+            if (categoriaAsignada) {
+                usuario.categoriaAsignada = { id: categoriaAsignada.id, nombre: categoriaAsignada.nombre };
+            } else {
+                usuario.categoriaAsignada = { id: null, nombre: 'Sin categoría' };
+            }
+            console.log('Categoría asignada a usuario', usuario.id, ':', usuario.categoriaAsignada);
+        }
+
+        // Renderizar la vista con los usuarios no inscritos, sus edades, categorías asignadas y los eventos con distancias
+        res.render('añadir_participante_cortesia', { usuarios, eventos, categoriasEdad });
+    } catch (error) {
+        console.error('Error al obtener los usuarios y eventos:', error);
+        res.status(500).send('Error interno del servidor');
+    }
+};
+
+//Funcion para calcular la edad de un usuario automaticamente
+function calcularEdad(fechaNacimiento) {
+    const hoy = new Date();
+    let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
+    const mes = hoy.getMonth() - fechaNacimiento.getMonth();
+
+    if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNacimiento.getDate())) {
+        edad--;
+    }
+
+    return edad;
+}
+
+//Funcion para calcular la categoria de un usuario automaticamente
+function calcularCategoria(edad, categorias) {
+    for (const categoria of categorias) {
+        const [minEdad, maxEdad] = categoria.rangoEdades; // Asume que `rangoEdades` es un array como [minEdad, maxEdad]
+        if (edad >= minEdad && edad <= maxEdad) {
+            return categoria; // Retorna la categoría correspondiente
+        }
+    }
+    return null; // Si no se encuentra ninguna categoría que coincida
+}
+
+exports.inscribirParticipantes = async (req, res) => {
+    try {
+        const data = Object.assign({}, req.body);
+        const usuarioIds = data.usuarioIds;
+        console.log('Inscribiendo participantes:', data);
+
+        if (!usuarioIds) {
+            return res.status(400).json({ error: 'Debe seleccionar al menos un usuario.' });
+        }
+
+        const usuariosSeleccionados = Array.isArray(usuarioIds) ? usuarioIds : [usuarioIds];
+        const eventoId = 1; // Cambia esto por el evento relevante
+
+        // Obtener todas las distancias y categorías de la base de datos
+        const [distanciasDisponibles, categoriasDisponibles] = await Promise.all([
+            prisma.distancia.findMany(),
+            prisma.categoria.findMany() // Obtener todas las categorías
+        ]);
+
+        for (const usuarioId of usuariosSeleccionados) {
+            console.log(req.body[`distanciaSeleccionada_${usuarioId}`]);
+            const distanciaSeleccionada = req.body[`distanciaSeleccionada_${usuarioId}`];
+
+            // Encontrar la distancia en la base de datos por nombre
+            const distanciaEncontrada = distanciasDisponibles.find(
+                distancia => distancia.nombre === distanciaSeleccionada
+            );
+
+            if (!distanciaEncontrada) {
+                console.log(`La distancia ${distanciaSeleccionada} no es válida para el usuario ${usuarioId}.`);
+                continue;
+            }
+
+            // Obtener el ID de la categoría asignada desde el campo oculto del formulario
+            const categoriaId = req.body[`categoriaId_${usuarioId}`]; // Capturar el ID de la categoría para este usuario
+            console.log(`ID de la categoría asignada para el usuario ${usuarioId}:`, categoriaId);
+
+            // Comprobar si el usuario ya está inscrito en el evento
+            const inscripcionExistente = await prisma.inscripcion.findFirst({
+                where: {
+                    usuarioId: parseInt(usuarioId),
+                    eventoId,
+                    distanciaId: distanciaEncontrada.id // Usar el ID de la distancia encontrada
+                },
+            });
+
+            if (!inscripcionExistente) {
+                // Insertar nueva inscripción en la base de datos
+                await prisma.inscripcion.create({
+                    data: {
+                        usuarioId: parseInt(usuarioId),   // Solo el ID del usuario
+                        eventoId,                         // El ID del evento
+                        distanciaId: distanciaEncontrada.id,  // El ID de la distancia encontrada
+                        categoriaId: parseInt(categoriaId),          // El ID de la categoría asociada
+                    },
+                });
+            }
+        }
+
+        res.redirect('/events/inspeccionar_evento/1'); // Cambia la ruta de redirección según sea necesario
+    } catch (error) {
+        console.error('Error al inscribir participantes:', error);
+        res.status(500).send('Error interno del servidor');
+    }
+};
