@@ -5,5 +5,6 @@ const router = Router();
 
 router.get('/cronometro/:id', cronometroController.mostrarCronometro);
 router.post('/registrar', cronometroController.registrarCorredor);
+router.get('/calcular_resultados/:eventoId', cronometroController.calcularResultados);
 
 module.exports = router;

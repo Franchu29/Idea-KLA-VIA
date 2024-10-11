@@ -1,3 +1,8 @@
+//git checkout -b nombre_de_rama
+//git add .
+//git commit -m "Mensaje"
+//git push origin nombre_de_rama
+
 const express = require('express');
 const userRoutes = require('./routes/user.routes.js');
 const eventRoutes = require('./routes/eventos.routes.js');

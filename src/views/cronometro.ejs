@@ -29,6 +29,9 @@
     <!-- Botones para controlar el cronómetro -->
     <button id="startButton" class="btn">Iniciar</button>
     <button id="stopButton" class="btn" disabled>Detener</button>
+    
+    <!-- Botón para calcular resultados -->
+    <button id="calcularResultadosButton" class="btn">Calcular Resultados</button>
 
     <!-- Formulario para registrar número de corredores -->
     <div id="corredorInput">
@@ -56,6 +59,7 @@
         const numeroCorredorInput = document.getElementById('numeroCorredor');
         const registrarCorredorForm = document.getElementById('registrarCorredorForm');
         const tiempoCorredorInput = document.getElementById('tiempoCorredor');
+        const calcularResultadosButton = document.getElementById('calcularResultadosButton');
 
         // Función para actualizar el cronómetro
         function actualizarCronometro() {
@@ -103,6 +107,28 @@
 
             // Enviar el formulario al servidor
             this.submit();
+        });
+
+        // Añadir un event listener al botón "Calcular Resultados"
+        calcularResultadosButton.addEventListener('click', async () => {
+            const eventoId = document.getElementById('eventoId').value; // Obtener el eventoId
+            try {
+                const response = await fetch(`/cronometro/calcular_resultados/${eventoId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al calcular resultados');
+                }
+
+                const resultados = await response.json();
+                console.log('Resultados calculados:', resultados); // Mostrar los resultados en la consola
+            } catch (error) {
+                console.error('Error en la solicitud:', error);
+            }
         });
     </script>
 </body>

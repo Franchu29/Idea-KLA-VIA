@@ -369,10 +369,17 @@ exports.inscribirParticipantes = async (req, res) => {
         const eventoId = 1; // Cambia esto por el evento relevante
 
         // Obtener todas las distancias y categorías de la base de datos
-        const [distanciasDisponibles, categoriasDisponibles] = await Promise.all([
+        const [distanciasDisponibles, categoriasDisponibles, inscripcionesExistentes] = await Promise.all([
             prisma.distancia.findMany(),
-            prisma.categoria.findMany() // Obtener todas las categorías
+            prisma.categoria.findMany(),
+            prisma.inscripcion.findMany({
+                where: { eventoId },
+                select: { numeroCorredor: true }, // Solo seleccionamos el número de corredor
+            })
         ]);
+
+        // Obtener números de corredores ya utilizados en el evento
+        const numerosUsados = inscripcionesExistentes.map(inscripcion => inscripcion.numeroCorredor);
 
         for (const usuarioId of usuariosSeleccionados) {
             console.log(req.body[`distanciaSeleccionada_${usuarioId}`]);
@@ -402,6 +409,12 @@ exports.inscribirParticipantes = async (req, res) => {
             });
 
             if (!inscripcionExistente) {
+                // Buscar el primer número de corredor disponible
+                let numeroCorredor = 1; // Comenzar desde el 1
+                while (numerosUsados.includes(numeroCorredor)) {
+                    numeroCorredor++;
+                }
+
                 // Insertar nueva inscripción en la base de datos
                 await prisma.inscripcion.create({
                     data: {
@@ -409,8 +422,12 @@ exports.inscribirParticipantes = async (req, res) => {
                         eventoId,                         // El ID del evento
                         distanciaId: distanciaEncontrada.id,  // El ID de la distancia encontrada
                         categoriaId: parseInt(categoriaId),          // El ID de la categoría asociada
+                        numeroCorredor,                   // Asignar el número de corredor
                     },
                 });
+
+                // Agregar el número de corredor a la lista de usados
+                numerosUsados.push(numeroCorredor);
             }
         }
 
@@ -420,3 +437,4 @@ exports.inscribirParticipantes = async (req, res) => {
         res.status(500).send('Error interno del servidor');
     }
 };
+

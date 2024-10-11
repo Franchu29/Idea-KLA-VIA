@@ -22,5 +22,4 @@ router.get('/participantes_cortesia/:id', eventosController.renderParticipantesC
 
 router.post('/inscribir', eventosController.inscribirParticipantes);
 
-
 module.exports = router;
