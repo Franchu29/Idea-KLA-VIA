@@ -274,3 +274,36 @@ async function obtenerResultados10k(eventoId) {
         throw error; // Lanza el error para manejarlo en el controlador
     }
 }
+
+exports.descargarPDF5K = (req, res) => {
+    const idEvento = req.params.idEvento;
+    const filePath = path.join(__dirname, '../uploads/evento_' + idEvento, 'resultados_5k_evento_' + idEvento + '.pdf');
+
+    // Verifica si el archivo existe
+    fs.access(filePath, fs.constants.F_OK, (err) => {
+        if (err) {
+            // Si el archivo no existe, envía un error
+            return res.status(404).send('Archivo no encontrado.');
+        }
+
+        // Si el archivo existe, se envía para descarga
+        res.download(filePath, 'resultados_5k_evento_' + idEvento + '.pdf');
+    });
+};
+
+exports.descargarPDF10K = (req, res) => {
+    const idEvento = req.params.idEvento;
+    const filePath = path.join(__dirname, '../uploads/evento_' + idEvento, 'resultados_10k_evento_' + idEvento + '.pdf');
+
+    // Verifica si el archivo existe
+    fs.access(filePath, fs.constants.F_OK, (err) => {
+        if (err) {
+            // Si el archivo no existe, envía un error
+            return res.status(404).send('Archivo no encontrado.');
+        }
+
+        // Si el archivo existe, se envía para descarga
+        res.download(filePath, 'resultados_10k_evento_' + idEvento + '.pdf');
+    });
+};
+

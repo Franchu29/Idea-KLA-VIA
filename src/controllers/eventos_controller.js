@@ -216,7 +216,9 @@ exports.inspeccionarEvento = async (req, res) => {
                 },
             },
         });
-  
+
+        console.log(evento); // Agregar este log para ver la estructura del objeto
+
         // Verificamos si se encontró el evento
         if (!evento) {
             return res.status(404).send('Evento no encontrado');
@@ -258,7 +260,6 @@ exports.renderParticipantesCortesia = async (req, res) => {
 
         // Calcular la edad para cada usuario que no esté inscrito
         for (const usuario of usuarios) {
-            console.log(`Fecha de nacimiento de usuario ${usuario.id}:`, usuario.fecha_nacimeinto);
 
             if (!usuario.fecha_nacimeinto) {
                 console.log(`El usuario ${usuario.id} no tiene una fecha de nacimiento.`);
@@ -267,12 +268,10 @@ exports.renderParticipantesCortesia = async (req, res) => {
 
             const fechaNacimiento = new Date(usuario.fecha_nacimeinto);
             if (isNaN(fechaNacimiento.getTime())) {
-                console.log(`Fecha de nacimiento inválida para el usuario ${usuario.id}`);
                 continue; // Saltar el usuario con fecha inválida y pasar al siguiente
             }
 
             const edadCalculada = calcularEdad(fechaNacimiento);
-            console.log(`Edad calculada para el usuario ${usuario.id}:`, edadCalculada);
 
             // Actualizar la base de datos con la edad calculada
             await prisma.user.update({
@@ -320,7 +319,6 @@ exports.renderParticipantesCortesia = async (req, res) => {
             } else {
                 usuario.categoriaAsignada = { id: null, nombre: 'Sin categoría' };
             }
-            console.log('Categoría asignada a usuario', usuario.id, ':', usuario.categoriaAsignada);
         }
 
         // Renderizar la vista con los usuarios no inscritos, sus edades, categorías asignadas y los eventos con distancias
@@ -357,23 +355,33 @@ function calcularCategoria(edad, categorias) {
 
 exports.inscribirParticipantes = async (req, res) => {
     try {
+        console.log('Cuerpo de la solicitud:', req.body); // Verifica el cuerpo de la solicitud
         const data = Object.assign({}, req.body);
         const usuarioIds = data.usuarioIds;
-        console.log('Inscribiendo participantes:', data);
+        
+        const eventoId = req.params.id; // Obtenemos el ID del evento desde los parámetros de la URL
+        console.log(`ID del evento recibido: ${eventoId}`);
 
+        const eventoIdParsed = parseInt(eventoId); // Convertir a entero
+
+        // Verificar si el eventoId es un número válido
+        if (isNaN(eventoIdParsed)) {
+            return res.status(400).json({ error: 'ID de evento inválido.' });
+        }
+
+        // Verificar que se haya seleccionado al menos un usuario
         if (!usuarioIds) {
             return res.status(400).json({ error: 'Debe seleccionar al menos un usuario.' });
         }
 
         const usuariosSeleccionados = Array.isArray(usuarioIds) ? usuarioIds : [usuarioIds];
-        const eventoId = 1; // Cambia esto por el evento relevante
 
-        // Obtener todas las distancias y categorías de la base de datos
+        // Obtener distancias, categorías y las inscripciones ya existentes para el evento
         const [distanciasDisponibles, categoriasDisponibles, inscripcionesExistentes] = await Promise.all([
             prisma.distancia.findMany(),
             prisma.categoria.findMany(),
             prisma.inscripcion.findMany({
-                where: { eventoId },
+                where: { eventoId: eventoIdParsed }, // Usamos eventoIdParsed como entero
                 select: { numeroCorredor: true }, // Solo seleccionamos el número de corredor
             })
         ]);
@@ -382,7 +390,7 @@ exports.inscribirParticipantes = async (req, res) => {
         const numerosUsados = inscripcionesExistentes.map(inscripcion => inscripcion.numeroCorredor);
 
         for (const usuarioId of usuariosSeleccionados) {
-            console.log(req.body[`distanciaSeleccionada_${usuarioId}`]);
+            // Obtener la distancia seleccionada para cada usuario
             const distanciaSeleccionada = req.body[`distanciaSeleccionada_${usuarioId}`];
 
             // Encontrar la distancia en la base de datos por nombre
@@ -390,51 +398,53 @@ exports.inscribirParticipantes = async (req, res) => {
                 distancia => distancia.nombre === distanciaSeleccionada
             );
 
+            // Si la distancia no es válida, saltamos al siguiente usuario
             if (!distanciaEncontrada) {
                 console.log(`La distancia ${distanciaSeleccionada} no es válida para el usuario ${usuarioId}.`);
                 continue;
             }
 
-            // Obtener el ID de la categoría asignada desde el campo oculto del formulario
-            const categoriaId = req.body[`categoriaId_${usuarioId}`]; // Capturar el ID de la categoría para este usuario
+            // Obtener el ID de la categoría asignada desde el formulario
+            const categoriaId = req.body[`categoriaId_${usuarioId}`];
             console.log(`ID de la categoría asignada para el usuario ${usuarioId}:`, categoriaId);
 
-            // Comprobar si el usuario ya está inscrito en el evento
+            // Comprobar si el usuario ya está inscrito en el evento para la distancia seleccionada
             const inscripcionExistente = await prisma.inscripcion.findFirst({
                 where: {
                     usuarioId: parseInt(usuarioId),
-                    eventoId,
-                    distanciaId: distanciaEncontrada.id // Usar el ID de la distancia encontrada
+                    eventoId: eventoIdParsed, // Usamos el eventoIdParsed como entero
+                    distanciaId: distanciaEncontrada.id // Usamos el ID de la distancia encontrada
                 },
             });
 
+            // Si no existe inscripción, creamos una nueva
             if (!inscripcionExistente) {
                 // Buscar el primer número de corredor disponible
-                let numeroCorredor = 1; // Comenzar desde el 1
+                let numeroCorredor = 1;
                 while (numerosUsados.includes(numeroCorredor)) {
                     numeroCorredor++;
                 }
 
-                // Insertar nueva inscripción en la base de datos
+                // Insertar la nueva inscripción en la base de datos
                 await prisma.inscripcion.create({
                     data: {
-                        usuarioId: parseInt(usuarioId),   // Solo el ID del usuario
-                        eventoId,                         // El ID del evento
-                        distanciaId: distanciaEncontrada.id,  // El ID de la distancia encontrada
-                        categoriaId: parseInt(categoriaId),          // El ID de la categoría asociada
+                        usuarioId: parseInt(usuarioId),   // ID del usuario
+                        eventoId: eventoIdParsed,         // ID del evento
+                        distanciaId: distanciaEncontrada.id,  // ID de la distancia encontrada
+                        categoriaId: parseInt(categoriaId),   // ID de la categoría
                         numeroCorredor,                   // Asignar el número de corredor
                     },
                 });
 
-                // Agregar el número de corredor a la lista de usados
+                // Agregar el número de corredor a la lista de números ya usados
                 numerosUsados.push(numeroCorredor);
             }
         }
 
-        res.redirect('/events/inspeccionar_evento/1'); // Cambia la ruta de redirección según sea necesario
+        // Redirigir a la página del evento tras la inscripción
+        res.redirect(`/events/inspeccionar_evento/${eventoIdParsed}`); // Cambia la ruta según sea necesario
     } catch (error) {
         console.error('Error al inscribir participantes:', error);
         res.status(500).send('Error interno del servidor');
     }
 };
-

@@ -1,0 +1,43 @@
+<%- include('./partials/header'); %>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil de Usuario</title>
+</head>
+<body>
+    <h1>Perfil de Usuario</h1>
+    <h2>Información del Usuario</h2>
+    <p><strong>ID:</strong> <%= user.id %></p>
+    <p><strong>Email:</strong> <%= user.email %></p>
+    <p><strong>Nombre:</strong> <%= user.nombre %></p>
+    <p><strong>Apellido:</strong> <%= user.apellido %></p>
+    <p><strong>Rol:</strong> <%= user.rolGeneralId  %></p>
+
+    <h2>Inscripciones</h2>
+    <ul>
+        <% inscripciones.forEach(inscripcion => { %>
+            <li>
+                Evento: <%= inscripcion.evento.nombre %> <br>
+                Distancia: <%= inscripcion.distancia.nombre %> <br>
+                Categoría: <%= inscripcion.categoria.nombre %> <br>
+                Fecha de Inscripción: <%= inscripcion.fechaInscripcion.toLocaleDateString() %>
+            </li>
+        <% }); %>
+    </ul>
+
+    <h2>Resultados</h2>
+    <ul>
+        <% resultados.forEach(resultado => { %>
+            <li>
+                Evento: <%= resultado.evento.nombre %> <br>
+                Tiempo: <%= resultado.tiempo %> segundos <br>
+                Lugar General: <%= resultado.lugarGeneral %> <br>
+                Lugar en Categoría: <%= resultado.lugarCategoria %>
+            </li>
+        <% }); %>
+    </ul>
+</body>
+</html>

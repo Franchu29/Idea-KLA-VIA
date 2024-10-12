@@ -38,8 +38,8 @@ exports.login = async (req, res) => {
         { expiresIn: '1h' }
       );
   
-      // Enviar el token al cliente
-      res.render('inicio.ejs');
+      res.cookie('token', token, { httpOnly: true }); // Almacena el token en cookies
+      res.render('inicio.ejs');      
     } catch (error) {
       res.status(500).json({ error: 'Error en el servidor' });
     }
@@ -202,24 +202,52 @@ exports.editUser = async (req, res) => {
 };
 
 //Muestra el perfil del usuario
-exports.getProfile = async (req, res) => {
-    try {
-        const { id } = req.params;
+exports.mostrarPerfil = async (req, res) => {
+    // Verificar el token JWT del usuario
+    const token = req.cookies.token; // Asegúrate de que el token se almacena en cookies o como desees
 
-        // Obtener el usuario por su ID
+    if (!token) {
+        return res.redirect('/'); // Redirigir si no hay token
+    }
+
+    try {
+        // Verificar el token y obtener el ID del usuario
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const userId = decoded.userId;
+
+        // Obtener los datos del usuario desde la base de datos
         const user = await prisma.user.findUnique({
-            where: { id: parseInt(id, 10) }
+            where: { id: userId },
         });
 
         if (!user) {
-            return res.status(404).send('Usuario no encontrado');
+            return res.render('index.ejs', { errorMessage: 'Usuario no encontrado' });
         }
 
-        // Renderizar la vista del perfil con los datos del usuario
-        res.render('mi_perfil', { user });
+        // Obtener las inscripciones del usuario
+        const inscripciones = await prisma.inscripcion.findMany({
+            where: { usuarioId: userId },
+            include: {
+                evento: true, // Obtener los detalles del evento
+                categoria: true, // Obtener los detalles de la categoría
+                distancia: true, // Obtener los detalles de la distancia
+                // Puedes incluir más relaciones si lo necesitas
+            },
+        });
+
+        // Obtener los resultados de las inscripciones del usuario
+        const resultados = await prisma.resultados.findMany({
+            where: { usuarioId: userId },
+            include: {
+                evento: true, // Obtener los detalles del evento
+            },
+        });
+
+        // Renderizar la vista de perfil con los datos del usuario, inscripciones y resultados
+        res.render('perfil.ejs', { user, inscripciones, resultados });
     } catch (error) {
-        console.error('Error al obtener el perfil del usuario:', error);
-        res.status(500).send('Error al obtener el perfil del usuario');
+        console.error(error);
+        res.status(500).json({ error: 'Error en el servidor' });
     }
 };
 

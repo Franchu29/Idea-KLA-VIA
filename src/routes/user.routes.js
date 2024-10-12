@@ -23,7 +23,7 @@ router.get('/edit_user_render/:id', userController.editUserRender);
 router.post('/edit_user/:id', userController.editUser);
 
 //Mi perfil
-router.get('/perfil/:id', userController.getProfile);
+router.get('/perfil', userController.mostrarPerfil);
 
 router.get('/show_rols_render', userController.showRolsRender);
 

@@ -8,6 +8,7 @@ const userRoutes = require('./routes/user.routes.js');
 const eventRoutes = require('./routes/eventos.routes.js');
 const cronometroRoutes = require('./routes/cronometro.routes.js');
 const path = require('path');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/styles', express.static(path.join(__dirname, 'views', 'styles')));
 app.use(express.static("public"));
+app.use(cookieParser());
 
 // Middleware para decodificar datos de formularios
 app.use(express.urlencoded({ extended: false }));
