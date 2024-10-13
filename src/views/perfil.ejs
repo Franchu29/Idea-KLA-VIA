@@ -14,7 +14,7 @@
     <p><strong>Email:</strong> <%= user.email %></p>
     <p><strong>Nombre:</strong> <%= user.nombre %></p>
     <p><strong>Apellido:</strong> <%= user.apellido %></p>
-    <p><strong>Rol:</strong> <%= user.rolGeneralId  %></p>
+    <p><strong>Rol:</strong> <%= user.rolGeneralId %></p>
 
     <h2>Inscripciones</h2>
     <ul>
@@ -38,6 +38,16 @@
                 Lugar en Categoría: <%= resultado.lugarCategoria %>
             </li>
         <% }); %>
+    </ul>
+
+    <h2>Puntajes por Año</h2>
+    <ul>
+        <% for (let ano in puntajesPorAno) { %>
+            <li>
+                Año: <%= ano %> <br>
+                Puntaje Total: <%= puntajesPorAno[ano] %>
+            </li>
+        <% } %>
     </ul>
 </body>
 </html>

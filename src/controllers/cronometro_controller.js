@@ -56,13 +56,16 @@ exports.calcularResultados = async (req, res) => {
         const resultados5k = await obtenerResultados5k(eventoId);
         const resultados10k = await obtenerResultados10k(eventoId);
 
+        // Calcular puntajes para corredores de 10 km
+        await calcularPuntajes10K(eventoId);
+
         // Crear la subcarpeta para el evento
         const dirPath = path.join(__dirname, '../uploads/evento_' + eventoId);
         if (!fs.existsSync(dirPath)) {
             fs.mkdirSync(dirPath, { recursive: true });
         }
 
-        // Generar el PDF para resultados de 5km
+        // Generar el PDF para resultados de 5 km
         const doc5k = new PDFDocument();
         const filePath5k = path.join(dirPath, `resultados_5k_evento_${eventoId}.pdf`);
         doc5k.pipe(fs.createWriteStream(filePath5k));
@@ -106,7 +109,7 @@ exports.calcularResultados = async (req, res) => {
         doc5k.end();
         console.log('PDF de 5 km generado correctamente');
 
-        // Generar el PDF para resultados de 10km
+        // Generar el PDF para resultados de 10 km
         const doc10k = new PDFDocument();
         const filePath10k = path.join(dirPath, `resultados_10k_evento_${eventoId}.pdf`);
         doc10k.pipe(fs.createWriteStream(filePath10k));
@@ -307,3 +310,33 @@ exports.descargarPDF10K = (req, res) => {
     });
 };
 
+// Función para calcular puntajes
+async function calcularPuntajes10K(eventoId) {
+    try {
+        const resultados10k = await obtenerResultados10k(eventoId);
+        const totalCorredores = resultados10k.length;
+
+        for (let i = 0; i < totalCorredores; i++) {
+            const resultado = resultados10k[i];
+            const puestoGeneral = i + 1; // Asignar posición (1 para el primero, 2 para el segundo, etc.)
+            const puntaje = Math.max(0, 100 - (puestoGeneral - 1)); // Calcular puntaje decreciente
+
+            await prisma.resultados.update({
+                where: {
+                    usuarioId_eventoId: {
+                        usuarioId: resultado.usuarioId,
+                        eventoId: Number(eventoId),
+                    },
+                },
+                data: {
+                    puntaje: puntaje,
+                },
+            });
+        }
+
+        console.log('Puntajes actualizados correctamente para el evento:', eventoId);
+    } catch (error) {
+        console.error('Error al calcular puntajes de 10 km:', error);
+        throw error;
+    }
+}

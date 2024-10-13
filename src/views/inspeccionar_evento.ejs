@@ -39,13 +39,11 @@
             <th>Edad</th>
             <th>Distancia</th>
             <th>Categoría</th>
-            <th>N° Emergencia</th>
             <th>N° Corredor</th>
             <th>Lugar General</th>
             <th>Lugar Categoria</th>
             <th>Tiempo</th>
             <th>Puntos Carrera</th>
-            <th>Extra</th>
           </tr>
         </thead>       
         <tbody>
@@ -59,23 +57,20 @@
                         <td><%= inscripcion.usuario ? inscripcion.usuario.edad : 'No disponible' %></td>
                         <td><%= inscripcion.distancia ? inscripcion.distancia.nombre : 'No definida' %></td>
                         <td><%= inscripcion.categoria ? inscripcion.categoria.nombre : 'No definida' %></td>
-                        <td><%= inscripcion.numeroEmergencia || 'No disponible' %></td>
                         <td><%= inscripcion.numeroCorredor || 'No disponible' %></td>
-                        <td><%= inscripcion.lugarGeneral || 'No disponible' %></td>
-                        <td><%= inscripcion.lugarCategoria || 'No disponible' %></td>
-                        <td><%= inscripcion.tiempo || 'No disponible' %></td>
-                        <td><%= inscripcion.puntosCarrera || 'No disponible' %></td>
-                        <td><%= inscripcion.extra || 'No disponible' %></td>
+                        <td><%= inscripcion.resultados ? inscripcion.resultados.lugarGeneral : 'No disponible' %></td>
+                        <td><%= inscripcion.resultados ? inscripcion.resultados.lugarCategoria : 'No disponible' %></td>
+                        <td><%= inscripcion.resultados ? inscripcion.resultados.tiempo : 'No disponible' %></td>
+                        <td><%= inscripcion.resultados ? inscripcion.resultados.puntaje : 'No disponible' %></td>
                     </tr>
                 <% }) %>
             <% } else { %>
                 <tr>
-                    <td colspan="14">No hay participantes inscritos para este evento.</td>
+                    <td colspan="12">No hay participantes inscritos para este evento.</td>
                 </tr>
             <% } %>
         </tbody>                           
-
-    </table>
+    </table>    
 
     <script>
         function iniciarCarrera() {

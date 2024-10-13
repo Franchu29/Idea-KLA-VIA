@@ -199,19 +199,24 @@ exports.editEvento = async (req, res) => {
 exports.inspeccionarEvento = async (req, res) => {
     console.log("Ruta alcanzada con ID:", req.params.id);
     const eventoId = parseInt(req.params.id);
-  
+
     try {
-        // Obtenemos los detalles del evento y los usuarios inscritos
+        // Obtenemos los detalles del evento, los usuarios inscritos y sus resultados
         const evento = await prisma.eventos.findUnique({
             where: {
                 id: eventoId,
             },
             include: {
-                inscripciones: { // Incluye las inscripciones relacionadas
+                inscripciones: {
                     include: {
-                        usuario: true, // Incluye los datos del usuario
-                        distancia: true, // Asegúrate de incluir la distancia
-                        categoria: true // Incluye la categoría si la necesitas
+                        usuario: true,
+                        distancia: true,
+                        categoria: true,
+                    },
+                },
+                resultados: {
+                    include: {
+                        usuario: true,  // Incluye los datos del usuario en los resultados
                     },
                 },
             },
@@ -223,12 +228,12 @@ exports.inspeccionarEvento = async (req, res) => {
         if (!evento) {
             return res.status(404).send('Evento no encontrado');
         }
-  
+
         // Renderizamos la vista inspeccionar_evento.ejs con los detalles del evento y los usuarios inscritos
         res.render('inspeccionar_evento', {
             evento
         });
-  
+
     } catch (error) {
         console.error('Error al obtener los detalles del evento:', error);
         res.status(500).send('Error interno del servidor');

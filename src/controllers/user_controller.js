@@ -231,7 +231,6 @@ exports.mostrarPerfil = async (req, res) => {
                 evento: true, // Obtener los detalles del evento
                 categoria: true, // Obtener los detalles de la categoría
                 distancia: true, // Obtener los detalles de la distancia
-                // Puedes incluir más relaciones si lo necesitas
             },
         });
 
@@ -239,12 +238,28 @@ exports.mostrarPerfil = async (req, res) => {
         const resultados = await prisma.resultados.findMany({
             where: { usuarioId: userId },
             include: {
-                evento: true, // Obtener los detalles del evento
+                evento: true, // Obtener los detalles del evento, incluyendo la fecha
             },
         });
 
-        // Renderizar la vista de perfil con los datos del usuario, inscripciones y resultados
-        res.render('perfil.ejs', { user, inscripciones, resultados });
+        // Calcular la suma de los puntajes agrupados por año
+        const puntajesPorAno = resultados.reduce((acumulado, resultado) => {
+            // Obtener el año del evento
+            const anoEvento = new Date(resultado.evento.fecha).getFullYear();
+
+            // Si el puntaje no es nulo, agregarlo al año correspondiente
+            if (resultado.puntaje !== null) {
+                if (!acumulado[anoEvento]) {
+                    acumulado[anoEvento] = 0; // Inicializar el año si no existe
+                }
+                acumulado[anoEvento] += resultado.puntaje; // Sumar el puntaje al año
+            }
+
+            return acumulado;
+        }, {}); // Inicializar como objeto vacío
+
+        // Renderizar la vista de perfil con los datos del usuario, inscripciones, resultados y puntajes agrupados por año
+        res.render('perfil.ejs', { user, inscripciones, resultados, puntajesPorAno });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Error en el servidor' });
