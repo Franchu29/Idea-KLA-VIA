@@ -6,48 +6,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perfil de Usuario</title>
+    <link rel="stylesheet" href="/styles/style_perfil.css">
 </head>
 <body>
-    <h1>Perfil de Usuario</h1>
-    <h2>Información del Usuario</h2>
-    <p><strong>ID:</strong> <%= user.id %></p>
-    <p><strong>Email:</strong> <%= user.email %></p>
-    <p><strong>Nombre:</strong> <%= user.nombre %></p>
-    <p><strong>Apellido:</strong> <%= user.apellido %></p>
-    <p><strong>Rol:</strong> <%= user.rolGeneralId %></p>
+    <div class="profile-container">
+        <div class="profile-section">
+            <h2>Información del Usuario</h2>
+            <p><strong>ID:</strong> <%= user.id %></p>
+            <p><strong>Email:</strong> <%= user.email %></p>
+            <p><strong>Nombre:</strong> <%= user.nombre %></p>
+            <p><strong>Apellido:</strong> <%= user.apellido %></p>
+            <p><strong>Rol:</strong> <%= user.rolGeneralId %></p>
+        </div>
 
-    <h2>Inscripciones</h2>
-    <ul>
-        <% inscripciones.forEach(inscripcion => { %>
-            <li>
-                Evento: <%= inscripcion.evento.nombre %> <br>
-                Distancia: <%= inscripcion.distancia.nombre %> <br>
-                Categoría: <%= inscripcion.categoria.nombre %> <br>
-                Fecha de Inscripción: <%= inscripcion.fechaInscripcion.toLocaleDateString() %>
-            </li>
-        <% }); %>
-    </ul>
+        <div class="profile-section">
+            <h2>Inscripciones</h2>
+            <ul>
+                <% inscripciones.forEach(inscripcion => { %>
+                    <li>
+                        <p><strong>Evento:</strong> <%= inscripcion.evento.nombre %></p>
+                        <p><strong>Distancia:</strong> <%= inscripcion.distancia.nombre %></p>
+                        <p><strong>Categoría:</strong> <%= inscripcion.categoria.nombre %></p>
+                        <p><strong>Fecha de Inscripción:</strong> <%= inscripcion.fechaInscripcion.toLocaleDateString() %></p>
+                    </li>
+                <% }); %>
+            </ul>
+        </div>
 
-    <h2>Resultados</h2>
-    <ul>
-        <% resultados.forEach(resultado => { %>
-            <li>
-                Evento: <%= resultado.evento.nombre %> <br>
-                Tiempo: <%= resultado.tiempo %> segundos <br>
-                Lugar General: <%= resultado.lugarGeneral %> <br>
-                Lugar en Categoría: <%= resultado.lugarCategoria %>
-            </li>
-        <% }); %>
-    </ul>
+        <div class="profile-section">
+            <h2>Resultados</h2>
+            <ul>
+                <% resultados.forEach(resultado => { %>
+                    <li>
+                        <p><strong>Evento:</strong> <%= resultado.evento.nombre %></p>
+                        <p><strong>Tiempo:</strong> <%= resultado.tiempo %> segundos</p>
+                        <p><strong>Lugar General:</strong> <%= resultado.lugarGeneral %></p>
+                        <p><strong>Lugar en Categoría:</strong> <%= resultado.lugarCategoria %></p>
+                    </li>
+                <% }); %>
+            </ul>
+        </div>
 
-    <h2>Puntajes por Año</h2>
-    <ul>
-        <% for (let ano in puntajesPorAno) { %>
-            <li>
-                Año: <%= ano %> <br>
-                Puntaje Total: <%= puntajesPorAno[ano] %>
-            </li>
-        <% } %>
-    </ul>
+        <div class="profile-section">
+            <h2>Puntajes por Año</h2>
+            <ul>
+                <% for (let ano in puntajesPorAno) { %>
+                    <li>
+                        <p><strong>Año:</strong> <%= ano %></p>
+                        <p><strong>Puntaje Total:</strong> <%= puntajesPorAno[ano] %></p>
+                    </li>
+                <% } %>
+            </ul>
+        </div>
+    </div>
 </body>
 </html>

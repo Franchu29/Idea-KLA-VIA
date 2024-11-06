@@ -52,7 +52,7 @@ exports.createEvent = async (req, res) => {
     // Ejecutar todas las promesas
     await Promise.all([...categoriasPromises, ...distanciasPromises]);
 
-    res.redirect('/events/views_events');
+    res.redirect('/show_event');
   } catch (error) {
     console.error('Error al crear el evento:', error);
     res.status(500).send('Error al crear el evento');
@@ -188,7 +188,7 @@ exports.editEvento = async (req, res) => {
           }
       }
 
-      res.redirect('/events/views_events');
+      res.redirect('/events/show_event');
   } catch (error) {
       console.error('Error al editar el evento:', error);
       res.status(500).json({ error: 'Error al editar el evento' });

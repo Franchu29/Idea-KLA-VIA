@@ -56,34 +56,47 @@ exports.createUserRender = (req, res) => {
     res.render('create_user.ejs');
 };
 
+// Función para calcular la edad a partir de la fecha de nacimiento
+function calcularEdad(fechaNacimiento) {
+    const hoy = new Date();
+    const nacimiento = new Date(fechaNacimiento);
+    let edad = hoy.getFullYear() - nacimiento.getFullYear();
+    const mes = hoy.getMonth() - nacimiento.getMonth();
+
+    // Ajusta la edad si el cumpleaños aún no ha ocurrido este año
+    if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+        edad--;
+    }
+
+    return edad;
+}
+
 //Crea un usuario
 exports.createUser = async (req, res) => {
     try {
         console.log("CREANDO EL USUARIO:", req.body);
 
-        const { nombre, apellido, email, fecha_nacimeinto, edad, contrasena, rolGeneralId } = req.body;
+        const { nombre, apellido, email, fecha_nacimeinto, contrasena, rolGeneralId } = req.body;
 
-        // Convierte edad a un número entero
-        const edadInt = parseInt(edad, 10);
-        if (isNaN(edadInt)) {
-            return res.status(400).json({ error: 'Edad debe ser un número entero válido' });
-        }
-
-        // Valida y convierte la fecha
+        // Valida y convierte la fecha de nacimiento
         const fechaNacimiento = new Date(fecha_nacimeinto);
         if (isNaN(fechaNacimiento.getTime())) {
             return res.status(400).json({ error: 'Fecha de nacimiento inválida' });
         }
 
-        // Cifrar la contraseña antes de guardarla
+        // Calcula la edad en base a la fecha de nacimiento
+        const edad = calcularEdad(fechaNacimiento);
+        console.log('Edad calculada:', edad);
+
+        // Cifra la contraseña antes de guardarla
         const hashedPassword = await bcrypt.hash(contrasena, 10);
 
         const newUser = await prisma.user.create({
             data: {
                 nombre,
                 apellido,
-                fecha_nacimeinto: fechaNacimiento, // Usa el objeto Date aquí
-                edad: edadInt,
+                fecha_nacimeinto: fechaNacimiento, // Guarda la fecha de nacimiento como objeto Date
+                edad, // Guarda la edad calculada
                 email,
                 contrasena: hashedPassword, // Guarda la contraseña cifrada
                 rolGeneral: {
@@ -92,7 +105,7 @@ exports.createUser = async (req, res) => {
             }
         });
 
-        res.redirect('/views_user');
+        res.redirect('/');
     } catch (error) {
         console.error('Error al crear el usuario:', error);
         res.status(500).json({ error: 'Error al crear el usuario' });

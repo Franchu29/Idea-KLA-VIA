@@ -20,15 +20,17 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
             padding: 20px;
             width: 300px;
+            text-align: center;
         }
 
         .container h2 {
-            text-align: center;
             margin-bottom: 20px;
         }
 
         .container input[type="text"],
-        .container input[type="password"] {
+        .container input[type="password"],
+        .container input[type="email"],
+        .container input[type="date"] {
             width: 100%;
             padding: 10px;
             margin-bottom: 15px;
@@ -49,6 +51,26 @@
         .container input[type="submit"]:hover {
             background-color: #45a049;
         }
+
+        .register-btn {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .register-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .register-form {
+            display: none;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -63,6 +85,35 @@
             <input type="password" name="contrasena" placeholder="Contraseña" required>
             <input type="submit" value="Login">
         </form>
+
+        <!-- Botón para mostrar el formulario de registro -->
+        <button class="register-btn" onclick="toggleRegisterForm()">Registrarse</button>
+
+        <!-- Formulario de registro -->
+        <div class="register-form" id="registerForm">
+            <h2>Registro</h2>
+            <form action="/create_user" method="POST">
+                <input type="text" name="nombre" placeholder="Nombre" required>
+                <input type="text" name="apellido" placeholder="Apellido" required>
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="date" name="fecha_nacimeinto" placeholder="Fecha Nacimiento" required>
+                <input type="password" name="contrasena" placeholder="Contraseña" required>
+                <input type="hidden" id="rolGeneralId" name="rolGeneralId" value="1">
+                <input type="submit" value="Registrar">
+            </form>
+        </div>
     </div>
+
+    <script>
+        // Función para mostrar u ocultar el formulario de registro
+        function toggleRegisterForm() {
+            var registerForm = document.getElementById("registerForm");
+            if (registerForm.style.display === "none" || registerForm.style.display === "") {
+                registerForm.style.display = "block";
+            } else {
+                registerForm.style.display = "none";
+            }
+        }
+    </script>
 </body>
 </html>

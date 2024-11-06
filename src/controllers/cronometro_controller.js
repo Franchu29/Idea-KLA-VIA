@@ -10,6 +10,9 @@ exports.mostrarCronometro = (req, res) => {
     res.render('cronometro', { id });
 };
 
+let corredoresTemp = []; // Definirlo al principio para que sea accesible globalmente en este archivo
+
+// Controlador para registrar un corredor
 exports.registrarCorredor = async (req, res) => {
     const { eventoId, numeroCorredor, tiempo } = req.body;
     console.log('Datos recibidos:', req.body);
@@ -18,8 +21,8 @@ exports.registrarCorredor = async (req, res) => {
         // Encuentra la inscripción correspondiente al número del corredor
         const inscripcion = await prisma.inscripcion.findFirst({
             where: {
-                numeroCorredor: parseInt(numeroCorredor), // Asegúrate de que el campo 'numeroCorredor' existe en Inscripcion
-                eventoId: parseInt(eventoId), // Asegúrate de que corresponde al evento actual
+                numeroCorredor: parseInt(numeroCorredor),
+                eventoId: parseInt(eventoId),
             },
         });
 
@@ -27,25 +30,51 @@ exports.registrarCorredor = async (req, res) => {
             return res.status(404).json({ error: 'Corredor no encontrado en la inscripción' });
         }
 
-        // Obtener el id del usuario desde la inscripción
         const usuarioId = inscripcion.usuarioId;
 
-        // Guardar el resultado en la tabla Resultados
-        const resultado = await prisma.resultados.create({
-            data: {
-                usuarioId: usuarioId,
-                eventoId: parseInt(eventoId),
-                tiempo: parseInt(tiempo), // Convertir el tiempo a un número entero
-                lugarGeneral: 0, // Inicialmente puedes establecerlo en 0
-                lugarCategoria: 0, // Inicialmente puedes establecerlo en 0
-            },
+        // Agregar el corredor al arreglo temporal
+        corredoresTemp.push({
+            usuarioId: usuarioId,
+            eventoId: parseInt(eventoId),
+            tiempo: parseInt(tiempo), // Asegurarse de convertir el tiempo a un número
         });
+        console.log('Corredores temporales:', corredoresTemp);
 
-        // Redirigir a la vista "cronometro" (ajusta la ruta según sea necesario)
-        res.redirect('/cronometro/cronometro'); // Cambia esto a la ruta correcta de tu vista de cronómetro
     } catch (error) {
         console.error('Error al registrar el corredor:', error);
         return res.status(500).json({ error: 'Error al registrar el corredor' });
+    }
+};
+
+// Controlador para guardar todos los corredores
+exports.guardarCorredores = async () => {
+    try {
+        if (corredoresTemp.length === 0) {
+            throw new Error('No hay corredores para guardar');
+        }
+
+        const resultados = [];
+        
+        // Guardar los corredores en la base de datos
+        for (const corredor of corredoresTemp) {
+            const resultado = await prisma.resultados.create({
+                data: {
+                    usuarioId: corredor.usuarioId,
+                    eventoId: corredor.eventoId,
+                    tiempo: corredor.tiempo,
+                    lugarGeneral: 0,
+                    lugarCategoria: 0,
+                },
+            });
+            resultados.push(resultado);
+        }
+
+        // Limpiar el arreglo después de guardar
+        corredoresTemp = [];
+        return resultados;
+    } catch (error) {
+        console.error('Error al guardar corredores:', error);
+        throw new Error('Error al guardar corredores');
     }
 };
 
@@ -53,6 +82,9 @@ exports.calcularResultados = async (req, res) => {
     const { eventoId } = req.params;
 
     try {
+        console.log('Corredores antes de guardar:', corredoresTemp);
+        const resultadosGuardados = await exports.guardarCorredores(corredoresTemp);
+
         const resultados5k = await obtenerResultados5k(eventoId);
         const resultados10k = await obtenerResultados10k(eventoId);
 

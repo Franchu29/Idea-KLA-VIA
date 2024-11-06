@@ -33,17 +33,12 @@
         <thead>
           <tr>
             <th>ID</th>
-            <th>RUT</th>
             <th>Nombre</th>
             <th>Apellido</th>
             <th>Edad</th>
             <th>Distancia</th>
             <th>Categoría</th>
             <th>N° Corredor</th>
-            <th>Lugar General</th>
-            <th>Lugar Categoria</th>
-            <th>Tiempo</th>
-            <th>Puntos Carrera</th>
           </tr>
         </thead>       
         <tbody>
@@ -51,17 +46,12 @@
                 <% evento.inscripciones.forEach(inscripcion => { %>
                     <tr>
                         <td><%= inscripcion.id %></td>
-                        <td><%= inscripcion.usuario ? inscripcion.usuario.rut : 'No disponible' %></td>
                         <td><%= inscripcion.usuario ? inscripcion.usuario.nombre : 'No disponible' %></td>
                         <td><%= inscripcion.usuario ? inscripcion.usuario.apellido : 'No disponible' %></td>
                         <td><%= inscripcion.usuario ? inscripcion.usuario.edad : 'No disponible' %></td>
                         <td><%= inscripcion.distancia ? inscripcion.distancia.nombre : 'No definida' %></td>
                         <td><%= inscripcion.categoria ? inscripcion.categoria.nombre : 'No definida' %></td>
                         <td><%= inscripcion.numeroCorredor || 'No disponible' %></td>
-                        <td><%= inscripcion.resultados ? inscripcion.resultados.lugarGeneral : 'No disponible' %></td>
-                        <td><%= inscripcion.resultados ? inscripcion.resultados.lugarCategoria : 'No disponible' %></td>
-                        <td><%= inscripcion.resultados ? inscripcion.resultados.tiempo : 'No disponible' %></td>
-                        <td><%= inscripcion.resultados ? inscripcion.resultados.puntaje : 'No disponible' %></td>
                     </tr>
                 <% }) %>
             <% } else { %>

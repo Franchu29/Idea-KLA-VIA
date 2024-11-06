@@ -4,7 +4,7 @@ const cronometroController = require('../controllers/cronometro_controller');
 const router = Router();
 
 router.get('/cronometro/:id', cronometroController.mostrarCronometro);
-router.post('/registrar', cronometroController.registrarCorredor);
+router.post('/registrarCorredor', cronometroController.registrarCorredor);
 router.get('/calcular_resultados/:eventoId', cronometroController.calcularResultados);
 
 router.get('/descargar_pdf_5k/:idEvento', cronometroController.descargarPDF5K);
