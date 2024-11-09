@@ -1,0 +1,21 @@
+<%- include('./partials/header'); %>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inspeccionar Club</title>
+</head>
+<body>
+
+    <div class="container">
+        <h1><%= club.nombre %></h1>
+
+        <img src="/uploads/images_club/club_<%= club.id %>.jpg" alt="Imagen de <%= club.nombre %>" class="club-image">
+
+        <a href="/club/show_club" class="button-back">Volver a la lista de clubes</a>
+    </div>
+
+</body>
+</html>

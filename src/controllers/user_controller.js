@@ -76,10 +76,10 @@ exports.createUser = async (req, res) => {
     try {
         console.log("CREANDO EL USUARIO:", req.body);
 
-        const { nombre, apellido, email, fecha_nacimeinto, contrasena, rolGeneralId } = req.body;
+        const { nombre, apellido, email, fecha_nacimiento, contrasena, rolGeneralId } = req.body;
 
         // Valida y convierte la fecha de nacimiento
-        const fechaNacimiento = new Date(fecha_nacimeinto);
+        const fechaNacimiento = new Date(fecha_nacimiento);
         if (isNaN(fechaNacimiento.getTime())) {
             return res.status(400).json({ error: 'Fecha de nacimiento inválida' });
         }
@@ -95,7 +95,7 @@ exports.createUser = async (req, res) => {
             data: {
                 nombre,
                 apellido,
-                fecha_nacimeinto: fechaNacimiento, // Guarda la fecha de nacimiento como objeto Date
+                fecha_nacimiento: fechaNacimiento, // Guarda la fecha de nacimiento como objeto Date
                 edad, // Guarda la edad calculada
                 email,
                 contrasena: hashedPassword, // Guarda la contraseña cifrada
@@ -168,7 +168,7 @@ exports.editUserRender = async (req, res) => {
 exports.editUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const { nombre, apellido, email, fecha_nacimeinto, edad, contrasena, rolGeneralId } = req.body;
+        const { nombre, apellido, email, fecha_nacimiento, edad, contrasena, rolGeneralId } = req.body;
 
         // Usa el valor directamente del req.body
         console.log('Valor de rolGeneralId:', rolGeneralId);
@@ -180,7 +180,7 @@ exports.editUser = async (req, res) => {
         }
 
         // Valida y convierte la fecha
-        const fechaNacimiento = new Date(fecha_nacimeinto);
+        const fechaNacimiento = new Date(fecha_nacimiento);
         if (isNaN(fechaNacimiento.getTime())) {
             return res.status(400).json({ error: 'Fecha de nacimiento inválida' });
         }
@@ -195,7 +195,7 @@ exports.editUser = async (req, res) => {
             data: {
                 nombre,
                 apellido,
-                fecha_nacimeinto: fechaNacimiento, // Usa el objeto Date directamente
+                fecha_nacimiento: fechaNacimiento, // Usa el objeto Date directamente
                 edad: edadInt,
                 email,
                 contrasena: hashedPassword, // Guarda la contraseña cifrada

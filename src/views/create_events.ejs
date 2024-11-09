@@ -1,5 +1,5 @@
 <%- include('./partials/header'); %>
-<form action="/events/create_event" method="POST">
+<form action="/events/create_event" method="POST" enctype="multipart/form-data">
     <label for="nombre">Nombre:</label>
     <input type="text" id="nombre" name="nombre" required>
 
@@ -30,6 +30,9 @@
       <label><input type="checkbox" name="distancias" value="3"> 10 km</label><br>
       <label><input type="checkbox" name="distancias" value="4"> 21 km</label><br>
     </div>    
+
+    <label for="imagen">Imagen del Evento:</label>
+    <input type="file" id="imagen" name="imagen" accept="image/*">
 
     <button type="submit">Crear Evento</button>
 </form>

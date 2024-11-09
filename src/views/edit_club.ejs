@@ -1,0 +1,28 @@
+<%- include('./partials/header'); %>  
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Club</title>
+</head>
+<body>
+
+    <div class="form-container">
+        <h1>Editar Club</h1>
+        <form action="/club/update_club/<%= club.id %>" method="post">
+            <div class="form-group">
+                <label for="nombre">Nombre del Club</label>
+                <input type="text" id="nombre" name="nombre" value="<%= club.nombre %>" required>
+            </div>
+            <!-- Aquí podrías agregar más campos si es necesario, por ejemplo, para los puntajes o usuarios -->
+            
+            <div class="form-group">
+                <button type="submit">Actualizar Club</button>
+            </div>
+        </form>
+    </div>
+
+</body>
+</html>

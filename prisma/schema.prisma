@@ -20,14 +20,18 @@ model User {
   id              Int       @id @default(autoincrement())
   nombre          String
   apellido        String
-  fecha_nacimeinto DateTime
+  fecha_nacimiento DateTime
   edad            Int
   email           String    @unique
   contrasena      String
 
+  clubId          Int?
+  club            Clubes?    @relation(fields: [clubId], references: [id])
+
   // Relación con Roles Generales
   rolGeneralId    Int
   rolGeneral      Roles      @relation(fields: [rolGeneralId], references: [id])
+
   inscripciones   Inscripcion[]
   resultados      Resultados[]
 }
@@ -37,46 +41,58 @@ model Roles {
   nombre      String
   descripcion String
 
-  // Relación con Usuarios
   usuarios    User[]
+}
+
+model Clubes {
+  id         Int       @id @default(autoincrement())
+  nombre     String
+  puntajes   PuntajeClub[]   // Relación para los puntajes anuales
+
+  usuarios   User[]
+}
+
+model PuntajeClub {
+  id        Int     @id @default(autoincrement())
+  clubId    Int
+  anio      Int
+  puntos    Int     // Puntaje acumulado del club en ese año
+
+  club      Clubes  @relation(fields: [clubId], references: [id])
+
+  @@unique([clubId, anio])  // Un puntaje por club por año
 }
 
 model Eventos {
   id          Int           @id @default(autoincrement())
-  nombre      String        // Nombre del evento (ej: "Maratón Ciudad")
-  descripcion String?       // Descripción opcional del evento
-  fecha       DateTime      // Fecha del evento
-  lugar       String        // Lugar donde se realizará el evento (ej: "Parque Central")
+  nombre      String        
+  descripcion String?       
+  fecha       DateTime      
+  lugar       String        
 
-  // Relación con Categorías y Distancias
   categorias  EventoCategoria[]
   distancias  EventoDistancia[]
-  inscripciones   Inscripcion[]
+  inscripciones Inscripcion[]
   resultados   Resultados[]
 }
 
 model Categoria {
-  id         Int           @id @default(autoincrement())
-  nombre     String        // e.g., "15-20 años", "21-30 años"
+  id           Int           @id @default(autoincrement())
+  nombre       String        
 
-  // Relación con Eventos
-  eventos    EventoCategoria[]
-
-  // Relación con Inscripciones
-  inscripciones   Inscripcion[]
+  eventos      EventoCategoria[]
+  inscripciones Inscripcion[]
 }
 
 model Distancia {
-  id         Int           @id @default(autoincrement())
-  nombre     String        //"2 km", "5 km", "10 km"
-  precio    Int           @default(0) // Precio de la inscripción 
+  id           Int           @id @default(autoincrement())
+  nombre       String        
+  precio       Int           @default(0)
 
-  // Relación con Eventos
-  eventos    EventoDistancia[]
-  inscripciones   Inscripcion[]
+  eventos      EventoDistancia[]
+  inscripciones Inscripcion[]
 }
 
-// Tabla intermedia para la relación muchos a muchos entre Eventos y Categorías
 model EventoCategoria {
   eventoId    Int
   categoriaId Int
@@ -87,7 +103,6 @@ model EventoCategoria {
   @@id([eventoId, categoriaId])
 }
 
-// Tabla intermedia para la relación muchos a muchos entre Eventos y Distancias
 model EventoDistancia {
   eventoId    Int
   distanciaId Int
@@ -99,36 +114,34 @@ model EventoDistancia {
 }
 
 model Inscripcion {
-  id               Int      @id @default(autoincrement())  // ID único de inscripción
+  id              Int       @id @default(autoincrement())  
   usuarioId       Int
   eventoId        Int
   distanciaId     Int
-  categoriaId     Int      // Relación con la tabla Categoria
-  numeroCorredor  Int?     // Nuevo campo para el número de corredor
+  categoriaId     Int
+  numeroCorredor  Int?
 
   usuario         User      @relation(fields: [usuarioId], references: [id])
   evento          Eventos   @relation(fields: [eventoId], references: [id])
   distancia       Distancia @relation(fields: [distanciaId], references: [id])
   categoria       Categoria @relation(fields: [categoriaId], references: [id])
 
-  fechaInscripcion DateTime @default(now()) // Fecha de la inscripción
+  fechaInscripcion DateTime @default(now())
 
-  @@unique([usuarioId, eventoId])  // Un usuario solo puede inscribirse una vez por evento
+  @@unique([usuarioId, eventoId])  
 }
 
 model Resultados {
-  id             Int      @id @default(autoincrement()) // ID único del resultado
+  id             Int       @id @default(autoincrement())  
   usuarioId      Int
   eventoId       Int
-  tiempo         Int      // Tiempo en segundos, puedes convertirlo a un formato de HH:MM:SS cuando sea necesario
-  lugarGeneral   Int      // Lugar general entre todos los participantes del evento
-  lugarCategoria Int      // Lugar dentro de su categoría
-  puntaje        Int?     // Puntaje (solo aplica si es la categoría de 10km, por lo tanto es opcional)
+  tiempo         Int       
+  lugarGeneral   Int       
+  lugarCategoria Int       
+  puntaje        Int?      
 
-  // Relaciones con Usuario y Evento
-  usuario        User     @relation(fields: [usuarioId], references: [id])
-  evento         Eventos  @relation(fields: [eventoId], references: [id])
+  usuario        User      @relation(fields: [usuarioId], references: [id])
+  evento         Eventos   @relation(fields: [eventoId], references: [id])
 
-  // Restricción para que un usuario no tenga más de un resultado por evento
   @@unique([usuarioId, eventoId])
 }

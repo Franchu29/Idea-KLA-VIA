@@ -1,6 +1,9 @@
 // eventos_controller.js
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
 // Renderiza el formulario de eventos
 exports.renderEvents = (req, res) => {
@@ -8,56 +11,94 @@ exports.renderEvents = (req, res) => {
     res.render('create_events.ejs');
 };
 
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, path.join(__dirname, '../uploads/images_evento'));
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({ storage });
+
 // Lógica para crear un evento
-exports.createEvent = async (req, res) => {
-  console.log("Formulario recibido: ", req.body);
-  let { nombre, descripcion, fecha, lugar, categorias, distancias } = req.body;
+exports.createEvent = [
+    upload.single('imagen'), // Middleware de multer para procesar la imagen
+    async (req, res) => {
+        console.log("Formulario recibido: ", req.body);
+        let { nombre, descripcion, fecha, lugar, categorias, distancias } = req.body;
 
-  categorias = Array.isArray(categorias) ? categorias : [categorias];
-  distancias = Array.isArray(distancias) ? distancias : [distancias];
+        categorias = Array.isArray(categorias) ? categorias : [categorias];
+        distancias = Array.isArray(distancias) ? distancias : [distancias];
 
-  try {
-    //Crea el evento
-    const nuevoEvento = await prisma.eventos.create({
-      data: {
-        nombre,
-        descripcion,
-        fecha: new Date(fecha),
-        lugar,
-      },
-    });
+        // Obtener el nombre del archivo subido, si existe
+        const imagen = req.file ? req.file.filename : null;
 
-    const eventoId = nuevoEvento.id;
+        try {
+            // Crear el evento en la base de datos
+            const nuevoEvento = await prisma.eventos.create({
+                data: {
+                    nombre,
+                    descripcion,
+                    fecha: new Date(fecha),
+                    lugar,
+                },
+            });
 
-    //Inserta en la tabla intermedia EventoCategoria
-    const categoriasPromises = categorias.map((categoriaId) => {
-      return prisma.eventoCategoria.create({
-        data: {
-          eventoId: eventoId,
-          categoriaId: parseInt(categoriaId),
-        },
-      });
-    });
+            const eventoId = nuevoEvento.id;
 
-    //Inserta en la tabla intermedia EventoDistancia
-    const distanciasPromises = distancias.map((distanciaId) => {
-      return prisma.eventoDistancia.create({
-        data: {
-          eventoId: eventoId,
-          distanciaId: parseInt(distanciaId),
-        },
-      });
-    });
+            // Ahora renombramos la imagen con el ID del evento
+            if (imagen) {
+                const oldPath = path.join(__dirname, '../uploads/images_evento', imagen);
+                const newFileName = `evento_${eventoId}${path.extname(imagen)}`;
+                const newPath = path.join(__dirname, '../uploads/images_evento', newFileName);
 
-    // Ejecutar todas las promesas
-    await Promise.all([...categoriasPromises, ...distanciasPromises]);
+                // Renombrar la imagen en el sistema de archivos
+                fs.rename(oldPath, newPath, (err) => {
+                    if (err) {
+                        console.error('Error al renombrar la imagen:', err);
+                    } else {
+                        // Actualizar el nombre de la imagen en la base de datos
+                        prisma.eventos.update({
+                            where: { id: eventoId },
+                            data: { imagen: newFileName }
+                        }).catch(err => console.error('Error al actualizar el nombre de la imagen:', err));
+                    }
+                });
+            }
 
-    res.redirect('/show_event');
-  } catch (error) {
-    console.error('Error al crear el evento:', error);
-    res.status(500).send('Error al crear el evento');
-  }
-};
+            // Inserta en la tabla intermedia EventoCategoria
+            const categoriasPromises = categorias.map((categoriaId) => {
+                return prisma.eventoCategoria.create({
+                    data: {
+                        eventoId: eventoId,
+                        categoriaId: parseInt(categoriaId),
+                    },
+                });
+            });
+
+            // Inserta en la tabla intermedia EventoDistancia
+            const distanciasPromises = distancias.map((distanciaId) => {
+                return prisma.eventoDistancia.create({
+                    data: {
+                        eventoId: eventoId,
+                        distanciaId: parseInt(distanciaId),
+                    },
+                });
+            });
+
+            // Ejecutar todas las promesas
+            await Promise.all([...categoriasPromises, ...distanciasPromises]);
+
+            res.redirect('/events/show_event');
+        } catch (error) {
+            console.error('Error al crear el evento:', error);
+            res.status(500).send('Error al crear el evento');
+        }
+    }
+];
 
 // Obtiene todos los eventos
 exports.getEvents = async (req, res) => {
@@ -266,12 +307,12 @@ exports.renderParticipantesCortesia = async (req, res) => {
         // Calcular la edad para cada usuario que no esté inscrito
         for (const usuario of usuarios) {
 
-            if (!usuario.fecha_nacimeinto) {
+            if (!usuario.fecha_nacimiento) {
                 console.log(`El usuario ${usuario.id} no tiene una fecha de nacimiento.`);
                 continue; // Saltar este usuario si no tiene una fecha de nacimiento
             }
 
-            const fechaNacimiento = new Date(usuario.fecha_nacimeinto);
+            const fechaNacimiento = new Date(usuario.fecha_nacimiento);
             if (isNaN(fechaNacimiento.getTime())) {
                 continue; // Saltar el usuario con fecha inválida y pasar al siguiente
             }
