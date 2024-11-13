@@ -1,52 +1,69 @@
 <%- include('./partials/header'); %>
-<form action="/events/inscribir_participantes/<%= eventos.id %>" method="POST">
-    <table border="1">
-        <thead>
-            <tr>
-                <th>Añadir</th>
-                <th>Nombre</th>
-                <th>Apellido</th>
-                <th>Email</th>
-                <th>Edad</th>
-                <th>Distancias</th>
-                <th>Categoría</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% usuarios.forEach(usuario => { %>
-                <tr>
-                    <td>
-                        <input type="checkbox" name="usuarioIds" value="<%= usuario.id %>" class="usuario-checkbox" data-usuario-id="<%= usuario.id %>">
-                    </td>
-                    <td><%= usuario.nombre %></td>
-                    <td><%= usuario.apellido %></td>
-                    <td><%= usuario.email %></td>
-                    <td><%= usuario.edad %></td>
-                    <td>
-                        <% if (eventos.distancias && eventos.distancias.length > 0) { %>
-                            <ul>
-                                <% eventos.distancias.forEach(eventoDistancia => { %>
-                                    <li>
-                                        <label>
-                                            <input type="radio" name="distanciaSeleccionada_<%= usuario.id %>" value="<%= eventoDistancia.distancia.nombre %>" class="distancia-radio">
-                                            <%= eventoDistancia.distancia.nombre %>
-                                        </label>
-                                    </li>
-                                <% }) %>
-                            </ul>
-                        <% } else { %>
-                            <p>No se encontraron distancias para este evento.</p>
-                        <% } %>
-                    </td>
-                    <td><%= usuario.categoriaAsignada.nombre %></td>
-                    <input type="hidden" name="categoriaId_<%= usuario.id %>" value="<%= usuario.categoriaAsignada.id %>">
-                </tr>
-            <% }) %>
-        </tbody>
-    </table>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/styles/style_evento.css">
+</head>
+<body>
+    <form action="/events/inscribir_participantes/<%= eventos.id %>" method="POST">
+        <% if (usuarios.length === 0) { %>
+            <!-- Mostrar mensaje si no hay participantes -->
+            <p>No hay participantes por añadir.</p>
+        <% } else { %>
+            <!-- Mostrar la tabla si hay participantes -->
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Añadir</th>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th>Email</th>
+                        <th>Edad</th>
+                        <th>Distancias</th>
+                        <th>Categoría</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% usuarios.forEach(usuario => { %>
+                        <tr>
+                            <td>
+                                <input type="checkbox" name="usuarioIds" value="<%= usuario.id %>" class="usuario-checkbox" data-usuario-id="<%= usuario.id %>">
+                            </td>
+                            <td><%= usuario.nombre %></td>
+                            <td><%= usuario.apellido %></td>
+                            <td><%= usuario.email %></td>
+                            <td><%= usuario.edad %></td>
+                            <td>
+                                <% if (eventos.distancias && eventos.distancias.length > 0) { %>
+                                    <ul>
+                                        <% eventos.distancias.forEach(eventoDistancia => { %>
+                                            <li>
+                                                <label>
+                                                    <input type="radio" name="distanciaSeleccionada_<%= usuario.id %>" value="<%= eventoDistancia.distancia.nombre %>" class="distancia-radio">
+                                                    <%= eventoDistancia.distancia.nombre %>
+                                                </label>
+                                            </li>
+                                        <% }) %>
+                                    </ul>
+                                <% } else { %>
+                                    <p>No se encontraron distancias para este evento.</p>
+                                <% } %>
+                            </td>
+                            <td><%= usuario.categoriaAsignada.nombre %></td>
+                            <input type="hidden" name="categoriaId_<%= usuario.id %>" value="<%= usuario.categoriaAsignada.id %>">
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        <% } %>
 
-    <button type="submit">Enviar</button>
-</form>
+        <button type="submit">Enviar</button>
+    </form>
+</body>
+</html>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {

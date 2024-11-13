@@ -1,5 +1,6 @@
 const { Router } = require('express');
 const clubController = require('../controllers/club_controller');
+const authMiddleware = require('../middlewares/auth_middlewares');
 
 const router = Router();
 
@@ -14,5 +15,8 @@ router.get('/edit_club/:id', clubController.editClubRender);
 router.post('/update_club/:id', clubController.updateClub);
 
 router.get('/inspeccionar_club/:id', clubController.inspeccionarClub);
+
+router.post('/unirseClub/:id', authMiddleware, clubController.unirseClub);
+router.post('/desligarse/:id', authMiddleware, clubController.desligarseDelClub);
 
 module.exports = router;

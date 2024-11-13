@@ -1,38 +1,52 @@
 <%- include('./partials/header'); %>
-<form action="/events/create_event" method="POST" enctype="multipart/form-data">
-    <label for="nombre">Nombre:</label>
-    <input type="text" id="nombre" name="nombre" required>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Evento</title>
+    <link rel="stylesheet" href="/styles/style_formulario.css">
+</head>
+<body>
+    <div class="form-container">
+        <h1>Crear Evento</h1>
+        <form action="/events/create_event" method="POST" enctype="multipart/form-data">
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="nombre" name="nombre" required>
 
-    <label for="descripcion">Descripción:</label>
-    <input type="text" id="descripcion" name="descripcion" required>
+            <label for="descripcion">Descripción:</label>
+            <input type="text" id="descripcion" name="descripcion" required>
 
-    <label for="fecha">Fecha:</label>
-    <input type="date" id="fecha" name="fecha" required>
+            <label for="fecha">Fecha:</label>
+            <input type="date" id="fecha" name="fecha" required>
 
-    <label for="lugar">Lugar:</label>
-    <input type="text" id="lugar" name="lugar" required>
+            <label for="lugar">Lugar:</label>
+            <input type="text" id="lugar" name="lugar" required>
 
-    <label for="categorias">Categorías:</label>
-    <div id="categorias">
-      <label><input type="checkbox" name="categorias" value="1"> 15-19 años</label><br>
-      <label><input type="checkbox" name="categorias" value="2"> 20-29 años</label><br>
-      <label><input type="checkbox" name="categorias" value="3"> 30-39 años</label><br>
-      <label><input type="checkbox" name="categorias" value="4"> 40-49 años</label><br>
-      <label><input type="checkbox" name="categorias" value="5"> 50-59 años</label><br>
-      <label><input type="checkbox" name="categorias" value="6"> 60-69 años</label><br>
-      <label><input type="checkbox" name="categorias" value="7"> 70+ años</label><br>
+            <label for="categorias">Categorías:</label>
+            <div class="checkbox-group" id="categorias">
+                <label><input type="checkbox" name="categorias" value="1"> 15-19 años</label>
+                <label><input type="checkbox" name="categorias" value="2"> 20-29 años</label>
+                <label><input type="checkbox" name="categorias" value="3"> 30-39 años</label>
+                <label><input type="checkbox" name="categorias" value="4"> 40-49 años</label>
+                <label><input type="checkbox" name="categorias" value="5"> 50-59 años</label>
+                <label><input type="checkbox" name="categorias" value="6"> 60-69 años</label>
+                <label><input type="checkbox" name="categorias" value="7"> 70+ años</label>
+            </div>
+
+            <label for="distancias">Distancias:</label>
+            <div class="checkbox-group" id="distancias">
+                <label><input type="checkbox" name="distancias" value="1"> 2 km</label>
+                <label><input type="checkbox" name="distancias" value="2"> 5 km</label>
+                <label><input type="checkbox" name="distancias" value="3"> 10 km</label>
+                <label><input type="checkbox" name="distancias" value="4"> 21 km</label>
+            </div>
+
+            <label for="imagen">Imagen del Evento:</label>
+            <input type="file" id="imagen" name="imagen" accept="image/*">
+
+            <button type="submit">Crear Evento</button>
+        </form>
     </div>
-    
-    <label for="distancias">Distancias:</label>
-    <div id="distancias">
-      <label><input type="checkbox" name="distancias" value="1"> 2 km</label><br>
-      <label><input type="checkbox" name="distancias" value="2"> 5 km</label><br>
-      <label><input type="checkbox" name="distancias" value="3"> 10 km</label><br>
-      <label><input type="checkbox" name="distancias" value="4"> 21 km</label><br>
-    </div>    
-
-    <label for="imagen">Imagen del Evento:</label>
-    <input type="file" id="imagen" name="imagen" accept="image/*">
-
-    <button type="submit">Crear Evento</button>
-</form>
+</body>
+</html>

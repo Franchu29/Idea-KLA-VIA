@@ -219,6 +219,7 @@ exports.calcularResultados = async (req, res) => {
             fs.unlinkSync(filePath5k);
             fs.unlinkSync(filePath10k);
         });
+        res.redirect('/evento/show_evento');
     } catch (error) {
         console.error('Error al calcular resultados:', error);
         res.status(500).send('Error al calcular resultados');

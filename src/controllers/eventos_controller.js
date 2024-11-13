@@ -238,7 +238,6 @@ exports.editEvento = async (req, res) => {
 
 // Inspecciona una evento
 exports.inspeccionarEvento = async (req, res) => {
-    console.log("Ruta alcanzada con ID:", req.params.id);
     const eventoId = parseInt(req.params.id);
 
     try {
@@ -248,6 +247,11 @@ exports.inspeccionarEvento = async (req, res) => {
                 id: eventoId,
             },
             include: {
+                resultados: {
+                    include: {
+                        usuario: true,  // Incluye los datos del usuario en los resultados
+                    },
+                },
                 inscripciones: {
                     include: {
                         usuario: true,
@@ -255,24 +259,22 @@ exports.inspeccionarEvento = async (req, res) => {
                         categoria: true,
                     },
                 },
-                resultados: {
-                    include: {
-                        usuario: true,  // Incluye los datos del usuario en los resultados
-                    },
-                },
             },
         });
 
-        console.log(evento); // Agregar este log para ver la estructura del objeto
-
-        // Verificamos si se encontró el evento
         if (!evento) {
             return res.status(404).send('Evento no encontrado');
         }
 
-        // Renderizamos la vista inspeccionar_evento.ejs con los detalles del evento y los usuarios inscritos
+        // Calculamos si el botón de "Añadir Participante de Cortesía" debe mostrarse
+        const fechaEvento = new Date(evento.fecha);
+        const fechaActual = new Date();
+        const mostrarBotonCortesia = fechaActual < fechaEvento;
+
+        // Renderizamos la vista inspeccionar_evento.ejs con los detalles del evento y el estado del botón
         res.render('inspeccionar_evento', {
-            evento
+            evento,
+            mostrarBotonCortesia
         });
 
     } catch (error) {
@@ -366,8 +368,6 @@ exports.renderParticipantesCortesia = async (req, res) => {
                 usuario.categoriaAsignada = { id: null, nombre: 'Sin categoría' };
             }
         }
-
-        // Renderizar la vista con los usuarios no inscritos, sus edades, categorías asignadas y los eventos con distancias
         res.render('añadir_participante_cortesia', { usuarios, eventos, categoriasEdad });
     } catch (error) {
         console.error('Error al obtener los usuarios y eventos:', error);

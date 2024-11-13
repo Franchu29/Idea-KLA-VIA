@@ -5,6 +5,7 @@ const cronometroRoutes = require('./routes/cronometro.routes.js');
 const clubRoutes = require('./routes/club.routes.js');
 const path = require('path');
 const cookieParser = require('cookie-parser');
+require('dotenv').config();
 
 const app = express();
 

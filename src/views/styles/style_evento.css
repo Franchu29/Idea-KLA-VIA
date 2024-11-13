@@ -1,0 +1,114 @@
+/* Estilos para botones */
+#btn-iniciar-carrera {
+    background-color: #007bff; /* Azul */
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin: 10px 5px;
+    transition: background-color 0.3s ease;
+}
+
+#btn-iniciar-carrera:hover {
+    background-color: #0056b3; /* Azul oscuro al pasar el ratón */
+}
+
+#btn-anadir-participante {
+    background-color: #28a745; /* Verde */
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin: 10px 5px;
+    transition: background-color 0.3s ease;
+}
+
+#btn-anadir-participante:hover {
+    background-color: #218838; /* Verde oscuro al pasar el ratón */
+}
+
+#btn-descargar-5k {
+    background-color: #ffc107; /* Amarillo */
+    border: none;
+    color: #333;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin: 10px 5px;
+    transition: background-color 0.3s ease;
+}
+
+#btn-descargar-5k:hover {
+    background-color: #e0a800; /* Amarillo oscuro al pasar el ratón */
+}
+
+#btn-descargar-10k {
+    background-color: #17a2b8; /* Cian */
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin: 10px 5px;
+    transition: background-color 0.3s ease;
+}
+
+#btn-descargar-10k:hover {
+    background-color: #138496; /* Cian oscuro al pasar el ratón */
+}
+
+/* Estilos para la tabla */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-family: Arial, sans-serif;
+}
+
+table th, table td {
+    padding: 12px 15px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+table thead th {
+    background-color: #343a40; /* Gris oscuro para la cabecera */
+    color: white;
+    font-weight: bold;
+}
+
+table tbody tr:nth-child(even) {
+    background-color: #f8f9fa; /* Gris claro para filas pares */
+}
+
+table tbody tr:nth-child(odd) {
+    background-color: #ffffff; /* Blanco para filas impares */
+}
+
+table tbody tr:hover {
+    background-color: #e9ecef; /* Gris claro al pasar el ratón */
+}
+
+/* Estilo para los encabezados */
+h1, h2 {
+    color: #333;
+    font-family: Arial, sans-serif;
+}
+
+h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    text-align: center;
+}

@@ -1,0 +1,101 @@
+/* Estilos generales para formularios */
+form {
+    background-color: #ffffff; /* Fondo blanco para el formulario */
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    margin: 20px auto; /* Centra el formulario */
+}
+
+/* Estilos para las etiquetas de los campos */
+form label {
+    display: block;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+/* Estilos para los campos de entrada */
+form input[type="text"],
+form input[type="date"],
+form input[type="number"],
+form input[type="file"],
+form input[type="email"],
+form input[type="password"],
+form textarea,
+form select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+
+/* Estilos para el enfoque en los campos de entrada */
+form input[type="text"]:focus,
+form input[type="date"]:focus,
+form input[type="number"]:focus,
+form input[type="file"]:focus,
+form input[type="email"]:focus,
+form input[type="password"]:focus,
+form textarea:focus,
+form select:focus {
+    border-color: #3498db; /* Color del borde al enfocar */
+    outline: none;
+}
+
+/* Estilos para checkboxes y radios */
+form .checkbox-group,
+form .radio-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+form .checkbox-group label,
+form .radio-group label {
+    font-weight: normal;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+/* Estilos para el botón de envío */
+form button[type="submit"] {
+    background-color: #3498db;
+    color: #ffffff;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.3s ease;
+}
+
+form button[type="submit"]:hover {
+    background-color: #2980b9;
+}
+
+/* Estilos para el selector de archivo */
+form input[type="file"] {
+    padding: 5px;
+    font-size: 14px;
+}
+
+/* Estilos para mensajes de error o ayuda */
+form .error-message,
+form .help-text {
+    font-size: 13px;
+    color: #e74c3c;
+    margin-top: -10px;
+    margin-bottom: 10px;
+}

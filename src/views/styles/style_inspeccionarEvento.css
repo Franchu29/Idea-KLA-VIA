@@ -1,0 +1,150 @@
+/* General */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+/* Contenedor principal */
+.container {
+    width: 80%;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Título principal */
+h1 {
+    text-align: center;
+    color: #333;
+    font-size: 2.5em;
+    margin-bottom: 20px;
+}
+
+/* Imagen del club */
+.club-image {
+    width: 100%;
+    max-width: 500px;
+    height: auto;
+    border-radius: 8px;
+    display: block;
+    margin: 20px auto;
+}
+
+/* Estilo para los botones */
+button {
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1em;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Estilo para los formularios */
+form {
+    margin: 20px 0;
+    text-align: center;
+}
+
+/* Botón de "volver" */
+.button-back {
+    background-color: #6c757d;
+}
+
+.button-back:hover {
+    background-color: #5a6268;
+}
+
+/* Botón para desligarse */
+.button-unirse {
+    background-color: #dc3545;
+}
+
+.button-unirse:hover {
+    background-color: #c82333;
+}
+
+/* Estilo para la lista de usuarios */
+h2 {
+    text-align: center;
+    color: #333;
+    font-size: 2em;
+    margin-top: 30px;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+}
+
+ul li {
+    padding: 10px;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    transition: background-color 0.3s ease;
+}
+
+ul li:hover {
+    background-color: #f1f1f1;
+}
+
+ul li strong {
+    font-size: 1.2em;
+    color: #333;
+}
+
+ul li p {
+    font-size: 0.9em;
+    color: #777;
+}
+
+/* Mensaje cuando no hay usuarios */
+p {
+    text-align: center;
+    font-size: 1.1em;
+    color: #666;
+}
+
+/* Responsive: Estilo para dispositivos móviles */
+@media (max-width: 768px) {
+    .container {
+        width: 90%;
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 2em;
+    }
+
+    .club-image {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    button {
+        width: 100%;
+        padding: 15px;
+        font-size: 1.2em;
+    }
+
+    ul li {
+        font-size: 1em;
+    }
+
+    h2 {
+        font-size: 1.5em;
+    }
+}

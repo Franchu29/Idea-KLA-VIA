@@ -120,7 +120,7 @@ exports.updateClub = async (req, res) => {
     try {
         console.log('ACTUALIZANDO CLUB:', req.params);
         const { id } = req.params;
-        const { nombre } = req.body; // Otras propiedades si las agregas
+        const { nombre } = req.body;
 
         // Actualizar el club en la base de datos
         const updatedClub = await prisma.clubes.update({
@@ -145,7 +145,6 @@ exports.updateClub = async (req, res) => {
 
 exports.inspeccionarClub = async (req, res) => {
     try {
-        console.log('MOSTRANDO DETALLES DEL CLUB:', req.params);
         const { id } = req.params;
 
         // Buscar el club por su ID
@@ -159,12 +158,108 @@ exports.inspeccionarClub = async (req, res) => {
             return res.status(404).send('Club no encontrado');
         }
 
-        console.log('Datos del club:', club); // Verifica los datos del club
+        // Obtener los usuarios asociados a este club
+        const usuariosDelClub = await prisma.user.findMany({
+            where: {
+                clubId: club.id
+            }
+        });
 
-        // Renderiza la vista con los datos del club
-        res.render('inspeccionar_club.ejs', { club });
+        console.log('Usuarios en el club:', usuariosDelClub);
+
+        // Renderiza la vista con los datos del club y los usuarios
+        res.render('inspeccionar_club.ejs', { club, usuarios: usuariosDelClub });
     } catch (error) {
         console.error('Error al inspeccionar el club:', error);
         res.status(500).json({ error: 'Error al inspeccionar el club' });
+    }
+};
+
+exports.unirseClub = async (req, res) => {
+    try {
+        const userId = req.userId; // Asegúrate de tener el ID del usuario disponible
+        if (!userId) {
+            return res.status(401).send('Usuario no autenticado');
+        }
+
+        const clubId = parseInt(req.params.id, 10);  // Convertir el id a un número entero
+        console.log('UNIÉNDOSE AL CLUB:', clubId);
+
+        // Verificar si el club existe
+        const club = await prisma.clubes.findUnique({
+            where: { 
+                id: clubId  // Ahora estamos pasando el valor correctamente como entero
+            }
+        });
+
+        if (!club) {
+            return res.status(404).send('Club no encontrado');
+        }
+
+        // Verificar si el usuario ya está asociado a un club
+        const user = await prisma.user.findUnique({
+            where: { id: userId }
+        });
+
+        if (user.clubId) {
+            return res.status(400).send('El usuario ya está asociado a un club');
+        }
+
+        // Actualizar el clubId del usuario en la base de datos
+        await prisma.user.update({
+            where: { id: userId },
+            data: { clubId: clubId }
+        });
+
+        // Redirigir al perfil del usuario
+        res.redirect(`/perfil`);
+    } catch (error) {
+        console.error('Error al unirse al club:', error);
+        res.status(500).send('Hubo un error al unirse al club. Intenta nuevamente.');
+    }
+};
+
+exports.desligarseDelClub = async (req, res) => {
+    try {
+        const userId = req.userId; // Asegúrate de tener el ID del usuario disponible
+        if (!userId) {
+            return res.status(401).send('Usuario no autenticado');
+        }
+
+        const clubId = parseInt(req.params.id, 10);  // Obtener el ID del club
+
+        console.log('DESLIGÁNDOSE DEL CLUB:', clubId);
+
+        // Verificar si el club existe
+        const club = await prisma.clubes.findUnique({
+            where: { 
+                id: clubId  // Verificamos si el club existe en la base de datos
+            }
+        });
+
+        if (!club) {
+            return res.status(404).send('Club no encontrado');
+        }
+
+        // Verificar si el usuario está asociado al club
+        const user = await prisma.user.findUnique({
+            where: { id: userId }
+        });
+
+        if (user.clubId !== clubId) {
+            return res.status(400).send('El usuario no está asociado a este club');
+        }
+
+        // Desligar al usuario del club (establecer clubId en null)
+        await prisma.user.update({
+            where: { id: userId },
+            data: { clubId: null }  // Actualizamos el clubId a null para desvincular al usuario
+        });
+
+        // Redirigir al perfil del usuario
+        res.redirect(`/perfil`);
+    } catch (error) {
+        console.error('Error al desligarse del club:', error);
+        res.status(500).send('Hubo un error al desligarse del club. Intenta nuevamente.');
     }
 };

@@ -4,44 +4,52 @@ const prisma = new PrismaClient();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = "corre_60";
-
 exports.renderIndex = (req, res) => {
+    res.clearCookie('token');
     console.log('MOSTRANDO LOGIN');
     res.render('index.ejs');
 };
 
 exports.login = async (req, res) => {
     const { email, contrasena } = req.body;
-    console.log(email, contrasena);
-  
+    console.log('Contraseña recibida:', contrasena);
+
     try {
-      // Buscar el usuario por email
-      const user = await prisma.user.findUnique({
-        where: { email: email },
-      });
-  
-      if (!user) {
-        return res.render('index.ejs', { errorMessage: 'Usuario no encontrado' });
-      }
-  
-      // Verificar la contraseña
-      const validContrasena = await bcrypt.compare(contrasena, user.contrasena);
-      if (!validContrasena) {
-        return res.render('index.ejs', { errorMessage: 'Contraseña incorrecta' });
-      }
-  
-      // Generar el token JWT
-      const token = jwt.sign(
-        { userId: user.id, email: user.email, role: user.role }, 
-        JWT_SECRET, 
-        { expiresIn: '1h' }
-      );
-  
-      res.cookie('token', token, { httpOnly: true }); // Almacena el token en cookies
-      res.render('inicio.ejs');      
+        // Buscar el usuario por email
+        const user = await prisma.user.findUnique({
+            where: { email: email },
+        });
+
+        if (!user) {
+            console.log('Usuario no encontrado');
+            return res.render('index.ejs', { errorMessage: 'Usuario no encontrado' });
+        }
+
+        // Verificar la contraseña
+        const validContrasena = await bcrypt.compare(contrasena, user.contrasena);
+        console.log('Contraseña cifrada en la base de datos:', user.contrasena);
+        console.log('Contraseña comparada:', validContrasena);
+
+        if (!validContrasena) {
+            console.log('Contraseña incorrecta');
+            return res.render('index.ejs', { errorMessage: 'Contraseña incorrecta' });
+        }
+
+        // Generar el token JWT
+        const token = jwt.sign(
+            { userId: user.id, email: user.email, role: user.role }, 
+            process.env.JWT_SECRET, 
+            { expiresIn: '1h' }
+        );
+        console.log('JWT generado:', token);
+
+        // Almacena el token en cookies y redirige al inicio
+        res.cookie('token', token, { httpOnly: true }); // Asegúrate de tener httpOnly para mayor seguridad
+        res.redirect('/inicio'); // Asegúrate de que esta ruta esté configurada en tu servidor
+
     } catch (error) {
-      res.status(500).json({ error: 'Error en el servidor' });
+        console.error('Error en el proceso de login:', error);
+        res.status(500).json({ error: 'Error en el servidor' });
     }
 };
 
@@ -146,8 +154,11 @@ exports.deleteUser = async (req, res) => {
 //Muestra la vista de editar usuario
 exports.editUserRender = async (req, res) => {
     try {
-        console.log('MOSTRANDO FORMULARIO DE EDICIÓN DE USUARIO:', req.params);
         const { id } = req.params;
+
+        // Obtiene los roles y clubes disponibles
+        const roles = await prisma.roles.findMany();
+        const clubs = await prisma.clubes.findMany();
 
         const user = await prisma.user.findUnique({
             where: {
@@ -155,9 +166,8 @@ exports.editUserRender = async (req, res) => {
             }
         });
 
-        console.log('Datos del usuario:', user); // Verifica el valor aquí
-
-        res.render('edit_user.ejs', { user }); 
+        // Renderiza la vista pasando tanto los datos del usuario, roles y clubes
+        res.render('edit_user.ejs', { user, roles, clubs });
     } catch (error) {
         console.error('Error al mostrar el formulario de edición de usuario:', error);
         res.status(500).json({ error: 'Error al mostrar el formulario de edición de usuario' });
@@ -168,10 +178,11 @@ exports.editUserRender = async (req, res) => {
 exports.editUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const { nombre, apellido, email, fecha_nacimiento, edad, contrasena, rolGeneralId } = req.body;
+        const { nombre, apellido, email, fecha_nacimiento, edad, contrasena, rolGeneralId, clubId } = req.body;
 
-        // Usa el valor directamente del req.body
+        // Muestra los valores recibidos del formulario
         console.log('Valor de rolGeneralId:', rolGeneralId);
+        console.log('Valor de clubId:', clubId);  
 
         // Convierte edad a un número entero
         const edadInt = parseInt(edad, 10);
@@ -185,28 +196,34 @@ exports.editUser = async (req, res) => {
             return res.status(400).json({ error: 'Fecha de nacimiento inválida' });
         }
 
-        // Cifrar la contraseña antes de guardarla
-        const hashedPassword = await bcrypt.hash(contrasena, 10);
-
-        const user = await prisma.user.update({
-            where: {
-                id: parseInt(id, 10)
+        // Si la contraseña está vacía, no la actualices
+        let updatedData = {
+            nombre,
+            apellido,
+            fecha_nacimiento: fechaNacimiento,
+            edad: edadInt,
+            email,
+            rolGeneral: {
+                connect: { id: parseInt(rolGeneralId, 10) }
             },
-            data: {
-                nombre,
-                apellido,
-                fecha_nacimiento: fechaNacimiento, // Usa el objeto Date directamente
-                edad: edadInt,
-                email,
-                contrasena: hashedPassword, // Guarda la contraseña cifrada
-                rolGeneral: {
-                    connect: { id: parseInt(rolGeneralId, 10) }
-                }
-            }
+            club: clubId ? { connect: { id: parseInt(clubId, 10) } } : { disconnect: true }
+        };
+
+        // Si el campo de contraseña tiene un valor, encripta la nueva contraseña
+        if (contrasena && contrasena.trim() !== '') {
+            const hashedPassword = await bcrypt.hash(contrasena, 10);
+            updatedData.contrasena = hashedPassword;  // Solo actualiza la contraseña si es proporcionada
+        }
+
+        // Realiza la actualización
+        const user = await prisma.user.update({
+            where: { id: parseInt(id, 10) },
+            data: updatedData
         });
 
         console.log('USUARIO EDITADO:', user);
 
+        // Redirige al usuario después de la actualización
         res.redirect('/views_user');
     } catch (error) {
         console.error('Error al editar el usuario:', error);
@@ -216,21 +233,16 @@ exports.editUser = async (req, res) => {
 
 //Muestra el perfil del usuario
 exports.mostrarPerfil = async (req, res) => {
-    // Verificar el token JWT del usuario
-    const token = req.cookies.token; // Asegúrate de que el token se almacena en cookies o como desees
-
-    if (!token) {
-        return res.redirect('/'); // Redirigir si no hay token
-    }
-
     try {
-        // Verificar el token y obtener el ID del usuario
-        const decoded = jwt.verify(token, JWT_SECRET);
-        const userId = decoded.userId;
+        const userId = req.userId; // Obtener el userId del req (establecido por el middleware)
 
-        // Obtener los datos del usuario desde la base de datos
+        // Obtener los datos del usuario desde la base de datos, incluyendo el rol y el club
         const user = await prisma.user.findUnique({
             where: { id: userId },
+            include: {
+                rolGeneral: true, // Incluir el rol del usuario
+                club: true,       // Incluir el club al que pertenece el usuario (si tiene)
+            },
         });
 
         if (!user) {
@@ -257,19 +269,15 @@ exports.mostrarPerfil = async (req, res) => {
 
         // Calcular la suma de los puntajes agrupados por año
         const puntajesPorAno = resultados.reduce((acumulado, resultado) => {
-            // Obtener el año del evento
             const anoEvento = new Date(resultado.evento.fecha).getFullYear();
-
-            // Si el puntaje no es nulo, agregarlo al año correspondiente
             if (resultado.puntaje !== null) {
                 if (!acumulado[anoEvento]) {
-                    acumulado[anoEvento] = 0; // Inicializar el año si no existe
+                    acumulado[anoEvento] = 0;
                 }
-                acumulado[anoEvento] += resultado.puntaje; // Sumar el puntaje al año
+                acumulado[anoEvento] += resultado.puntaje;
             }
-
             return acumulado;
-        }, {}); // Inicializar como objeto vacío
+        }, {});
 
         // Renderizar la vista de perfil con los datos del usuario, inscripciones, resultados y puntajes agrupados por año
         res.render('perfil.ejs', { user, inscripciones, resultados, puntajesPorAno });

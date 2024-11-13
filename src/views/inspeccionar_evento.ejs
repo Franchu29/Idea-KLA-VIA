@@ -5,10 +5,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Participantes del Evento</title>
     <link rel="stylesheet" href="//cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="//cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="/styles/style_evento.css">
     <script>
         $(document).ready(function(){
             $('#tabla-corredores_carrera').DataTable();
@@ -19,15 +20,18 @@
     <h1>Participantes del Evento: <%= evento.nombre %></h1>
     
     <button id="btn-iniciar-carrera" onclick="window.location.href='/cronometro/cronometro/<%= evento.id %>'">Comenzar Carrera</button>
-    <button id="btn-anadir-participante" onclick="window.location.href='/events/participantes_cortesia/<%= evento.id %>'">Añadir Participante de Cortesía</button>
+
+    <% if (mostrarBotonCortesia) { %>
+        <button id="btn-anadir-participante" onclick="window.location.href='/events/participantes_cortesia/<%= evento.id %>'">Añadir Participante de Cortesía</button>
+    <% } %>
 
     <h2>Descargar Resultados</h2>
-    <% if (evento.inscripciones.length > 0) { %> <!-- Verifica si hay inscripciones -->
+    <% if (evento.resultados.length > 0) { %>
         <button id="btn-descargar-5k" onclick="window.location.href='/cronometro/descargar_pdf_5k/<%= evento.id %>'">Descargar Resultados 5K</button>
         <button id="btn-descargar-10k" onclick="window.location.href='/cronometro/descargar_pdf_10k/<%= evento.id %>'">Descargar Resultados 10K</button>
     <% } else { %>
-        <p>No hay participantes inscritos, por lo tanto no se pueden descargar resultados.</p>
-    <% } %>
+        <p>No hay resultados disponibles para este evento.</p>
+    <% } %>    
     
     <table id="tabla-corredores_carrera" class="w3-table-all w3-card-4">
         <thead>
@@ -56,16 +60,10 @@
                 <% }) %>
             <% } else { %>
                 <tr>
-                    <td colspan="12">No hay participantes inscritos para este evento.</td>
+                    <td colspan="7">No hay participantes inscritos para este evento.</td>
                 </tr>
             <% } %>
         </tbody>                           
     </table>    
-
-    <script>
-        function iniciarCarrera() {
-            alert("¡La carrera ha comenzado!");
-        }
-    </script>
 </body>
 </html>

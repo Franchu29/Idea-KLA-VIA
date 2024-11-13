@@ -16,7 +16,8 @@
             <p><strong>Email:</strong> <%= user.email %></p>
             <p><strong>Nombre:</strong> <%= user.nombre %></p>
             <p><strong>Apellido:</strong> <%= user.apellido %></p>
-            <p><strong>Rol:</strong> <%= user.rolGeneralId %></p>
+            <p><strong>Rol:</strong> <%= user.rolGeneral ? user.rolGeneral.nombre : 'No asignado' %></p>
+            <p><strong>Club:</strong> <%= user.club ? user.club.nombre : 'No pertenece a un club' %></p>
         </div>
 
         <div class="profile-section">
