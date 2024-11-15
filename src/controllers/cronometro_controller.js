@@ -3,7 +3,7 @@ const prisma = new PrismaClient();
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
-const archiver = require('archiver');
+const zip = require('express-zip');
 
 exports.mostrarCronometro = (req, res) => {
     const { id } = req.params;
@@ -63,21 +63,86 @@ exports.guardarCorredores = async () => {
             throw new Error('No hay corredores para guardar');
         }
 
+        // Inicializa un objeto para almacenar los corredores separados por distancia
+        const corredoresPorDistancia = {};
+
+        // Ordenar los corredores por tiempo (de menor a mayor)
+        const corredoresOrdenados = corredoresTemp.sort((a, b) => a.tiempo - b.tiempo);
+
+        // Separar los corredores por distancia
+        corredoresOrdenados.forEach((corredor) => {
+            // Usar la distancia del corredor para agruparlos
+            if (!corredoresPorDistancia[corredor.distanciaId]) {
+                corredoresPorDistancia[corredor.distanciaId] = [];
+            }
+            corredoresPorDistancia[corredor.distanciaId].push(corredor);
+        });
+
+        // Inicializa un objeto para asignar lugares por categoría
+        const lugaresPorCategoria = {};
+
+        // Asignar lugares generales y categorías por distancia
+        for (const distanciaId in corredoresPorDistancia) {
+            const corredoresPorEstaDistancia = corredoresPorDistancia[distanciaId];
+            
+            for (let i = 0; i < corredoresPorEstaDistancia.length; i++) {
+                const corredor = corredoresPorEstaDistancia[i];
+
+                // Asignar lugar general dentro de la distancia
+                const lugarGeneral = i + 1;
+
+                // Verificar la categoría del corredor
+                const inscripcion = await prisma.inscripcion.findFirst({
+                    where: {
+                        usuarioId: corredor.usuarioId,
+                        eventoId: corredor.eventoId,
+                    },
+                    include: {
+                        categoria: true, // Incluir la categoría
+                    },
+                });
+
+                if (inscripcion && inscripcion.categoria) {
+                    const categoria = inscripcion.categoria.nombre;
+
+                    // Asignar lugarCategoria dentro de su categoría
+                    if (!lugaresPorCategoria[categoria]) {
+                        lugaresPorCategoria[categoria] = [];
+                    }
+                    lugaresPorCategoria[categoria].push(corredor);
+
+                    const lugarCategoria = lugaresPorCategoria[categoria].length;
+
+                    // Asignar lugar general y lugar de categoría al corredor
+                    corredor.lugarGeneral = lugarGeneral;
+                    corredor.lugarCategoria = lugarCategoria;
+                    corredor.distanciaId = distanciaId; // Mantener la distancia asociada
+
+                } else {
+                    console.warn(`Corredor con ID ${corredor.usuarioId} no tiene categoría asignada.`);
+                }
+            }
+        }
+
+        // Guardar los resultados en la base de datos
         const resultados = [];
-        
-        // Guardar los corredores en la base de datos
-        for (const corredor of corredoresTemp) {
+        for (const corredor of corredoresOrdenados) {
             const resultado = await prisma.resultados.create({
                 data: {
                     usuarioId: corredor.usuarioId,
                     eventoId: corredor.eventoId,
                     tiempo: corredor.tiempo,
-                    lugarGeneral: 0,
-                    lugarCategoria: 0,
+                    lugarGeneral: corredor.lugarGeneral,
+                    lugarCategoria: corredor.lugarCategoria,
+                    distanciaId: corredor.distanciaId, // Guardar la distancia
                 },
             });
             resultados.push(resultado);
         }
+
+        // Calcular puntajes de los corredores de 10k después de guardar
+        const eventoId = corredoresOrdenados[0].eventoId; // Asumiendo que todos los corredores son del mismo evento
+        await calcularPuntajes10K(eventoId);
 
         // Limpiar el arreglo después de guardar
         corredoresTemp = [];
@@ -110,9 +175,6 @@ exports.calcularResultados = async (req, res) => {
 
         const resultados5k = await obtenerResultados5k(eventoId);
         const resultados10k = await obtenerResultados10k(eventoId);
-
-        // Calcular puntajes para corredores de 10 km
-        await calcularPuntajes10K(eventoId);
 
         // Crear la subcarpeta para el evento
         const dirPath = path.join(__dirname, '../uploads/evento_' + eventoId);
@@ -219,7 +281,7 @@ exports.calcularResultados = async (req, res) => {
             fs.unlinkSync(filePath5k);
             fs.unlinkSync(filePath10k);
         });
-        res.redirect('/evento/show_evento');
+        res.redirect('/inicio');
     } catch (error) {
         console.error('Error al calcular resultados:', error);
         res.status(500).send('Error al calcular resultados');
@@ -230,11 +292,11 @@ exports.calcularResultados = async (req, res) => {
     try {
         const resultados5k = await prisma.resultados.findMany({
             where: {
-                eventoId: Number(eventoId), // Asegúrate de que el eventoId sea un número
+                eventoId: Number(eventoId),
                 usuario: {
                     inscripciones: {
                         some: {
-                            distanciaId: 1 // Suponiendo que 1 es el ID para 5 km
+                            distanciaId: 4
                         }
                     }
                 }
@@ -284,11 +346,11 @@ async function obtenerResultados10k(eventoId) {
     try {
         const resultados10k = await prisma.resultados.findMany({
             where: {
-                eventoId: Number(eventoId), // Asegúrate de que el eventoId sea un número
+                eventoId: Number(eventoId),
                 usuario: {
                     inscripciones: {
                         some: {
-                            distanciaId: 2 // Suponiendo que 2 es el ID para 10 km
+                            distanciaId: 3
                         }
                     }
                 }

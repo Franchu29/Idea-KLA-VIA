@@ -31,4 +31,15 @@ router.get('/show_rols_render', userController.showRolsRender);
 router.get('/create_rol_render', userController.createRolRender);
 router.post('/create_rol', userController.createRol);
 
+//Ruta para recuperar contraseña
+router.post('/recuperar_contrasena', userController.recuperarContrasena);
+router.get('/recuperar/:token', userController.mostrarFormularioRecuperacion);
+router.post('/actualizar_contrasena', userController.actualizarContrasena);
+
+// Ruta para enviar el correo de actualización de rol
+router.post('/enviar_correo_cambio_rol', userController.enviarCorreoCambioRol);
+
+// Ruta para actualizar el rol cuando el usuario hace clic en el enlace del correo
+router.get('/actualizar_rol/:token', userController.actualizarRol);
+
 module.exports = router;

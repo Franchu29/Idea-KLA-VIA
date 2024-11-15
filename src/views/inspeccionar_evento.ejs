@@ -25,8 +25,8 @@
         <button id="btn-anadir-participante" onclick="window.location.href='/events/participantes_cortesia/<%= evento.id %>'">Añadir Participante de Cortesía</button>
     <% } %>
 
-    <h2>Descargar Resultados</h2>
     <% if (evento.resultados.length > 0) { %>
+        <h2>Descargar Resultados</h2>
         <button id="btn-descargar-5k" onclick="window.location.href='/cronometro/descargar_pdf_5k/<%= evento.id %>'">Descargar Resultados 5K</button>
         <button id="btn-descargar-10k" onclick="window.location.href='/cronometro/descargar_pdf_10k/<%= evento.id %>'">Descargar Resultados 10K</button>
     <% } else { %>

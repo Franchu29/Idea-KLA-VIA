@@ -3,6 +3,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { enviarCorreoRecuperacion, enviarCorreoActualizacionRol } = require('../middlewares/email_services');
 
 exports.renderIndex = (req, res) => {
     res.clearCookie('token');
@@ -23,6 +24,12 @@ exports.login = async (req, res) => {
         if (!user) {
             console.log('Usuario no encontrado');
             return res.render('index.ejs', { errorMessage: 'Usuario no encontrado' });
+        }
+
+        // Verificar si el usuario tiene rolGeneralId = 4 y denegar el acceso
+        if (user.rolGeneralId === 4) {
+            console.log('Acceso denegado para usuarios con rolGeneralId = 4');
+            return res.render('index.ejs', { errorMessage: 'Acceso denegado. Valide su correo o solicite otra vez el correo.' });
         }
 
         // Verificar la contraseña
@@ -99,20 +106,29 @@ exports.createUser = async (req, res) => {
         // Cifra la contraseña antes de guardarla
         const hashedPassword = await bcrypt.hash(contrasena, 10);
 
+        // Crea el usuario en la base de datos
         const newUser = await prisma.user.create({
             data: {
                 nombre,
                 apellido,
-                fecha_nacimiento: fechaNacimiento, // Guarda la fecha de nacimiento como objeto Date
-                edad, // Guarda la edad calculada
+                fecha_nacimiento: fechaNacimiento,
+                edad,
                 email,
-                contrasena: hashedPassword, // Guarda la contraseña cifrada
+                contrasena: hashedPassword,
                 rolGeneral: {
                     connect: { id: parseInt(rolGeneralId, 10) }
                 }
             }
         });
 
+        // Genera el token para la actualización de rol
+        const token = jwt.sign({ email: newUser.email }, process.env.JWT_SECRET, { expiresIn: '15m' });
+
+        // Envía el correo de actualización de rol
+        await enviarCorreoActualizacionRol(newUser.email, token);
+        console.log('Correo de actualización de rol enviado.');
+
+        // Redirige al usuario después de la creación
         res.redirect('/');
     } catch (error) {
         console.error('Error al crear el usuario:', error);
@@ -325,3 +341,81 @@ exports.createRol = async (req, res) => {
         res.status(500).json({ error: 'Error al crear el usuario' });
     }
 };
+
+// Genera y envía el correo con el token para recuperación de contraseña
+exports.recuperarContrasena = async (req, res) => {
+    const { email } = req.body;
+
+    const tokenRecuperacion = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '15m' });
+
+    // Enviar correo de recuperación
+    await enviarCorreoRecuperacion(email, tokenRecuperacion);
+
+    res.send('Correo de recuperación enviado, revisa tu bandeja de entrada.');
+};
+
+// Muestra el formulario para ingresar la nueva contraseña
+exports.mostrarFormularioRecuperacion = (req, res) => {
+    const { token } = req.params;
+    
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        res.render('recuperar_contrasena', { email: decoded.email, token });
+    } catch (error) {
+        return res.status(400).send('El enlace de recuperación ha expirado o es inválido.');
+    }
+};
+
+// Actualiza la contraseña del usuario
+exports.actualizarContrasena = async (req, res) => {
+    const { token, nuevaContrasena } = req.body;
+    
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const hashedPassword = await bcrypt.hash(nuevaContrasena, 10);
+        // Actualiza la contraseña en la base de datos para el usuario con el correo decodificado
+        await prisma.user.update({
+            where: { email: decoded.email },
+            data: { contrasena: hashedPassword } // Asegúrate de hashear la contraseña
+        });
+        res.send('Contraseña actualizada correctamente.');
+    } catch (error) {
+        res.status(400).send('El enlace de recuperación ha expirado o es inválido.');
+    }
+};
+
+// Genera y envía el correo con el token para actualización de rol
+exports.enviarCorreoCambioRol = async (req, res) => {
+    const { email } = req.body;
+
+    // Genera el token con el email
+    const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '15m' });
+
+    // Envía el correo de actualización de rol
+    await enviarCorreoActualizacionRol(email, token);
+
+    res.redirect('/');
+};
+
+// Ruta para actualizar el rol basado en el token
+exports.actualizarRol = async (req, res) => {
+    const { token } = req.params;
+
+    try {
+        // Verifica y decodifica el token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const email = decoded.email;
+
+        // Actualiza el rol del usuario a 3
+        await prisma.user.update({
+            where: { email },
+            data: { rolGeneralId: 3 }
+        });
+
+        res.redirect('/');
+    } catch (error) {
+        console.error('Error al actualizar el rol:', error);
+        res.status(400).send('El enlace ha expirado o es inválido.');
+    }
+};
+

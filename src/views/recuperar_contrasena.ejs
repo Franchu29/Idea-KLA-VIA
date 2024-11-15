@@ -1,0 +1,26 @@
+<!-- recuperar_contrasena.ejs -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperación de Contraseña</title>
+</head>
+<body>
+    <h2>Recupera tu Contraseña</h2>
+    <p>Ingresa tu nueva contraseña para actualizarla.</p>
+
+    <form action="/actualizar_contrasena" method="POST">
+        <!-- Campo para la nueva contraseña -->
+        <label for="nuevaContrasena">Nueva Contraseña:</label>
+        <input type="password" id="nuevaContrasena" name="nuevaContrasena" required>
+
+        <!-- Campo oculto para enviar el token -->
+        <input type="hidden" name="token" value="<%= token %>">
+
+        <!-- Botón para enviar el formulario -->
+        <button type="submit">Actualizar Contraseña</button>
+    </form>
+
+</body>
+</html>

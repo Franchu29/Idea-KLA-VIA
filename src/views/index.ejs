@@ -52,7 +52,7 @@
             background-color: #45a049;
         }
 
-        .register-btn {
+        .register-btn, .forgot-password-btn {
             background-color: #007bff;
             color: #fff;
             padding: 10px;
@@ -63,11 +63,11 @@
             width: 100%;
         }
 
-        .register-btn:hover {
+        .register-btn:hover, .forgot-password-btn:hover {
             background-color: #0056b3;
         }
 
-        .register-form {
+        .register-form, .forgot-password-form, .validation-form {
             display: none;
             margin-top: 20px;
         }
@@ -87,7 +87,7 @@
         </form>
 
         <!-- Botón para mostrar el formulario de registro -->
-        <button class="register-btn" onclick="toggleRegisterForm()">Registrarse</button>
+        <button class="register-btn" onclick="toggleForm('registerForm')">Registrarse</button>
 
         <!-- Formulario de registro -->
         <div class="register-form" id="registerForm">
@@ -98,21 +98,41 @@
                 <input type="email" name="email" placeholder="Email" required>
                 <input type="date" name="fecha_nacimiento" placeholder="Fecha Nacimiento" required>
                 <input type="password" name="contrasena" placeholder="Contraseña" required>
-                <input type="hidden" id="rolGeneralId" name="rolGeneralId" value="2">
+                <input type="hidden" id="rolGeneralId" name="rolGeneralId" value="4">
                 <input type="submit" value="Registrar">
+            </form>
+        </div>
+
+        <!-- Enlace para recuperar la contraseña -->
+        <p><a href="#" onclick="toggleForm('forgotPasswordForm')">¿Olvidaste tu contraseña?</a></p>
+
+        <!-- Formulario de recuperación de contraseña -->
+        <div class="forgot-password-form" id="forgotPasswordForm">
+            <h2>Recuperar Contraseña</h2>
+            <form action="/recuperar_contrasena" method="POST">
+                <input type="email" name="email" placeholder="Ingresa tu Email" required>
+                <input type="submit" value="Recuperar Contraseña">
+            </form>
+        </div>
+
+        <!-- Enlace para problemas de validación -->
+        <p><a href="#" onclick="toggleForm('validationForm')">¿Problemas con validar tu cuenta?</a></p>
+
+        <!-- Formulario para reenviar correo de validación -->
+        <div class="validation-form" id="validationForm">
+            <h2>Reenviar Correo de Validación</h2>
+            <form action="/enviar_correo_cambio_rol" method="POST">
+                <input type="email" name="email" placeholder="Ingresa tu Email" required>
+                <input type="submit" value="Enviar Correo de Validación">
             </form>
         </div>
     </div>
 
     <script>
-        // Función para mostrar u ocultar el formulario de registro
-        function toggleRegisterForm() {
-            var registerForm = document.getElementById("registerForm");
-            if (registerForm.style.display === "none" || registerForm.style.display === "") {
-                registerForm.style.display = "block";
-            } else {
-                registerForm.style.display = "none";
-            }
+        // Función para mostrar u ocultar formularios
+        function toggleForm(formId) {
+            var form = document.getElementById(formId);
+            form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
         }
     </script>
 </body>
