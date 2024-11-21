@@ -4,6 +4,7 @@ const prisma = new PrismaClient();
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { obtenerPronostico, buscarLugar, obtenerPronosticoPorCoordenadas } = require('../services/clima');
 
 // Renderiza el formulario de eventos
 exports.renderEvents = (req, res) => {
@@ -249,7 +250,7 @@ exports.inspeccionarEvento = async (req, res) => {
             include: {
                 resultados: {
                     include: {
-                        usuario: true,  // Incluye los datos del usuario en los resultados
+                        usuario: true, // Incluye los datos del usuario en los resultados
                     },
                 },
                 inscripciones: {
@@ -266,17 +267,28 @@ exports.inspeccionarEvento = async (req, res) => {
             return res.status(404).send('Evento no encontrado');
         }
 
-        // Calculamos si el botón de "Añadir Participante de Cortesía" debe mostrarse
+        // Calculamos si los botones deben mostrarse
         const fechaEvento = new Date(evento.fecha);
         const fechaActual = new Date();
-        const mostrarBotonCortesia = fechaActual < fechaEvento;
+        const hayResultados = evento.resultados.length > 0;
+        const hayInscripciones = evento.inscripciones.length > 0;
 
-        // Renderizamos la vista inspeccionar_evento.ejs con los detalles del evento y el estado del botón
+        // Botón "Añadir Participante de Cortesía"
+        const mostrarBotonCortesia = fechaActual < fechaEvento && !hayResultados;
+
+        // Botón "Comenzar Carrera"
+        const mostrarBotonIniciarCarrera = fechaActual >= fechaEvento && hayInscripciones && !hayResultados;
+
+        let ciudad = evento.lugar;
+        const lugar = await buscarLugar(ciudad);
+        pronostico = await obtenerPronosticoPorCoordenadas(lugar.lat, lugar.lon, 5);
+
         res.render('inspeccionar_evento', {
             evento,
-            mostrarBotonCortesia
+            mostrarBotonCortesia,
+            mostrarBotonIniciarCarrera,
+            pronostico,
         });
-
     } catch (error) {
         console.error('Error al obtener los detalles del evento:', error);
         res.status(500).send('Error interno del servidor');
@@ -494,3 +506,108 @@ exports.inscribirParticipantes = async (req, res) => {
         res.status(500).send('Error interno del servidor');
     }
 };
+
+// Controlador para mostrar formulario de crear categorías
+exports.renderDistancias = (req, res) => {
+    console.log('MOSTRANDO FORMULARIO DE CREACIÓN DE DISTANCIAS');
+    res.render('create_distancias.ejs');
+};
+
+// Controlador para crear categorías
+exports.createDistancias = async (req, res) => {
+
+    try {
+        const { nombre, precio } = req.body;
+        console.log(nombre, precio)
+    
+        // Validar entrada de datos
+        if (!nombre || !precio) {
+          return res.status(400).send('Todos los campos son obligatorios');
+        }
+    
+        // Crear la nueva distancia en la base de datos
+        const nuevaDistancia = await prisma.distancia.create({
+          data: {
+            nombre,
+            precio: parseInt(precio, 10), // Convertir el precio a un número entero
+          },
+        });
+    
+        res.redirect('/events/ver_distancias'); 
+      } catch (error) {
+        console.error('Error al crear distancia:', error);
+        res.status(500).send('Hubo un error al crear la distancia');
+      }
+}
+
+//Obtiene todas las distancias
+exports.getDistancias = async (req, res) => {
+    console.log('OBTENIENDO DISTANCIAS');
+    try {
+        const distancias = await prisma.distancia.findMany({});
+        res.render('ver_distancias.ejs', { distancias });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error al obtener los eventos');
+    }
+};
+
+// Elimina un evento
+exports.deleteDistancia = async (req, res) => {
+    try {
+        console.log('ELIMINANDO DISTANCIA:', req.params);
+        const { id } = req.params;
+  
+        // Eliminar el evento
+        const distancia = await prisma.distancia.delete({
+            where: {
+                id: parseInt(id, 10)
+            }
+        });
+  
+        res.redirect('/events/ver_distancias');
+    } catch (error) {
+        console.error('Error al eliminar el evento:', error);
+        res.status(500).json({ error: 'Error al eliminar el evento' });
+    }
+};
+
+//Muestra la vista de editar evento
+exports.editDistanciaRender = async (req, res) => {
+    try {
+        const { id } = req.params;
+  
+        const distancia = await prisma.distancia.findUnique({
+            where: { id: parseInt(id, 10) },
+        });
+  
+        const categorias = await prisma.categoria.findMany();
+        const distancias = await prisma.distancia.findMany();
+  
+        res.render('edit_distancia.ejs', {distancia});
+    } catch (error) {
+        console.error('Error al mostrar el formulario de edición de distancia:', error);
+        res.status(500).json({ error: 'Error al mostrar el formulario de edición de distancia' });
+    }
+};
+
+exports.editDistancia = async (req, res) => {
+    const { id } = req.params;
+    const {nombre, precio} = req.body
+
+    console.log ("Nombre", nombre, "precio", precio, "ID:", id)
+
+    try{
+        const updatedDistancia = await prisma.distancia.update({
+            where: { id: parseInt(id, 10) },
+            data: {
+                nombre,
+                precio: parseInt(precio, 10)
+            }
+        });
+        res.redirect('/events/ver_distancias')
+    } catch(error) {
+            console.error('Error al mostrar el formulario de edición de evento:', error);
+            res.status(500).json({ error: 'Error al mostrar el formulario de edición de evento' });
+    }
+}

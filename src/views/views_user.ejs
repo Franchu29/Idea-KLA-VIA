@@ -6,12 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Usuarios</title>
     <link rel="stylesheet" href="/styles/style_usuario.css">
+    <link rel="stylesheet" href="//cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="//cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="/styles/style_evento.css">
+    <script>
+        $(document).ready(function(){
+            $('#tabla-mostrar-usuarios').DataTable();
+        });
+    </script>
 </head>
 <body>
     <h1>Lista de Usuarios</h1>
 
     <% if (users.length > 0) { %>
-        <table border="1">
+        <table id="tabla-mostrar-usuarios" class="w3-table-all w3-card-4">
             <thead>
                 <tr>
                     <th>ID</th>

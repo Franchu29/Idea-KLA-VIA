@@ -66,87 +66,97 @@ exports.guardarCorredores = async () => {
         // Inicializa un objeto para almacenar los corredores separados por distancia
         const corredoresPorDistancia = {};
 
-        // Ordenar los corredores por tiempo (de menor a mayor)
-        const corredoresOrdenados = corredoresTemp.sort((a, b) => a.tiempo - b.tiempo);
-
         // Separar los corredores por distancia
-        corredoresOrdenados.forEach((corredor) => {
-            // Usar la distancia del corredor para agruparlos
-            if (!corredoresPorDistancia[corredor.distanciaId]) {
-                corredoresPorDistancia[corredor.distanciaId] = [];
-            }
-            corredoresPorDistancia[corredor.distanciaId].push(corredor);
-        });
-
-        // Inicializa un objeto para asignar lugares por categoría
-        const lugaresPorCategoria = {};
-
-        // Asignar lugares generales y categorías por distancia
-        for (const distanciaId in corredoresPorDistancia) {
-            const corredoresPorEstaDistancia = corredoresPorDistancia[distanciaId];
-            
-            for (let i = 0; i < corredoresPorEstaDistancia.length; i++) {
-                const corredor = corredoresPorEstaDistancia[i];
-
-                // Asignar lugar general dentro de la distancia
-                const lugarGeneral = i + 1;
-
-                // Verificar la categoría del corredor
-                const inscripcion = await prisma.inscripcion.findFirst({
-                    where: {
-                        usuarioId: corredor.usuarioId,
-                        eventoId: corredor.eventoId,
-                    },
-                    include: {
-                        categoria: true, // Incluir la categoría
-                    },
-                });
-
-                if (inscripcion && inscripcion.categoria) {
-                    const categoria = inscripcion.categoria.nombre;
-
-                    // Asignar lugarCategoria dentro de su categoría
-                    if (!lugaresPorCategoria[categoria]) {
-                        lugaresPorCategoria[categoria] = [];
-                    }
-                    lugaresPorCategoria[categoria].push(corredor);
-
-                    const lugarCategoria = lugaresPorCategoria[categoria].length;
-
-                    // Asignar lugar general y lugar de categoría al corredor
-                    corredor.lugarGeneral = lugarGeneral;
-                    corredor.lugarCategoria = lugarCategoria;
-                    corredor.distanciaId = distanciaId; // Mantener la distancia asociada
-
-                } else {
-                    console.warn(`Corredor con ID ${corredor.usuarioId} no tiene categoría asignada.`);
-                }
-            }
-        }
-
-        // Guardar los resultados en la base de datos
-        const resultados = [];
-        for (const corredor of corredoresOrdenados) {
-            const resultado = await prisma.resultados.create({
-                data: {
+        for (const corredor of corredoresTemp) {
+            const inscripcion = await prisma.inscripcion.findFirst({
+                where: {
                     usuarioId: corredor.usuarioId,
                     eventoId: corredor.eventoId,
-                    tiempo: corredor.tiempo,
-                    lugarGeneral: corredor.lugarGeneral,
-                    lugarCategoria: corredor.lugarCategoria,
-                    distanciaId: corredor.distanciaId, // Guardar la distancia
+                },
+                include: {
+                    distancia: true, // Incluir la distancia
+                    categoria: true, // Incluir la categoría
                 },
             });
-            resultados.push(resultado);
+
+            if (!inscripcion || !inscripcion.distancia || !inscripcion.categoria) {
+                console.warn(`Faltan datos para el corredor con ID ${corredor.usuarioId}`);
+                continue;
+            }
+
+            const distanciaId = inscripcion.distancia.id;
+            const categoriaId = inscripcion.categoria.id;
+
+            // Agrupar corredores por distancia
+            if (!corredoresPorDistancia[distanciaId]) {
+                corredoresPorDistancia[distanciaId] = [];
+            }
+            corredoresPorDistancia[distanciaId].push({ ...corredor, distanciaId, categoriaId });
+        }
+
+        const resultados = [];
+
+        // Asignar lugares generales y por categoría por distancia
+        for (const distanciaId in corredoresPorDistancia) {
+            const corredoresDeEstaDistancia = corredoresPorDistancia[distanciaId];
+
+            // Ordenar por tiempo dentro de la distancia
+            corredoresDeEstaDistancia.sort((a, b) => a.tiempo - b.tiempo);
+
+            // Calcular lugarGeneral
+            for (let i = 0; i < corredoresDeEstaDistancia.length; i++) {
+                corredoresDeEstaDistancia[i].lugarGeneral = i + 1;
+            }
+
+            // Agrupar corredores por categoría dentro de esta distancia
+            const corredoresPorCategoria = {};
+
+            corredoresDeEstaDistancia.forEach((corredor) => {
+                if (!corredoresPorCategoria[corredor.categoriaId]) {
+                    corredoresPorCategoria[corredor.categoriaId] = [];
+                }
+                corredoresPorCategoria[corredor.categoriaId].push(corredor);
+            });
+
+            // Calcular lugarCategoria
+            for (const categoriaId in corredoresPorCategoria) {
+                const corredoresDeEstaCategoria = corredoresPorCategoria[categoriaId];
+
+                // Ordenar por tiempo dentro de la categoría
+                corredoresDeEstaCategoria.sort((a, b) => a.tiempo - b.tiempo);
+
+                for (let i = 0; i < corredoresDeEstaCategoria.length; i++) {
+                    corredoresDeEstaCategoria[i].lugarCategoria = i + 1;
+                }
+            }
+
+            // Guardar los corredores en la base de datos
+            for (const corredor of corredoresDeEstaDistancia) {
+                const resultado = await prisma.resultados.create({
+                    data: {
+                        usuarioId: corredor.usuarioId,
+                        eventoId: corredor.eventoId,
+                        tiempo: corredor.tiempo,
+                        lugarGeneral: corredor.lugarGeneral,
+                        lugarCategoria: corredor.lugarCategoria,
+                    },
+                });
+                resultados.push(resultado);
+            }
         }
 
         // Calcular puntajes de los corredores de 10k después de guardar
-        const eventoId = corredoresOrdenados[0].eventoId; // Asumiendo que todos los corredores son del mismo evento
+        const eventoId = corredoresTemp[0].eventoId; // Asumiendo que todos los corredores son del mismo evento
         await calcularPuntajes10K(eventoId);
 
         // Limpiar el arreglo después de guardar
         corredoresTemp = [];
-        return resultados;
+
+        // Integrar conteo de participantes y actualización de puntajes
+        const participantesPorDistancia = await contarParticipantesEvento(eventoId);
+        console.log('Participantes por club:', participantesPorDistancia);
+
+        return { resultados, participantesPorDistancia };
     } catch (error) {
         console.error('Error al guardar corredores:', error);
         throw new Error('Error al guardar corredores');
@@ -173,8 +183,18 @@ exports.calcularResultados = async (req, res) => {
         console.log('Corredores antes de guardar:', corredoresTemp);
         const resultadosGuardados = await exports.guardarCorredores(corredoresTemp);
 
+        // Obtener los resultados de 5k y 10k, asegurándonos de que solo obtenemos los de la distancia correcta
         const resultados5k = await obtenerResultados5k(eventoId);
         const resultados10k = await obtenerResultados10k(eventoId);
+
+        // Verificar que tenemos resultados para ambas distancias
+        if (resultados5k.length === 0) {
+            console.log('No se encontraron resultados para 5k');
+        }
+
+        if (resultados10k.length === 0) {
+            console.log('No se encontraron resultados para 10k');
+        }
 
         // Crear la subcarpeta para el evento
         const dirPath = path.join(__dirname, '../uploads/evento_' + eventoId);
@@ -183,92 +203,104 @@ exports.calcularResultados = async (req, res) => {
         }
 
         // Generar el PDF para resultados de 5 km
-        const doc5k = new PDFDocument();
-        const filePath5k = path.join(dirPath, `resultados_5k_evento_${eventoId}.pdf`);
-        doc5k.pipe(fs.createWriteStream(filePath5k));
+        if (resultados5k.length > 0) {
+            const doc5k = new PDFDocument();
+            const filePath5k = path.join(dirPath, `resultados_5k_evento_${eventoId}.pdf`);
+            doc5k.pipe(fs.createWriteStream(filePath5k));
 
-        doc5k.fontSize(25).text(`Resultados del Evento: ${nombre} (${fechaFormateada}) - 5 km`, { align: 'center' });
-        doc5k.moveDown();
-
-        // Calcular y mostrar los puestos generales
-        const puestosGenerales5k = resultados5k.map((resultado, index) => ({
-            puestoGeneral: index + 1,
-            nombreCorredor: resultado.usuario.nombre,
-            tiempo: resultado.tiempo,
-            categoria: resultado.usuario.inscripciones[0].categoria.nombre,
-        }));
-
-        // Mostrar resultados generales
-        doc5k.fontSize(18).text('Resultados Generales:', { underline: true });
-        puestosGenerales5k.forEach(({ puestoGeneral, nombreCorredor, tiempo }) => {
-            doc5k.fontSize(12).text(`Posición: ${puestoGeneral} - Corredor: ${nombreCorredor} - Tiempo: ${formatearTiempo(tiempo)}`);
-        });
-
-        // Agrupar por categoría y ordenar
-        const resultadosPorCategoria5k = {};
-        puestosGenerales5k.forEach(({ puestoGeneral, nombreCorredor, tiempo, categoria }) => {
-            if (!resultadosPorCategoria5k[categoria]) {
-                resultadosPorCategoria5k[categoria] = [];
-            }
-            resultadosPorCategoria5k[categoria].push({ puestoGeneral, nombreCorredor, tiempo });
-        });
-
-        // Ordenar los resultados por categoría y tiempo
-        Object.keys(resultadosPorCategoria5k).forEach(categoria => {
-            resultadosPorCategoria5k[categoria].sort((a, b) => a.tiempo - b.tiempo);
+            doc5k.fontSize(25).text(`Resultados del Evento: ${nombre} (${fechaFormateada}) - 5 km`, { align: 'center' });
             doc5k.moveDown();
-            doc5k.fontSize(18).text(`Categoría: ${categoria}`, { underline: true });
-            resultadosPorCategoria5k[categoria].forEach(({ puestoGeneral, nombreCorredor, tiempo }) => {
-                doc5k.fontSize(12).text(`Posición: ${puestoGeneral} - Corredor: ${nombreCorredor} - Tiempo: ${formatearTiempo(tiempo)}`);
-            });
-        });
 
-        doc5k.end();
-        console.log('PDF de 5 km generado correctamente');
+            // Calcular y mostrar los puestos generales
+            const puestosGenerales5k = resultados5k.map((resultado, index) => ({
+                puestoGeneral: index + 1,
+                nombreCorredor: resultado.usuario.nombre,
+                apellidoCorredor: resultado.usuario.apellido,
+                tiempo: resultado.tiempo,
+                categoria: resultado.usuario.inscripciones[0].categoria.nombre,
+            }));
+
+            // Mostrar resultados generales
+            doc5k.fontSize(18).text('Resultados Generales:', { underline: true });
+            puestosGenerales5k.forEach(({ puestoGeneral, nombreCorredor, apellidoCorredor, tiempo }) => {
+                doc5k.fontSize(12).text(`Posición: ${puestoGeneral} - Corredor: ${nombreCorredor} ${apellidoCorredor} - Tiempo: ${formatearTiempo(tiempo)}`);
+            });
+
+            // Agrupar por categoría y ordenar
+            const resultadosPorCategoria5k = {};
+            puestosGenerales5k.forEach(({ puestoGeneral, nombreCorredor, apellidoCorredor, tiempo, categoria }) => {
+                if (!resultadosPorCategoria5k[categoria]) {
+                    resultadosPorCategoria5k[categoria] = [];
+                }
+                resultadosPorCategoria5k[categoria].push({ puestoGeneral, nombreCorredor, apellidoCorredor, tiempo });
+            });
+
+            // Ordenar los resultados por categoría y tiempo
+            Object.keys(resultadosPorCategoria5k).forEach(categoria => {
+                // Ordenar por tiempo dentro de la categoría
+                resultadosPorCategoria5k[categoria].sort((a, b) => a.tiempo - b.tiempo);
+                doc5k.moveDown();
+                doc5k.fontSize(18).text(`Categoría: ${categoria}`, { underline: true });
+
+                // Asignar posiciones dentro de la categoría
+                resultadosPorCategoria5k[categoria].forEach((resultado, index) => {
+                    doc5k.fontSize(12).text(`Posición: ${index + 1} - Corredor: ${resultado.nombreCorredor} ${resultado.apellidoCorredor} - Tiempo: ${formatearTiempo(resultado.tiempo)}`);
+                });
+            });
+
+            doc5k.end();
+            console.log('PDF de 5 km generado correctamente');
+        }
 
         // Generar el PDF para resultados de 10 km
-        const doc10k = new PDFDocument();
-        const filePath10k = path.join(dirPath, `resultados_10k_evento_${eventoId}.pdf`);
-        doc10k.pipe(fs.createWriteStream(filePath10k));
+        if (resultados10k.length > 0) {
+            const doc10k = new PDFDocument();
+            const filePath10k = path.join(dirPath, `resultados_10k_evento_${eventoId}.pdf`);
+            doc10k.pipe(fs.createWriteStream(filePath10k));
 
-        doc10k.fontSize(25).text(`Resultados del Evento: ${nombre} (${fechaFormateada}) - 10 km`, { align: 'center' });
-        doc10k.moveDown();
-
-        // Calcular y mostrar los puestos generales
-        const puestosGenerales10k = resultados10k.map((resultado, index) => ({
-            puestoGeneral: index + 1,
-            nombreCorredor: resultado.usuario.nombre,
-            tiempo: resultado.tiempo,
-            categoria: resultado.usuario.inscripciones[0].categoria.nombre,
-        }));
-
-        // Mostrar resultados generales
-        doc10k.fontSize(18).text('Resultados Generales:', { underline: true });
-        puestosGenerales10k.forEach(({ puestoGeneral, nombreCorredor, tiempo }) => {
-            doc10k.fontSize(12).text(`Posición: ${puestoGeneral} - Corredor: ${nombreCorredor} - Tiempo: ${formatearTiempo(tiempo)}`);
-        });
-
-        // Agrupar por categoría y ordenar
-        const resultadosPorCategoria10k = {};
-        puestosGenerales10k.forEach(({ puestoGeneral, nombreCorredor, tiempo, categoria }) => {
-            if (!resultadosPorCategoria10k[categoria]) {
-                resultadosPorCategoria10k[categoria] = [];
-            }
-            resultadosPorCategoria10k[categoria].push({ puestoGeneral, nombreCorredor, tiempo });
-        });
-
-        // Ordenar los resultados por categoría y tiempo
-        Object.keys(resultadosPorCategoria10k).forEach(categoria => {
-            resultadosPorCategoria10k[categoria].sort((a, b) => a.tiempo - b.tiempo);
+            doc10k.fontSize(25).text(`Resultados del Evento: ${nombre} (${fechaFormateada}) - 10 km`, { align: 'center' });
             doc10k.moveDown();
-            doc10k.fontSize(18).text(`Categoría: ${categoria}`, { underline: true });
-            resultadosPorCategoria10k[categoria].forEach(({ puestoGeneral, nombreCorredor, tiempo }) => {
-                doc10k.fontSize(12).text(`Posición: ${puestoGeneral} - Corredor: ${nombreCorredor} - Tiempo: ${formatearTiempo(tiempo)}`);
-            });
-        });
 
-        doc10k.end();
-        console.log('PDF de 10 km generado correctamente');
+            // Calcular y mostrar los puestos generales
+            const puestosGenerales10k = resultados10k.map((resultado, index) => ({
+                puestoGeneral: index + 1,
+                nombreCorredor: resultado.usuario.nombre,
+                apellidoCorredor: resultado.usuario.apellido,
+                tiempo: resultado.tiempo,
+                categoria: resultado.usuario.inscripciones[0].categoria.nombre,
+            }));
+
+            // Mostrar resultados generales
+            doc10k.fontSize(18).text('Resultados Generales:', { underline: true });
+            puestosGenerales10k.forEach(({ puestoGeneral, nombreCorredor, apellidoCorredor, tiempo }) => {
+                doc10k.fontSize(12).text(`Posición: ${puestoGeneral} - Corredor: ${nombreCorredor} ${apellidoCorredor} - Tiempo: ${formatearTiempo(tiempo)}`);
+            });
+
+            // Agrupar por categoría y ordenar
+            const resultadosPorCategoria10k = {};
+            puestosGenerales10k.forEach(({ puestoGeneral, nombreCorredor, apellidoCorredor, tiempo, categoria }) => {
+                if (!resultadosPorCategoria10k[categoria]) {
+                    resultadosPorCategoria10k[categoria] = [];
+                }
+                resultadosPorCategoria10k[categoria].push({ puestoGeneral, nombreCorredor, apellidoCorredor, tiempo });
+            });
+
+            // Ordenar los resultados por categoría y tiempo
+            Object.keys(resultadosPorCategoria10k).forEach(categoria => {
+                // Ordenar por tiempo dentro de la categoría
+                resultadosPorCategoria10k[categoria].sort((a, b) => a.tiempo - b.tiempo);
+                doc10k.moveDown();
+                doc10k.fontSize(18).text(`Categoría: ${categoria}`, { underline: true });
+
+                // Asignar posiciones dentro de la categoría
+                resultadosPorCategoria10k[categoria].forEach((resultado, index) => {
+                    doc10k.fontSize(12).text(`Posición: ${index + 1} - Corredor: ${resultado.nombreCorredor} ${resultado.apellidoCorredor} - Tiempo: ${formatearTiempo(resultado.tiempo)}`);
+                });
+            });
+
+            doc10k.end();
+            console.log('PDF de 10 km generado correctamente');
+        }
 
         // Enviar los archivos PDF como respuesta
         res.zip([filePath5k, filePath10k], (err) => {
@@ -278,8 +310,8 @@ exports.calcularResultados = async (req, res) => {
             }
 
             // Eliminar los archivos después de ser enviados
-            fs.unlinkSync(filePath5k);
-            fs.unlinkSync(filePath10k);
+            if (fs.existsSync(filePath5k)) fs.unlinkSync(filePath5k);
+            if (fs.existsSync(filePath10k)) fs.unlinkSync(filePath10k);
         });
         res.redirect('/inicio');
     } catch (error) {
@@ -287,6 +319,7 @@ exports.calcularResultados = async (req, res) => {
         res.status(500).send('Error al calcular resultados');
     }
 };
+
 
   async function obtenerResultados5k(eventoId) {
     try {
@@ -296,7 +329,7 @@ exports.calcularResultados = async (req, res) => {
                 usuario: {
                     inscripciones: {
                         some: {
-                            distanciaId: 4
+                            distanciaId: 2
                         }
                     }
                 }
@@ -464,4 +497,54 @@ function formatearTiempo(segundos) {
     const minutos = Math.floor((segundos % 3600) / 60);
     const segs = segundos % 60;
     return `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}:${segs.toString().padStart(2, '0')}`;
+}
+
+async function contarParticipantesEvento(eventoId) {
+    try {
+        // Obtener los participantes agrupados por club
+        const participantes = await prisma.inscripcion.groupBy({
+            by: ['usuarioId'],
+            where: { eventoId },
+            _count: { usuarioId: true },
+        });
+
+        // Asociar los usuarios a sus respectivos clubes
+        const usuarios = await prisma.user.findMany({
+            where: {
+                id: { in: participantes.map((p) => p.usuarioId) },
+            },
+            include: { club: true }, // Asegurarse de incluir los datos del club
+        });
+
+        const puntajePorClub = {};
+
+        // Asociar los puntajes a los clubes
+        for (const usuario of usuarios) {
+            if (usuario.clubId) {
+                if (!puntajePorClub[usuario.clubId]) {
+                    puntajePorClub[usuario.clubId] = 0;
+                }
+                puntajePorClub[usuario.clubId] += 1; // Incrementar puntaje por cada participante
+            }
+        }
+
+        // Actualizar los puntajes en la tabla PuntajeClub
+        const anioActual = new Date().getFullYear();
+
+        for (const clubId in puntajePorClub) {
+            const puntos = puntajePorClub[clubId];
+
+            // Actualizar o crear puntaje del club
+            await prisma.puntajeClub.upsert({
+                where: { clubId_anio: { clubId: parseInt(clubId), anio: anioActual } },
+                update: { puntos: { increment: puntos } },
+                create: { clubId: parseInt(clubId), anio: anioActual, puntos },
+            });
+        }
+
+        return puntajePorClub; // Retornar la información del puntaje actualizado
+    } catch (error) {
+        console.error('Error al contar participantes del evento:', error);
+        throw new Error('Error al contar participantes del evento');
+    }
 }

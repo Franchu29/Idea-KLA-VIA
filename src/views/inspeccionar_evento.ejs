@@ -17,18 +17,45 @@
     </script>
 </head>
 <body>
-    <h1>Participantes del Evento: <%= evento.nombre %></h1>
+    <h1>Evento <%= evento.nombre %> Fecha <%= evento.fecha %></h1>
+
+    <% if (pronostico) { %>
+        <div class="pronostico-clima">
+            <h2>Pronóstico del clima en <%= pronostico.location.name %>:</h2>
+            <% pronostico.forecast.forecastday.forEach(dia => { %>
+                <div class="dia-pronostico">
+                    <h3><%= dia.date %></h3>
+                    <p>Máxima: <%= dia.day.maxtemp_c %>°C</p>
+                    <p>Mínima: <%= dia.day.mintemp_c %>°C</p>
+                    <p>Condición: <%= dia.day.condition.text %></p>
+                    <img src="<%= dia.day.condition.icon %>" alt="Icono del clima">
+                </div>
+            <% }) %>
+        </div>
+    <% } else { %>
+        <p>No se pudo obtener el pronóstico del clima.</p>
+    <% } %>    
     
-    <button id="btn-iniciar-carrera" onclick="window.location.href='/cronometro/cronometro/<%= evento.id %>'">Comenzar Carrera</button>
+    <% if (mostrarBotonIniciarCarrera) { %>
+        <button id="btn-iniciar-carrera" onclick="window.location.href='/cronometro/cronometro/<%= evento.id %>'">
+            Comenzar Carrera
+        </button>
+    <% } %>
 
     <% if (mostrarBotonCortesia) { %>
-        <button id="btn-anadir-participante" onclick="window.location.href='/events/participantes_cortesia/<%= evento.id %>'">Añadir Participante de Cortesía</button>
+        <button id="btn-anadir-participante" onclick="window.location.href='/events/participantes_cortesia/<%= evento.id %>'">
+            Añadir Participante de Cortesía
+        </button>
     <% } %>
 
     <% if (evento.resultados.length > 0) { %>
         <h2>Descargar Resultados</h2>
-        <button id="btn-descargar-5k" onclick="window.location.href='/cronometro/descargar_pdf_5k/<%= evento.id %>'">Descargar Resultados 5K</button>
-        <button id="btn-descargar-10k" onclick="window.location.href='/cronometro/descargar_pdf_10k/<%= evento.id %>'">Descargar Resultados 10K</button>
+        <button id="btn-descargar-5k" onclick="window.location.href='/cronometro/descargar_pdf_5k/<%= evento.id %>'">
+            Descargar Resultados 5K
+        </button>
+        <button id="btn-descargar-10k" onclick="window.location.href='/cronometro/descargar_pdf_10k/<%= evento.id %>'">
+            Descargar Resultados 10K
+        </button>
     <% } else { %>
         <p>No hay resultados disponibles para este evento.</p>
     <% } %>    

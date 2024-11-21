@@ -120,6 +120,7 @@ model Inscripcion {
   distanciaId     Int
   categoriaId     Int
   numeroCorredor  Int?
+  asistencia      Boolean?
 
   usuario         User      @relation(fields: [usuarioId], references: [id])
   evento          Eventos   @relation(fields: [eventoId], references: [id])

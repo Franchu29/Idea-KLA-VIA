@@ -71,12 +71,35 @@
             display: none;
             margin-top: 20px;
         }
+
+        .floating-message {
+            position: fixed;
+            top: 20px; /* Cambié la posición para que esté en la parte superior */
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #f44336; /* Color de fondo del mensaje (puedes cambiarlo) */
+            color: #fff; /* Color del texto */
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+            z-index: 9999; /* Asegura que el mensaje esté sobre otros elementos */
+            display: none; /* Inicialmente oculto */
+        }
+
+        .floating-message.error {
+            background-color: #f44336; /* Rojo para error */
+        }
+
+        .floating-message.success {
+            background-color: #4CAF50; /* Verde para éxito */
+        }
+
     </style>
 </head>
 <body>
+    <div class="floating-message" id="floatingMessage"></div>
     <div class="container">
         <h2>Login</h2>
-        <!-- Muestra el mensaje de error si existe -->
         <% if (typeof errorMessage !== 'undefined') { %>
             <p class="error-message"><%= errorMessage %></p>
         <% } %>
@@ -86,7 +109,6 @@
             <input type="submit" value="Login">
         </form>
 
-        <!-- Botón para mostrar el formulario de registro -->
         <button class="register-btn" onclick="toggleForm('registerForm')">Registrarse</button>
 
         <!-- Formulario de registro -->
@@ -103,10 +125,9 @@
             </form>
         </div>
 
-        <!-- Enlace para recuperar la contraseña -->
+        <!-- Enlaces de recuperación de contraseña -->
         <p><a href="#" onclick="toggleForm('forgotPasswordForm')">¿Olvidaste tu contraseña?</a></p>
 
-        <!-- Formulario de recuperación de contraseña -->
         <div class="forgot-password-form" id="forgotPasswordForm">
             <h2>Recuperar Contraseña</h2>
             <form action="/recuperar_contrasena" method="POST">
@@ -115,10 +136,9 @@
             </form>
         </div>
 
-        <!-- Enlace para problemas de validación -->
+        <!-- Validación de cuenta -->
         <p><a href="#" onclick="toggleForm('validationForm')">¿Problemas con validar tu cuenta?</a></p>
 
-        <!-- Formulario para reenviar correo de validación -->
         <div class="validation-form" id="validationForm">
             <h2>Reenviar Correo de Validación</h2>
             <form action="/enviar_correo_cambio_rol" method="POST">
@@ -126,14 +146,39 @@
                 <input type="submit" value="Enviar Correo de Validación">
             </form>
         </div>
-    </div>
 
     <script>
-        // Función para mostrar u ocultar formularios
         function toggleForm(formId) {
-            var form = document.getElementById(formId);
-            form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
+            const form = document.getElementById(formId);
+            form.style.display = form.style.display === "none" || form.style.display === "" ? "block" : "none";
         }
-    </script>
+    
+        function showFloatingMessage(message, isError = false) {
+        const floatingMessage = document.getElementById('floatingMessage');
+        floatingMessage.textContent = message;
+        floatingMessage.classList.toggle('error', isError);
+        floatingMessage.classList.toggle('success', !isError);
+        floatingMessage.style.display = 'block';
+
+        setTimeout(() => {
+            floatingMessage.style.display = 'none';
+        }, 3000);
+    }
+
+    
+        // Asigna las variables de EJS a variables de JavaScript
+        var successMessage = "<%= typeof successMessage !== 'undefined' ? successMessage : '' %>";
+        var errorMessage = "<%= typeof errorMessage !== 'undefined' ? errorMessage : '' %>";
+    
+        // Mostrar los mensajes si están definidos
+        if (successMessage) {
+            showFloatingMessage(successMessage);
+        }
+    
+        if (errorMessage) {
+            showFloatingMessage(errorMessage, true);
+        }
+    </script>    
+    
 </body>
 </html>

@@ -112,3 +112,43 @@ h2 {
     margin-bottom: 10px;
     text-align: center;
 }
+
+.clima-info {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 20px 0;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+.clima-info img {
+    width: 50px;
+    height: 50px;
+}
+
+/* Contenedor para el pronóstico */
+.pronostico-clima {
+    display: flex;
+    flex-wrap: wrap; /* Permite ajustar si hay demasiados elementos */
+    justify-content: center; /* Centra los elementos horizontalmente */
+    gap: 20px; /* Espaciado entre los días */
+    margin: 20px 0;
+}
+
+/* Cada día del pronóstico */
+.dia-pronostico {
+    display: flex;
+    flex-direction: column; /* Apilar elementos dentro del día */
+    align-items: center; /* Centrar elementos */
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    width: 150px; /* Ancho fijo para cada día */
+    text-align: center;
+}
+
+.dia-pronostico img {
+    width: 60px;
+    height: 60px;
+    margin-top: 10px;
+}

@@ -3,7 +3,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { enviarCorreoRecuperacion, enviarCorreoActualizacionRol } = require('../middlewares/email_services');
+const { enviarCorreoRecuperacion, enviarCorreoActualizacionRol } = require('../services/email_services');
 
 exports.renderIndex = (req, res) => {
     res.clearCookie('token');
@@ -346,12 +346,22 @@ exports.createRol = async (req, res) => {
 exports.recuperarContrasena = async (req, res) => {
     const { email } = req.body;
 
-    const tokenRecuperacion = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '15m' });
+    try {
+        const tokenRecuperacion = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '15m' });
 
-    // Enviar correo de recuperación
-    await enviarCorreoRecuperacion(email, tokenRecuperacion);
+        // Enviar correo de recuperación
+        await enviarCorreoRecuperacion(email, tokenRecuperacion);
 
-    res.send('Correo de recuperación enviado, revisa tu bandeja de entrada.');
+        // Si el correo fue enviado exitosamente, pasa el mensaje de éxito
+        res.render('index', {
+            successMessage: 'Correo de recuperación enviado, revisa tu bandeja de entrada.'
+        });
+    } catch (error) {
+        // Si ocurre un error, pasa el mensaje de error
+        res.render('index', {
+            errorMessage: 'Ocurrió un error al enviar el correo de recuperación.'
+        });
+    }
 };
 
 // Muestra el formulario para ingresar la nueva contraseña
@@ -388,13 +398,23 @@ exports.actualizarContrasena = async (req, res) => {
 exports.enviarCorreoCambioRol = async (req, res) => {
     const { email } = req.body;
 
-    // Genera el token con el email
-    const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '15m' });
+    try {
+        // Genera el token con el email
+        const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '15m' });
 
-    // Envía el correo de actualización de rol
-    await enviarCorreoActualizacionRol(email, token);
+        // Envía el correo de actualización de rol
+        await enviarCorreoActualizacionRol(email, token);
 
-    res.redirect('/');
+        // Pasa el mensaje de éxito a la vista
+        res.render('index', {
+            successMessage: 'Correo de validación enviado, revisa tu bandeja de entrada.'
+        });
+    } catch (error) {
+        // Si ocurre un error, pasa el mensaje de error
+        res.render('index', {
+            errorMessage: 'Ocurrió un error al enviar el correo de validación.'
+        });
+    }
 };
 
 // Ruta para actualizar el rol basado en el token

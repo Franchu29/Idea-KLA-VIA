@@ -22,4 +22,12 @@ router.get('/participantes_cortesia/:id', eventosController.renderParticipantesC
 
 router.post('/inscribir_participantes/:id', eventosController.inscribirParticipantes);
 
+router.get('/render_distancias', eventosController.renderDistancias);
+router.post('/create_distancias', eventosController.createDistancias)
+router.get('/ver_distancias', eventosController.getDistancias)
+
+router.post('/delete_distancia/:id', eventosController.deleteDistancia);
+router.get('/edit_render_distancia/:id', eventosController.editDistanciaRender)
+router.post('/edit_distancia/:id', eventosController.editDistancia);
+
 module.exports = router;
