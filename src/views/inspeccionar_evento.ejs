@@ -11,8 +11,10 @@
     <script src="//cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <link rel="stylesheet" href="/styles/style_evento.css">
     <script>
-        $(document).ready(function(){
-            $('#tabla-corredores_carrera').DataTable();
+        $(document).ready(function() {
+            $('#tabla-corredores_carrera').DataTable({
+                stateSave: true
+            });
         });
     </script>
 </head>
@@ -34,7 +36,7 @@
         </div>
     <% } else { %>
         <p>No se pudo obtener el pronóstico del clima.</p>
-    <% } %>    
+    <% } %>
     
     <% if (mostrarBotonIniciarCarrera) { %>
         <button id="btn-iniciar-carrera" onclick="window.location.href='/cronometro/cronometro/<%= evento.id %>'">
@@ -70,6 +72,8 @@
             <th>Distancia</th>
             <th>Categoría</th>
             <th>N° Corredor</th>
+            <th>Asistencia</th>
+            <th>Botones</th>
           </tr>
         </thead>       
         <tbody>
@@ -83,14 +87,38 @@
                         <td><%= inscripcion.distancia ? inscripcion.distancia.nombre : 'No definida' %></td>
                         <td><%= inscripcion.categoria ? inscripcion.categoria.nombre : 'No definida' %></td>
                         <td><%= inscripcion.numeroCorredor || 'No disponible' %></td>
+                        <td>
+                            <% if (inscripcion.asistencia === true) { %>
+                                <span style="color: green;">✅ Asistió</span>
+                            <% } else if (inscripcion.asistencia === false) { %>
+                                <span style="color: red;">❌ No Asistió</span>
+                            <% } else { %>
+                                <span style="color: gray;">Pendiente</span>
+                            <% } %>
+                        </td>
+                        <td>
+                            <!-- Botones para marcar asistencia -->
+                            <form action="/events/actualizar_asistencia/<%= inscripcion.id %>" method="POST" class="form-asistencia">
+                                <input type="hidden" name="asistencia" value="true">
+                                <button type="submit" class="btn-asistio" style="background-color: #4CAF50; color: white; border: none; padding: 5px 10px; border-radius: 4px;">
+                                    Marcar Asistió
+                                </button>
+                            </form>
+                            <form action="/events/actualizar_asistencia/<%= inscripcion.id %>" method="POST" class="form-asistencia" style="margin-top: 5px;">
+                                <input type="hidden" name="asistencia" value="false">
+                                <button type="submit" class="btn-no-asistio" style="background-color: #f44336; color: white; border: none; padding: 5px 10px; border-radius: 4px;">
+                                    Marcar No Asistió
+                                </button>
+                            </form>
+                        </td>                   
                     </tr>
                 <% }) %>
             <% } else { %>
                 <tr>
-                    <td colspan="7">No hay participantes inscritos para este evento.</td>
+                    <td colspan="9">No hay participantes inscritos para este evento.</td>
                 </tr>
             <% } %>
-        </tbody>                           
-    </table>    
+        </tbody>
+    </table>
 </body>
 </html>

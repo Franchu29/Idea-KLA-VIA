@@ -178,7 +178,7 @@ exports.calcularResultados = async (req, res) => {
         }
 
         const { nombre, fecha } = evento;
-        const fechaFormateada = new Date(fecha).toLocaleDateString('es-ES'); // Ajusta el formato de la fecha si es necesario
+        const fechaFormateada = new Date(fecha).toLocaleDateString('es-ES');
 
         console.log('Corredores antes de guardar:', corredoresTemp);
         const resultadosGuardados = await exports.guardarCorredores(corredoresTemp);
@@ -216,14 +216,15 @@ exports.calcularResultados = async (req, res) => {
                 puestoGeneral: index + 1,
                 nombreCorredor: resultado.usuario.nombre,
                 apellidoCorredor: resultado.usuario.apellido,
+                numeroCorredor: resultado.usuario.inscripciones[0].numeroCorredor,
                 tiempo: resultado.tiempo,
                 categoria: resultado.usuario.inscripciones[0].categoria.nombre,
             }));
 
             // Mostrar resultados generales
             doc5k.fontSize(18).text('Resultados Generales:', { underline: true });
-            puestosGenerales5k.forEach(({ puestoGeneral, nombreCorredor, apellidoCorredor, tiempo }) => {
-                doc5k.fontSize(12).text(`Posición: ${puestoGeneral} - Corredor: ${nombreCorredor} ${apellidoCorredor} - Tiempo: ${formatearTiempo(tiempo)}`);
+            puestosGenerales5k.forEach(({ puestoGeneral, nombreCorredor, apellidoCorredor, tiempo, numeroCorredor }) => {
+                doc5k.fontSize(12).text(`Posición: ${puestoGeneral} Número de Corredor: ${numeroCorredor} - Corredor: ${nombreCorredor} ${apellidoCorredor} - Tiempo: ${formatearTiempo(tiempo)}`);
             });
 
             // Agrupar por categoría y ordenar
@@ -266,14 +267,15 @@ exports.calcularResultados = async (req, res) => {
                 puestoGeneral: index + 1,
                 nombreCorredor: resultado.usuario.nombre,
                 apellidoCorredor: resultado.usuario.apellido,
+                numeroCorredor: resultado.usuario.inscripciones[0].numeroCorredor,
                 tiempo: resultado.tiempo,
                 categoria: resultado.usuario.inscripciones[0].categoria.nombre,
             }));
 
             // Mostrar resultados generales
             doc10k.fontSize(18).text('Resultados Generales:', { underline: true });
-            puestosGenerales10k.forEach(({ puestoGeneral, nombreCorredor, apellidoCorredor, tiempo }) => {
-                doc10k.fontSize(12).text(`Posición: ${puestoGeneral} - Corredor: ${nombreCorredor} ${apellidoCorredor} - Tiempo: ${formatearTiempo(tiempo)}`);
+            puestosGenerales10k.forEach(({ puestoGeneral, nombreCorredor, apellidoCorredor, tiempo, numeroCorredor }) => {
+                doc10k.fontSize(12).text(`Posición: ${puestoGeneral} Número de Corredor: ${numeroCorredor} - Corredor: ${nombreCorredor} ${apellidoCorredor} - Tiempo: ${formatearTiempo(tiempo)}`);
             });
 
             // Agrupar por categoría y ordenar
@@ -320,8 +322,7 @@ exports.calcularResultados = async (req, res) => {
     }
 };
 
-
-  async function obtenerResultados5k(eventoId) {
+async function obtenerResultados5k(eventoId) {
     try {
         const resultados5k = await prisma.resultados.findMany({
             where: {
@@ -351,6 +352,7 @@ exports.calcularResultados = async (req, res) => {
                                 eventoId: Number(eventoId)
                             },
                             select: {
+                                numeroCorredor: true,
                                 categoria: {
                                     select: {
                                         nombre: true
@@ -368,10 +370,10 @@ exports.calcularResultados = async (req, res) => {
             }
         });
 
-        return resultados5k; // Retornar los resultados obtenidos
+        return resultados5k;
     } catch (error) {
         console.error('Error al obtener resultados de 5km:', error);
-        throw error; // Lanza el error para manejarlo en el controlador
+        throw error;
     }
 }
 
@@ -410,6 +412,7 @@ async function obtenerResultados10k(eventoId) {
                                         nombre: true
                                     }
                                 },
+                                numeroCorredor: true,
                                 distancia: {
                                     select: {
                                         nombre: true
@@ -422,10 +425,10 @@ async function obtenerResultados10k(eventoId) {
             }
         });
 
-        return resultados10k; // Retornar los resultados obtenidos
+        return resultados10k;
     } catch (error) {
         console.error('Error al obtener resultados de 10km:', error);
-        throw error; // Lanza el error para manejarlo en el controlador
+        throw error;
     }
 }
 

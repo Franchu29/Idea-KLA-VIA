@@ -105,16 +105,32 @@ exports.createEvent = [
 exports.getEvents = async (req, res) => {
     console.log('OBTENIENDO EVENTOS');
     try {
+        // Obtiene todos los eventos con las distancias y la información relacionada
         const events = await prisma.eventos.findMany({
             include: {
                 distancias: {
                     include: {
-                        distancia: true,  // Trae la informacion de la tabla distancia
+                        distancia: true, // Trae la información de la tabla distancia
                     },
                 },
             },
+            orderBy: {
+                fecha: 'desc', // Ordena por fecha de más nuevo a más antiguo
+            },
         });
-        res.render('views_events.ejs', { events });
+
+        // Agrupa los eventos por año
+        const groupedEvents = events.reduce((acc, event) => {
+            const year = new Date(event.fecha).getFullYear(); // Obtiene el año de la fecha
+            if (!acc[year]) {
+                acc[year] = [];
+            }
+            acc[year].push(event);
+            return acc;
+        }, {});
+
+        // Renderiza la vista, pasando los eventos agrupados por año
+        res.render('views_events.ejs', { groupedEvents });
     } catch (error) {
         console.error(error);
         res.status(500).send('Error al obtener los eventos');
@@ -295,10 +311,45 @@ exports.inspeccionarEvento = async (req, res) => {
     }
 };
 
+exports.actualizarAsistencia = async (req, res) => {
+    const inscripcionId = parseInt(req.params.id);
+    const asistencia = req.body.asistencia === 'true';
+
+    try {
+        // Obtener el eventoId relacionado con la inscripción
+        const inscripcion = await prisma.inscripcion.findUnique({
+            where: { id: inscripcionId },
+            select: { eventoId: true }, // Solo obtener el eventoId
+        });
+
+        if (!inscripcion) {
+            return res.status(404).send('Inscripción no encontrada');
+        }
+
+        const eventoId = inscripcion.eventoId;
+
+        // Actualizar la asistencia en la base de datos
+        await prisma.inscripcion.update({
+            where: {
+                id: inscripcionId, // Usar el ID de la inscripción
+            },
+            data: {
+                asistencia: asistencia, // Actualizar el valor de asistencia
+            },
+        });
+
+        // Redirigir al evento correspondiente con el eventoId
+        res.redirect(`/events/inspeccionar_evento/${eventoId}`);
+    } catch (error) {
+        console.error('Error al actualizar la asistencia:', error);
+        res.status(500).send('Error interno del servidor');
+    }
+};
+
 exports.renderParticipantesCortesia = async (req, res) => {
     const { id: eventoId } = req.params; // Obtenemos el ID del evento desde los parámetros
     console.log("Ruta alcanzada con ID de evento:", eventoId);
-    
+
     try {
         // Obtener todos los usuarios inscritos en el evento
         const usuariosInscritos = await prisma.inscripcion.findMany({
@@ -313,14 +364,14 @@ exports.renderParticipantesCortesia = async (req, res) => {
         const usuarios = await prisma.user.findMany({
             where: {
                 id: {
-                    notIn: usuariosInscritosIds, // Excluir los usuarios que ya están inscritos
-                }
+                    notIn: usuariosInscritosIds,
+                },
+                rolGeneralId: 3,
             }
         });
 
         // Calcular la edad para cada usuario que no esté inscrito
         for (const usuario of usuarios) {
-
             if (!usuario.fecha_nacimiento) {
                 console.log(`El usuario ${usuario.id} no tiene una fecha de nacimiento.`);
                 continue; // Saltar este usuario si no tiene una fecha de nacimiento
@@ -611,3 +662,88 @@ exports.editDistancia = async (req, res) => {
             res.status(500).json({ error: 'Error al mostrar el formulario de edición de evento' });
     }
 }
+
+exports.reportesEventos = async (req, res) => {
+    try {
+      // Obtenemos los eventos con sus distancias, inscripciones y precios
+      const eventosConIngresos = await prisma.eventos.findMany({
+        include: {
+          distancias: {
+            include: {
+              distancia: true,
+            },
+          },
+          inscripciones: {
+            include: {
+              categoria: true, // Incluir la categoría en las inscripciones
+            }
+          }, // Incluir todas las inscripciones
+        },
+      });
+  
+      // Calculamos los ingresos por evento
+      const ingresosPorEvento = eventosConIngresos.map(evento => {
+        let totalIngresos = 0;
+  
+        evento.inscripciones.forEach(inscripcion => {
+          const distanciaRelacionada = evento.distancias.find(
+            d => d.distanciaId === inscripcion.distanciaId
+          );
+  
+          if (distanciaRelacionada) {
+            totalIngresos += distanciaRelacionada.distancia.precio;
+          }
+        });
+  
+        return {
+          nombre: evento.nombre,
+          ingresos: totalIngresos,
+        };
+      });
+  
+      // Calculamos la cantidad de inscripciones por evento
+      const inscripcionesPorEvento = eventosConIngresos.map(evento => ({
+        nombre: evento.nombre,
+        inscripciones: evento.inscripciones.length,  // Número de inscripciones
+      }));
+  
+      // Distribución de inscripciones por categoría
+      const distribucionPorCategoria = eventosConIngresos.map(evento => {
+        const categoriasDistribucion = evento.inscripciones.reduce((acc, inscripcion) => {
+          const categoriaNombre = inscripcion.categoria.nombre;
+          acc[categoriaNombre] = (acc[categoriaNombre] || 0) + 1;
+          return acc;
+        }, {});
+  
+        return {
+          evento: evento.nombre,
+          distribucion: categoriasDistribucion,
+        };
+      });
+  
+      // Distribución de inscripciones por distancia
+      const distribucionPorDistancia = eventosConIngresos.map(evento => {
+        const distanciasDistribucion = evento.inscripciones.reduce((acc, inscripcion) => {
+          const distanciaNombre = evento.distancias.find(d => d.distanciaId === inscripcion.distanciaId)?.distancia.nombre;
+          acc[distanciaNombre] = (acc[distanciaNombre] || 0) + 1;
+          return acc;
+        }, {});
+  
+        return {
+          evento: evento.nombre,
+          distribucion: distanciasDistribucion,
+        };
+      });
+  
+      // Enviar los datos a la vista
+      res.render('reportes', {
+        ingresosPorEvento: JSON.stringify(ingresosPorEvento), // Convertir a JSON
+        inscripcionesPorEvento: JSON.stringify(inscripcionesPorEvento), // Convertir a JSON
+        distribucionPorCategoria: JSON.stringify(distribucionPorCategoria),
+        distribucionPorDistancia: JSON.stringify(distribucionPorDistancia),
+      });
+    } catch (error) {
+      console.error('Error al generar los ingresos:', error);
+      res.status(500).send('Error interno del servidor');
+    }
+};  

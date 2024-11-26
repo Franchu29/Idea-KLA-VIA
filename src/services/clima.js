@@ -27,7 +27,7 @@ async function buscarLugar(lugar) {
       const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(lugar)}&countrycodes=CL`;
       const response = await axios.get(url, {
           headers: {
-              'User-Agent': 'TestingDev/1.0 (miemail@dominio.com)', // Cambia esto con tu email
+              'User-Agent': 'TestingDev/1.0 (miemail@dominio.com)',
           },
       });
 
@@ -37,7 +37,6 @@ async function buscarLugar(lugar) {
       }
 
       const lugarEncontrado = response.data[0];
-      console.log('Coordenadas obtenidas: Latitud =', lugarEncontrado.lat, 'Longitud =', lugarEncontrado.lon);  // Aquí logueamos las coordenadas
       return { lat: lugarEncontrado.lat, lon: lugarEncontrado.lon };
   } catch (error) {
       console.error('Error al buscar el lugar:', error);
@@ -51,9 +50,7 @@ const obtenerPronosticoPorCoordenadas = async (lat, lon, dias = 3) => {
       const apiKey = '391a60b09db04dfb837221412242011';
       const url = `https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${lat},${lon}&days=${dias}&lang=es`;
 
-      console.log('URL de la API con coordenadas:', url);  // Log para ver la URL completa que se está llamando
       const respuesta = await axios.get(url);
-      console.log('Respuesta de WeatherAPI:', respuesta.data);  // Log para ver la respuesta de la API
       return respuesta.data;
   } catch (error) {
       console.error('Error al obtener el pronóstico del clima:', error.message);

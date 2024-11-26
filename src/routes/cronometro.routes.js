@@ -1,9 +1,10 @@
 const { Router } = require('express');
 const cronometroController = require('../controllers/cronometro_controller');
+const authMiddleware = require('../services/auth_middlewares');
 
 const router = Router();
 
-router.get('/cronometro/:id', cronometroController.mostrarCronometro);
+router.get('/cronometro/:id', authMiddleware([1, 2, 3]), cronometroController.mostrarCronometro);
 router.post('/registrarCorredor', cronometroController.registrarCorredor);
 router.get('/calcular_resultados/:eventoId', cronometroController.calcularResultados);
 

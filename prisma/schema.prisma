@@ -6,6 +6,10 @@
 
 //npx prisma migrate dev --name nombre_migracion
 //npx prisma generate
+//Crear una nueva rama: git checkout -b nombre_de_rama.
+//Añadir los cambios: git add ..
+//Hacer commit: git commit -m "Mensaje".
+//Empujar los cambios: git push origin nombre_de_rama.
 
 generator client {
   provider = "prisma-client-js"
