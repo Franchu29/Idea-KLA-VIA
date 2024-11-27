@@ -60,9 +60,39 @@ exports.login = async (req, res) => {
     }
 };
 
-exports.inicio = (req, res) => {
-    console.log('MOSTRANDO INICIO');
-    res.render('inicio.ejs');
+exports.inicio = async (req, res) => {
+    try {
+        // Obtener los 3 siguientes eventos
+        const eventosFuturos = await prisma.eventos.findMany({
+            where: {
+                fecha: {
+                    gt: new Date()  // Solo eventos con fecha futura
+                }
+            },
+            orderBy: {
+                fecha: 'asc'  // Ordenar por fecha ascendente
+            },
+            take: 3  // Tomar los 3 primeros
+        });
+
+        // Obtener los clubes con su puntaje para el año actual
+        const anioActual = new Date().getFullYear();
+        const clubesConPuntajes = await prisma.clubes.findMany({
+            include: {
+                puntajes: {
+                    where: {
+                        anio: anioActual  // Filtrar los puntajes por el año actual
+                    }
+                }
+            }
+        });
+
+        // Pasar los datos a la vista
+        res.render('inicio.ejs', { eventosFuturos, clubesConPuntajes });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Hubo un error al obtener los eventos, clubes y usuarios.');
+    }
 };
 
 //Muestra la vista de crear usuario
@@ -140,7 +170,6 @@ exports.createUser = async (req, res) => {
 exports.views_user = async (req, res) => {
     try {
         const users = await prisma.user.findMany();
-        console.log("MOSTRANDO LOS USUARIOS:", users);
         res.render('views_user.ejs', { users });
     } catch (error) {
         console.error('Error al obtener los usuarios:', error);
@@ -277,11 +306,21 @@ exports.mostrarPerfil = async (req, res) => {
 
         // Obtener los resultados de las inscripciones del usuario
         const resultados = await prisma.resultados.findMany({
-            where: { usuarioId: userId },
-            include: {
-                evento: true, // Obtener los detalles del evento, incluyendo la fecha
+            where: {
+              usuarioId: 1, // Suponiendo que buscas los resultados del usuario con id 1
             },
-        });
+            include: {
+              evento: {
+                include: {
+                  distancias: {
+                    include: {
+                      distancia: true, // Incluye las distancias relacionadas con el evento
+                    },
+                  },
+                },
+              },
+            },
+          });             
 
         // Calcular la suma de los puntajes agrupados por año
         const puntajesPorAno = resultados.reduce((acumulado, resultado) => {
@@ -388,7 +427,7 @@ exports.actualizarContrasena = async (req, res) => {
             where: { email: decoded.email },
             data: { contrasena: hashedPassword } // Asegúrate de hashear la contraseña
         });
-        res.send('Contraseña actualizada correctamente.');
+        res.redirect('/');
     } catch (error) {
         res.status(400).send('El enlace de recuperación ha expirado o es inválido.');
     }

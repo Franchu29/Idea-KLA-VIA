@@ -299,11 +299,15 @@ exports.inspeccionarEvento = async (req, res) => {
         const lugar = await buscarLugar(ciudad);
         pronostico = await obtenerPronosticoPorCoordenadas(lugar.lat, lugar.lon, 5);
 
+        // Suponiendo que el objeto de usuario autenticado está en req.user
+        const user = req.user; // Asegúrate de que el usuario esté autenticado
+
         res.render('inspeccionar_evento', {
             evento,
             mostrarBotonCortesia,
             mostrarBotonIniciarCarrera,
             pronostico,
+            user,
         });
     } catch (error) {
         console.error('Error al obtener los detalles del evento:', error);
@@ -663,87 +667,95 @@ exports.editDistancia = async (req, res) => {
     }
 }
 
-exports.reportesEventos = async (req, res) => {
+exports.reportesEventosSinAño = async (req, res) => {
     try {
-      // Obtenemos los eventos con sus distancias, inscripciones y precios
-      const eventosConIngresos = await prisma.eventos.findMany({
-        include: {
-          distancias: {
-            include: {
-              distancia: true,
-            },
-          },
-          inscripciones: {
-            include: {
-              categoria: true, // Incluir la categoría en las inscripciones
-            }
-          }, // Incluir todas las inscripciones
+      // Obtener todas las fechas de los eventos
+      const eventos = await prisma.eventos.findMany({
+        select: {
+          fecha: true, // Suponiendo que el campo de fecha se llama 'fecha'
         },
       });
   
-      // Calculamos los ingresos por evento
-      const ingresosPorEvento = eventosConIngresos.map(evento => {
-        let totalIngresos = 0;
+      // Extraer los años únicos
+      const añosDisponibles = [...new Set(eventos.map(evento => new Date(evento.fecha).getFullYear()))];
   
-        evento.inscripciones.forEach(inscripcion => {
-          const distanciaRelacionada = evento.distancias.find(
-            d => d.distanciaId === inscripcion.distanciaId
-          );
-  
-          if (distanciaRelacionada) {
-            totalIngresos += distanciaRelacionada.distancia.precio;
-          }
-        });
-  
-        return {
-          nombre: evento.nombre,
-          ingresos: totalIngresos,
-        };
-      });
-  
-      // Calculamos la cantidad de inscripciones por evento
-      const inscripcionesPorEvento = eventosConIngresos.map(evento => ({
-        nombre: evento.nombre,
-        inscripciones: evento.inscripciones.length,  // Número de inscripciones
-      }));
-  
-      // Distribución de inscripciones por categoría
-      const distribucionPorCategoria = eventosConIngresos.map(evento => {
-        const categoriasDistribucion = evento.inscripciones.reduce((acc, inscripcion) => {
-          const categoriaNombre = inscripcion.categoria.nombre;
-          acc[categoriaNombre] = (acc[categoriaNombre] || 0) + 1;
-          return acc;
-        }, {});
-  
-        return {
-          evento: evento.nombre,
-          distribucion: categoriasDistribucion,
-        };
-      });
-  
-      // Distribución de inscripciones por distancia
-      const distribucionPorDistancia = eventosConIngresos.map(evento => {
-        const distanciasDistribucion = evento.inscripciones.reduce((acc, inscripcion) => {
-          const distanciaNombre = evento.distancias.find(d => d.distanciaId === inscripcion.distanciaId)?.distancia.nombre;
-          acc[distanciaNombre] = (acc[distanciaNombre] || 0) + 1;
-          return acc;
-        }, {});
-  
-        return {
-          evento: evento.nombre,
-          distribucion: distanciasDistribucion,
-        };
-      });
-  
-      // Enviar los datos a la vista
       res.render('reportes', {
-        ingresosPorEvento: JSON.stringify(ingresosPorEvento), // Convertir a JSON
-        inscripcionesPorEvento: JSON.stringify(inscripcionesPorEvento), // Convertir a JSON
-        distribucionPorCategoria: JSON.stringify(distribucionPorCategoria),
-        distribucionPorDistancia: JSON.stringify(distribucionPorDistancia),
+        añosDisponibles: JSON.stringify(añosDisponibles),
+        añoSeleccionado: null,
+        ingresosPorEvento: [],
+        inscripcionesPorEvento: []
       });
     } catch (error) {
-      console.error('Error al generar los ingresos:', error);
-      res.status(500).send('Error interno del servidor');
+      console.error("Error al obtener años:", error);
+      res.status(500).send("Error interno del servidor");
     }
-};  
+};
+  
+exports.reportesEventos = async (req, res) => {
+    try {
+        const año = parseInt(req.params.ano);
+        console.log(año);
+
+        // Obtener todas las fechas de los eventos
+        const eventos = await prisma.eventos.findMany({
+            select: {
+                fecha: true,
+            },
+        });
+
+        // Extraer los años únicos
+        const añosDisponibles = [...new Set(eventos.map(evento => new Date(evento.fecha).getFullYear()))];
+
+        // Filtrar eventos por el año seleccionado
+        const eventosDelAño = await prisma.eventos.findMany({
+            where: {
+                fecha: {
+                    gte: new Date(`${año}-01-01`),
+                    lt: new Date(`${año + 1}-01-01`),
+                },
+            },
+            include: {
+                inscripciones: {
+                    include: {
+                        distancia: true, // Para acceder al precio de cada inscripción
+                    },
+                },
+            },
+        });
+
+        // Calcular ingresos e inscripciones por evento
+        const datosIngresos = eventosDelAño.map(evento => ({
+            nombre: evento.nombre,
+            ingresos: evento.inscripciones.reduce((total, inscripcion) => total + (inscripcion.distancia.precio || 0), 0),
+        }));
+
+        const datosInscripciones = eventosDelAño.map(evento => ({
+            nombre: evento.nombre,
+            inscripciones: evento.inscripciones.length,
+        }));
+
+        console.log("Ingresos por evento:", datosIngresos);
+        console.log("Inscripciones por evento:", datosInscripciones);
+
+        res.render('reportes', {
+            añosDisponibles: JSON.stringify(añosDisponibles),
+            añoSeleccionado: año,
+            ingresosPorEvento: JSON.stringify(datosIngresos),
+            inscripcionesPorEvento: JSON.stringify(datosInscripciones),
+        });
+    } catch (error) {
+        console.error("Error al generar el reporte:", error);
+        res.status(500).send("Error interno del servidor");
+    }
+};    
+  
+  // Función para obtener los años disponibles en la base de datos
+  const obtenerAñosDisponibles = async () => {
+    const eventos = await prisma.eventos.findMany({
+      select: {
+        fecha: true,
+      },
+    });
+    const años = [...new Set(eventos.map(evento => new Date(evento.fecha).getFullYear()))];
+    return años.sort((a, b) => a - b);
+  };  

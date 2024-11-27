@@ -29,6 +29,7 @@
                         <p><strong>Distancia:</strong> <%= inscripcion.distancia.nombre %></p>
                         <p><strong>Categoría:</strong> <%= inscripcion.categoria.nombre %></p>
                         <p><strong>Fecha de Inscripción:</strong> <%= inscripcion.fechaInscripcion.toLocaleDateString() %></p>
+                        <p><strong>Asistencia:</strong> <%= inscripcion.asistencia ? 'Asistió' : 'No asistió' %></p>
                     </li>
                 <% }); %>
             </ul>
@@ -43,10 +44,21 @@
                         <p><strong>Tiempo:</strong> <%= resultado.tiempo %> segundos</p>
                         <p><strong>Lugar General:</strong> <%= resultado.lugarGeneral %></p>
                         <p><strong>Lugar en Categoría:</strong> <%= resultado.lugarCategoria %></p>
+        
+                        <!-- Mostrar solo la distancia a la que el usuario se inscribió -->
+                        <p><strong>Distancia:</strong>
+                            <% 
+                            const inscripcion = inscripciones.find(i => i.eventoId === resultado.eventoId);
+                            if (inscripcion) { 
+                            %>
+                                <span><%= inscripcion.distancia.nombre %></span>
+                            <% } %>
+                        </p>
+                        <p><strong>Puntaje:</strong> <%= resultado.puntaje !== null ? resultado.puntaje : 'No tiene puntaje' %></p>
                     </li>
                 <% }); %>
             </ul>
-        </div>
+        </div>                  
 
         <div class="profile-section">
             <h2>Puntajes por Año</h2>

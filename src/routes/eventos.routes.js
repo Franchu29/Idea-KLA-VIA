@@ -21,17 +21,18 @@ router.post('/edit_event/:id', eventosController.editEvento);
 router.get('/inspeccionar_evento/:id', eventosController.inspeccionarEvento);
 router.post('/actualizar_asistencia/:id', eventosController.actualizarAsistencia);
 
-router.get('/participantes_cortesia/:id', authMiddleware([1, 2, 3]), eventosController.renderParticipantesCortesia);
+router.get('/participantes_cortesia/:id', authMiddleware([1, 2]), eventosController.renderParticipantesCortesia);
 router.post('/inscribir_participantes/:id', eventosController.inscribirParticipantes);
 
-router.get('/render_distancias', authMiddleware([1, 2, 3]), eventosController.renderDistancias);
+router.get('/render_distancias', authMiddleware([1, 2]), eventosController.renderDistancias);
 router.post('/create_distancias', eventosController.createDistancias)
-router.get('/ver_distancias', authMiddleware([1, 2, 3]), eventosController.getDistancias)
+router.get('/ver_distancias', authMiddleware([1, 2]), eventosController.getDistancias)
 
 router.post('/delete_distancia/:id', eventosController.deleteDistancia);
-router.get('/edit_render_distancia/:id', authMiddleware([1, 2, 3]), eventosController.editDistanciaRender)
+router.get('/edit_render_distancia/:id', authMiddleware([1, 2]), eventosController.editDistanciaRender)
 router.post('/edit_distancia/:id', eventosController.editDistancia);
 
-router.get('/reportes', authMiddleware([1, 2, 3]), eventosController.reportesEventos);
+router.get('/reportes', authMiddleware([1, 2]), eventosController.reportesEventosSinAño);
+router.get('/reportes/:ano', authMiddleware([1, 2]), eventosController.reportesEventos);
 
 module.exports = router;

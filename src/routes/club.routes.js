@@ -4,19 +4,19 @@ const authMiddleware = require('../services/auth_middlewares');
 
 const router = Router();
 
-router.get('/render_club', clubController.renderClub);
-router.post('/create_club', clubController.createClub);
+router.get('/render_club', authMiddleware([1, 2, 3]), clubController.renderClub);
+router.post('/create_club', authMiddleware([1, 2, 3]), clubController.createClub);
 
-router.get('/show_club', clubController.getClubes);
+router.get('/show_club', authMiddleware([1, 2, 3]), clubController.getClubes);
 
-router.post('/delete_club/:id', clubController.borrarClub);
+router.post('/delete_club/:id', authMiddleware([1, 2]), clubController.borrarClub);
 
-router.get('/edit_club/:id', clubController.editClubRender);
-router.post('/update_club/:id', clubController.updateClub);
+router.get('/edit_club/:id', authMiddleware([1, 2, 3]), clubController.editClubRender);
+router.post('/update_club/:id', authMiddleware([1, 2, 3]), clubController.updateClub);
 
-router.get('/inspeccionar_club/:id', clubController.inspeccionarClub);
+router.get('/inspeccionar_club/:id', authMiddleware([1, 2, 3]), clubController.inspeccionarClub);
 
-router.post('/unirseClub/:id', authMiddleware, clubController.unirseClub);
-router.post('/desligarse/:id', authMiddleware, clubController.desligarseDelClub);
+router.post('/unirseClub/:id', authMiddleware([1, 2, 3]), clubController.unirseClub);
+router.post('/desligarse/:id', authMiddleware([1, 2, 3]), clubController.desligarseDelClub);
 
 module.exports = router;

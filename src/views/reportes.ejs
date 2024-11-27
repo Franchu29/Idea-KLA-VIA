@@ -1,55 +1,62 @@
 <%- include('./partials/header'); %>
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reporte de Ingresos</title>
+  <!-- Incluir Chart.js desde un CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
   <style>
-    /* Contenedor para los gráficos */
+    /* Contenedor de los gráficos usando Flexbox */
     .chart-container {
       display: flex;
-      justify-content: space-evenly;
-      gap: 20px;
-      padding: 20px;
-      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 20px; /* Espacio entre los gráficos */
+      margin-top: 30px;
     }
 
-    /* Estilo de cada gráfico */
+    /* Estilo para los gráficos */
     .chart-container canvas {
-      max-width: 400px;
-      height: 300px;
-      flex: 1 1 350px;
+      width: 48%;  /* Ocupa el 48% del ancho del contenedor */
+      height: 400px; /* Altura fija para los gráficos */
+    }
+    
+    h2 {
+      text-align: center;
     }
   </style>
 </head>
 <body>
   <h1>Reporte de Ingresos por Evento</h1>
-  
+
+  <!-- Selector de años -->
+  <form id="filtroAño" method="GET" action="">
+    <label for="año">Selecciona el Año:</label>
+    <select name="año" id="año" onchange="console.log(this.value); window.location.href = '/events/reportes/' + this.value;">
+      <!-- Opción por defecto "Seleccione Año" -->
+      <option value="" disabled selected>Seleccione Año</option>
+      
+      <% JSON.parse(añosDisponibles).forEach(a => { %>
+        <option value="<%= a %>" <%= a === añoSeleccionado ? 'selected' : '' %>><%= a %></option>
+      <% }) %>
+    </select>    
+  </form>  
+
   <!-- Contenedor para los gráficos -->
   <div class="chart-container">
     <!-- Gráfico de ingresos -->
     <div>
-      <h2>Ingresos por Evento</h2>
+      <h2>Ingresos por Evento (<%= añoSeleccionado %>)</h2>
       <canvas id="ingresosChart"></canvas>
     </div>
     
     <!-- Gráfico de inscripciones -->
     <div>
-      <h2>Cantidad de Inscripciones</h2>
+      <h2>Cantidad de Inscripciones (<%= añoSeleccionado %>)</h2>
       <canvas id="inscripcionesChart"></canvas>
     </div>
-  </div>
-
-  <h2>Distribución de Inscripciones por Categoría</h2>
-  <div class="chart-container">
-    <canvas id="distribucionCategoriaChart"></canvas>
-  </div>
-
-  <h2>Distribución de Inscripciones por Distancia</h2>
-  <div class="chart-container">
-    <canvas id="distribucionDistanciaChart"></canvas>
   </div>
 
   <script>
@@ -103,64 +110,6 @@
           borderColor: 'rgba(153, 102, 255, 1)',
           borderWidth: 1
         }]
-      },
-      options: {
-        scales: {
-          y: {
-            beginAtZero: true
-          }
-        }
-      }
-    });
-
-    // Distribución de inscripciones por categoría
-    const distribucionPorCategoria = <%- distribucionPorCategoria %>;
-
-    // Preparar los datos para el gráfico de distribución por categoría
-    const distribucionLabelsCategoria = distribucionPorCategoria.map(evento => evento.evento);
-    const distribucionCategoria = distribucionPorCategoria.map(evento => Object.values(evento.distribucion));
-
-    const ctxDistribucionCategoria = document.getElementById('distribucionCategoriaChart').getContext('2d');
-    const distribucionCategoriaChart = new Chart(ctxDistribucionCategoria, {
-      type: 'bar',
-      data: {
-        labels: distribucionLabelsCategoria,
-        datasets: distribucionCategoria.map((distribucion, index) => ({
-          label: distribucionLabelsCategoria[index],
-          data: distribucion,
-          backgroundColor: 'rgba(255, 159, 64, 0.2)',
-          borderColor: 'rgba(255, 159, 64, 1)',
-          borderWidth: 1
-        }))
-      },
-      options: {
-        scales: {
-          y: {
-            beginAtZero: true
-          }
-        }
-      }
-    });
-
-    // Distribución de inscripciones por distancia
-    const distribucionPorDistancia = <%- distribucionPorDistancia %>;
-
-    // Preparar los datos para el gráfico de distribución por distancia
-    const distribucionLabelsDistancia = distribucionPorDistancia.map(evento => evento.evento);
-    const distribucionDistancia = distribucionPorDistancia.map(evento => Object.values(evento.distribucion));
-
-    const ctxDistribucionDistancia = document.getElementById('distribucionDistanciaChart').getContext('2d');
-    const distribucionDistanciaChart = new Chart(ctxDistribucionDistancia, {
-      type: 'bar',
-      data: {
-        labels: distribucionLabelsDistancia,
-        datasets: distribucionDistancia.map((distribucion, index) => ({
-          label: distribucionLabelsDistancia[index],
-          data: distribucion,
-          backgroundColor: 'rgba(54, 162, 235, 0.2)',
-          borderColor: 'rgba(54, 162, 235, 1)',
-          borderWidth: 1
-        }))
       },
       options: {
         scales: {

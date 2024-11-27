@@ -1,56 +1,157 @@
-<%- include('./partials/header'); %>  
+<%- include('./partials/header'); %>
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Eventos Deportivos</title>
-    <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio</title>
+    <style>
+        /* Estilos básicos para las tarjetas */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            color: #333;
+            margin-top: 20px;
+        }
+
+        h2 {
+            color: #555;
+            margin-top: 40px;
+        }
+
+        .event-container, .club-container, .user-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .event-card, .club-card, .user-card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 300px;
+            transition: transform 0.2s ease;
+        }
+
+        .event-card:hover, .club-card:hover, .user-card:hover {
+            transform: scale(1.03);
+        }
+
+        .event-card-header, .club-card-header, .user-card-header {
+            padding: 16px;
+            background-color: #333;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .event-card-body, .club-card-body, .user-card-body {
+            padding: 16px;
+        }
+
+        .event-card-body p, .club-card-body p, .user-card-body p {
+            margin: 8px 0;
+        }
+
+        /* Estilo de las imágenes, tanto para eventos como para clubes */
+        .event-image, .club-image, .user-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background-color: #eee;
+        }
+
+        .event-card-footer, .club-card-footer, .user-card-footer {
+            display: flex;
+            justify-content: space-between;
+            padding: 16px;
+            border-top: 1px solid #eee;
+        }
+
+        .button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            text-align: center;
+            text-decoration: none;
+            color: #fff;
+        }
+
+        .button-inspect {
+            background-color: #2196F3;
+        }
+
+        .button-view-puntaje {
+            background-color: #4CAF50;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Bienvenido a Eventos Deportivos</h1>
-        <nav>
-            <ul>
-                <li><a href="#">Inicio</a></li>
-                <li><a href="#">Eventos</a></li>
-                <li><a href="#">Contacto</a></li>
-            </ul>
-        </nav>
-    </header>
-    
-    <main>
-        <section>
-            <h2>Próximos Eventos</h2>
-            <ul>
-                <li>
-                    <h3>Partido de Fútbol</h3>
-                    <p>Fecha: 10 de octubre</p>
-                    <p>Lugar: Estadio Municipal</p>
-                </li>
-                <li>
-                    <h3>Torneo de Tenis</h3>
-                    <p>Fecha: 15 de octubre</p>
-                    <p>Lugar: Club de Tenis</p>
-                </li>
-            </ul>
-        </section>
-        
-        <section>
-            <h2>Últimas Noticias</h2>
-            <ul>
-                <li>
-                    <h3>Gran éxito en el Maratón de la Ciudad</h3>
-                    <p>Fecha: 5 de octubre</p>
-                </li>
-                <li>
-                    <h3>Nuevo récord en la Competencia de Natación</h3>
-                    <p>Fecha: 8 de octubre</p>
-                </li>
-            </ul>
-        </section>
-    </main>
-    
-    <footer>
-        <p>&copy; 2022 Eventos Deportivos. Todos los derechos reservados.</p>
-    </footer>
+    <h1>Bienvenido al Sistema de Corre 60</h1>
+
+    <section>
+        <h2>Próximos Eventos</h2>
+        <% if (eventosFuturos && eventosFuturos.length > 0) { %>
+            <div class="event-container">
+                <% eventosFuturos.forEach(evento => { %>
+                    <div class="event-card">
+                        <img src="/uploads/images_evento/evento_<%= evento.id %>.jpg" alt="Imagen de <%= evento.nombre %>" class="event-image">
+                        <div class="event-card-header">
+                            <%= evento.nombre %>
+                        </div>
+                        <div class="event-card-body">
+                            <p><strong>Descripción:</strong> <%= evento.descripcion %></p>
+                            <p><strong>Fecha:</strong> <%= new Date(evento.fecha).toLocaleDateString('es-ES', { timeZone: 'UTC' }) %></p>
+                            <p><strong>Lugar:</strong> <%= evento.lugar %></p>
+                        </div>
+                        <div class="event-card-footer">
+                            <form action="/events/inspeccionar_evento/<%= evento.id %>" method="get">
+                                <button type="submit" class="button-inspect">Inspeccionar</button>
+                            </form>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <p>No hay eventos futuros registrados.</p>
+        <% } %>
+    </section>
+
+    <section>
+        <h2>Puntajes de Clubes</h2>
+        <% if (clubesConPuntajes && clubesConPuntajes.length > 0) { %>
+            <div class="club-container">
+                <% clubesConPuntajes.forEach(club => { %>
+                    <div class="club-card">
+                        <img src="/uploads/images_club/club_<%= club.id %>.jpg" alt="Imagen de <%= club.nombre %>" class="club-image">
+                        <div class="club-card-header">
+                            <%= club.nombre %>
+                        </div>
+                        <div class="club-card-body">
+                            <% if (club.puntajes.length > 0) { %>
+                                <p class="club-score"><%= club.puntajes[0].puntos %> puntos</p>
+                            <% } else { %>
+                                <p>No hay puntajes registrados para este club en el año actual.</p>
+                            <% } %>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <p>No hay clubes con puntajes registrados para este año.</p>
+        <% } %>
 </body>
 </html>
