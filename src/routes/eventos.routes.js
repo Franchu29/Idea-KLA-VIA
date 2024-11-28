@@ -35,4 +35,12 @@ router.post('/edit_distancia/:id', eventosController.editDistancia);
 router.get('/reportes', authMiddleware([1, 2]), eventosController.reportesEventosSinAño);
 router.get('/reportes/:ano', authMiddleware([1, 2]), eventosController.reportesEventos);
 
+router.get('/render_categorias', authMiddleware([1, 2]), eventosController.renderCategorias);
+router.post('/create_categorias', eventosController.createCategorias)
+router.get('/ver_categorias', authMiddleware([1, 2]), eventosController.getCategorias)
+
+router.post('/delete_categoria/:id', eventosController.deleteCategorias);
+router.get('/edit_render_categoria/:id', authMiddleware([1, 2]), eventosController.editCategoriasRender)
+router.post('/edit_categoria/:id', eventosController.editCategorias);
+
 module.exports = router;

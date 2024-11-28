@@ -1,0 +1,47 @@
+<%- include('./partials/header'); %>  
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Categorias</title>
+    <link rel="stylesheet" href="/styles/style_usuario.css">
+</head>
+<body>
+    <h1>Lista de Categorias</h1>
+
+    <% if (categorias.length > 0) { %>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Editar</th>
+                    <th>Eliminar</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% categorias.forEach(categoria => { %>
+                    <tr>
+                        <td><%= categoria.id %></td>
+                        <td><%= categoria.nombre %></td>
+                        <td>
+                            <form action="/events/edit_render_categoria/<%= categoria.id %>" method="get">
+                                <button type="submit">Editar</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form action="/events/delete_categoria/<%= categoria.id %>" method="post" onsubmit="return confirm('¿Estás seguro que quieres eliminar esta categoria?');">
+                                <button type="submit">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    <% } else { %>
+        <p>No hay distancias registradas.</p>
+    <% } %>
+
+</body>
+</html>

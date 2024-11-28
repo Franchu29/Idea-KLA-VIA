@@ -1,0 +1,21 @@
+<%- include('./partials/header'); %>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Distancias</title>
+    <link rel="stylesheet" href="/styles/style_formulario.css">
+</head>
+<body>
+    <div class="form-container">
+        <h1>Crear Distancias</h1>
+        <form action="/events/create_categorias" method="POST">
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="nombre" name="nombre" required>
+
+            <button type="submit">Crear Distancias</button>
+        </form>
+    </div>
+</body>
+</html>

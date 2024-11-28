@@ -52,15 +52,19 @@
 
     <% if (evento.resultados.length > 0) { %>
         <h2>Descargar Resultados</h2>
-        <button id="btn-descargar-5k" onclick="window.location.href='/cronometro/descargar_pdf_5k/<%= evento.id %>'">
-            Descargar Resultados 5K
-        </button>
-        <button id="btn-descargar-10k" onclick="window.location.href='/cronometro/descargar_pdf_10k/<%= evento.id %>'">
-            Descargar Resultados 10K
-        </button>
+        <% if (pdfsExistentes["5K"]) { %>
+            <button id="btn-descargar-5k" onclick="window.location.href='/cronometro/descargar_pdf_5k/<%= evento.id %>'">
+                Descargar Resultados 5K
+            </button>
+        <% } %>
+        <% if (pdfsExistentes["10K"]) { %>
+            <button id="btn-descargar-10k" onclick="window.location.href='/cronometro/descargar_pdf_10k/<%= evento.id %>'">
+                Descargar Resultados 10K
+            </button>
+        <% } %>
     <% } else { %>
         <p>No hay resultados disponibles para este evento.</p>
-    <% } %>    
+    <% } %> 
     
     <table id="tabla-corredores_carrera" class="w3-table-all w3-card-4">
         <thead>
@@ -110,13 +114,11 @@
                                     Marcar No Asistió
                                 </button>
                             </form>
-                        </td>                   
+                        </td>
                     </tr>
-                <% }) %>
+                <% }); %>
             <% } else { %>
-                <tr>
-                    <td colspan="9">No hay participantes inscritos para este evento.</td>
-                </tr>
+                <tr><td colspan="9">No hay inscripciones para este evento.</td></tr>
             <% } %>
         </tbody>
     </table>

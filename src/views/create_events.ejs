@@ -25,20 +25,16 @@
 
             <label for="categorias">Categorías:</label>
             <div class="checkbox-group" id="categorias">
-                <label><input type="checkbox" name="categorias" value="1"> 15-19 años</label>
-                <label><input type="checkbox" name="categorias" value="2"> 20-29 años</label>
-                <label><input type="checkbox" name="categorias" value="3"> 30-39 años</label>
-                <label><input type="checkbox" name="categorias" value="4"> 40-49 años</label>
-                <label><input type="checkbox" name="categorias" value="5"> 50-59 años</label>
-                <label><input type="checkbox" name="categorias" value="6"> 60-69 años</label>
-                <label><input type="checkbox" name="categorias" value="7"> 70+ años</label>
+                <% categorias.forEach(categoria => { %>
+                    <label><input type="checkbox" name="categorias" value="<%= categoria.id %>"> <%= categoria.nombre %></label>
+                <% }) %>
             </div>
 
             <label for="distancias">Distancias:</label>
             <div class="checkbox-group" id="distancias">
-                <label><input type="checkbox" name="distancias" value="1"> 2 km</label>
-                <label><input type="checkbox" name="distancias" value="2"> 5 km</label>
-                <label><input type="checkbox" name="distancias" value="3"> 10 km</label>
+                <% distancias.forEach(distancia => { %>
+                    <label><input type="checkbox" name="distancias" value="<%= distancia.id %>"> <%= distancia.nombre %></label>
+                <% }) %>
             </div>
 
             <label for="imagen">Imagen del Evento:</label>

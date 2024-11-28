@@ -7,9 +7,21 @@ const fs = require('fs');
 const { obtenerPronostico, buscarLugar, obtenerPronosticoPorCoordenadas } = require('../services/clima');
 
 // Renderiza el formulario de eventos
-exports.renderEvents = (req, res) => {
-    console.log('MOSTRANDO FORMULARIO DE CREACIÓN DE EVENTOS');
-    res.render('create_events.ejs');
+exports.renderEvents = async (req, res) => {
+    try {
+        // Obtener las categorías y distancias desde la base de datos
+        const categorias = await prisma.categoria.findMany();
+        const distancias = await prisma.distancia.findMany();
+
+        // Renderizar la vista y pasar las categorías y distancias
+        res.render('create_events', {
+            categorias,
+            distancias
+        });
+    } catch (error) {
+        console.error('Error al obtener las categorías y distancias:', error);
+        res.status(500).send('Error al obtener las categorías y distancias');
+    }
 };
 
 const storage = multer.diskStorage({
@@ -295,12 +307,22 @@ exports.inspeccionarEvento = async (req, res) => {
         // Botón "Comenzar Carrera"
         const mostrarBotonIniciarCarrera = fechaActual >= fechaEvento && hayInscripciones && !hayResultados;
 
+        // Verificar si existen los PDFs para cada distancia
+        const pdfsExistentes = {};
+        const distancias = ['5K', '10K']; // Añadir las distancias que necesites aquí
+        for (const distancia of distancias) {
+            pdfsExistentes[distancia] = verificarPdfExistente(eventoId, distancia);
+        }
+
         let ciudad = evento.lugar;
         const lugar = await buscarLugar(ciudad);
-        pronostico = await obtenerPronosticoPorCoordenadas(lugar.lat, lugar.lon, 5);
+        const pronostico = await obtenerPronosticoPorCoordenadas(lugar.lat, lugar.lon, 5);
 
         // Suponiendo que el objeto de usuario autenticado está en req.user
-        const user = req.user; // Asegúrate de que el usuario esté autenticado
+        const user = req.user;
+
+        // Verificar existencia de resultados
+        console.log("Resultados del evento:", evento.resultados);
 
         res.render('inspeccionar_evento', {
             evento,
@@ -308,12 +330,36 @@ exports.inspeccionarEvento = async (req, res) => {
             mostrarBotonIniciarCarrera,
             pronostico,
             user,
+            pdfsExistentes, // Pasamos la información sobre la existencia de los PDFs
         });
     } catch (error) {
         console.error('Error al obtener los detalles del evento:', error);
         res.status(500).send('Error interno del servidor');
     }
 };
+
+// Función para verificar si el archivo PDF existe
+function verificarPdfExistente(eventoId, distancia) {
+    // Crear la ruta base del evento
+    const dirPath = path.join(__dirname, '../uploads/evento_' + eventoId);
+
+    // Crear las rutas de los archivos de acuerdo con el nombre que estás usando al generarlos
+    const archivoPdf5k = path.join(dirPath, `resultados_5k_evento_${eventoId}.pdf`);
+    const archivoPdf10k = path.join(dirPath, `resultados_10k_evento_${eventoId}.pdf`);
+
+    // Imprimir las rutas para verificar que sean correctas
+    console.log('Ruta 5K:', archivoPdf5k);
+    console.log('Ruta 10K:', archivoPdf10k);
+
+    // Verificar si el archivo existe dependiendo de la distancia
+    if (distancia === '5K') {
+        return fs.existsSync(archivoPdf5k);
+    } else if (distancia === '10K') {
+        return fs.existsSync(archivoPdf10k);
+    } else {
+        return false;
+    }
+}
 
 exports.actualizarAsistencia = async (req, res) => {
     const inscripcionId = parseInt(req.params.id);
@@ -748,14 +794,103 @@ exports.reportesEventos = async (req, res) => {
         res.status(500).send("Error interno del servidor");
     }
 };    
+
+// Controlador para mostrar formulario de crear categorías
+exports.renderCategorias = (req, res) => {
+    console.log('MOSTRANDO FORMULARIO DE CREACIÓN DE CATEGORIAS');
+    res.render('create_categorias.ejs');
+};
+
+// Controlador para crear categorías
+exports.createCategorias = async (req, res) => {
+
+    try {
+        const { nombre,  } = req.body;
+        console.log(nombre)
+    
+        // Validar entrada de datos
+        if (!nombre) {
+          return res.status(400).send('Todos los campos son obligatorios');
+        }
+    
+        // Crear la nueva categoria en la base de datos
+        const nuevaCategoria = await prisma.categoria.create({
+          data: {
+            nombre,
+          },
+        });
+    
+        res.redirect('/events/ver_categorias'); 
+      } catch (error) {
+        console.error('Error al crear categorias:', error);
+        res.status(500).send('Hubo un error al crear la categorias');
+      }
+}
+
+//Obtiene todas las distancias
+exports.getCategorias = async (req, res) => {
+    console.log('OBTENIENDO Categorias');
+    try {
+        const categorias = await prisma.categoria.findMany({});
+        res.render('ver_categorias.ejs', { categorias });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error al obtener los eventos');
+    }
+};
+
+// Elimina un evento
+exports.deleteCategorias = async (req, res) => {
+    try {
+        console.log('ELIMINANDO Categorias:', req.params);
+        const { id } = req.params;
   
-  // Función para obtener los años disponibles en la base de datos
-  const obtenerAñosDisponibles = async () => {
-    const eventos = await prisma.eventos.findMany({
-      select: {
-        fecha: true,
-      },
-    });
-    const años = [...new Set(eventos.map(evento => new Date(evento.fecha).getFullYear()))];
-    return años.sort((a, b) => a - b);
-  };  
+        // Eliminar el evento
+        const categoria = await prisma.categoria.delete({
+            where: {
+                id: parseInt(id, 10)
+            }
+        });
+  
+        res.redirect('/events/ver_categorias');
+    } catch (error) {
+        console.error('Error al eliminar la categoria:', error);
+        res.status(500).json({ error: 'Error al eliminar la categoria' });
+    }
+};
+
+//Muestra la vista de editar evento
+exports.editCategoriasRender = async (req, res) => {
+    try {
+        const { id } = req.params;
+  
+        const categoria = await prisma.categoria.findUnique({
+            where: { id: parseInt(id, 10) },
+        });
+  
+        const categorias = await prisma.categoria.findMany();
+  
+        res.render('edit_categorias.ejs', {categoria});
+    } catch (error) {
+        console.error('Error al mostrar el formulario de edición de distancia:', error);
+        res.status(500).json({ error: 'Error al mostrar el formulario de edición de distancia' });
+    }
+};
+
+exports.editCategorias = async (req, res) => {
+    const { id } = req.params;
+    const {nombre} = req.body
+
+    try{
+        const updatedCategoria = await prisma.categoria.update({
+            where: { id: parseInt(id, 10) },
+            data: {
+                nombre,
+            }
+        });
+        res.redirect('/events/ver_categorias')
+    } catch(error) {
+            console.error('Error al mostrar el formulario de edición de evento:', error);
+            res.status(500).json({ error: 'Error al mostrar el formulario de edición de evento' });
+    }
+}

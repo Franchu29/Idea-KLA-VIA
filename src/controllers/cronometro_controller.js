@@ -185,7 +185,9 @@ exports.calcularResultados = async (req, res) => {
 
         // Obtener los resultados de 5k y 10k, asegurándonos de que solo obtenemos los de la distancia correcta
         const resultados5k = await obtenerResultados5k(eventoId);
+        console.log('Resultados de 5k:', resultados5k);
         const resultados10k = await obtenerResultados10k(eventoId);
+        console.log('Resultados de 10k:', resultados10k);
 
         // Verificar que tenemos resultados para ambas distancias
         if (resultados5k.length === 0) {
@@ -330,7 +332,8 @@ async function obtenerResultados5k(eventoId) {
                 usuario: {
                     inscripciones: {
                         some: {
-                            distanciaId: 2
+                            eventoId: Number(eventoId),
+                            distanciaId: 2, // Asegura que la inscripción sea para 5k
                         }
                     }
                 }
@@ -339,6 +342,7 @@ async function obtenerResultados5k(eventoId) {
                 tiempo: 'asc'
             },
             select: {
+                eventoId: true,
                 usuarioId: true,
                 tiempo: true,
                 lugarGeneral: true,
@@ -349,7 +353,8 @@ async function obtenerResultados5k(eventoId) {
                         apellido: true,
                         inscripciones: {
                             where: {
-                                eventoId: Number(eventoId)
+                                eventoId: Number(eventoId),
+                                distanciaId: 2 // Filtra también las inscripciones por distancia 5k
                             },
                             select: {
                                 numeroCorredor: true,
@@ -385,7 +390,8 @@ async function obtenerResultados10k(eventoId) {
                 usuario: {
                     inscripciones: {
                         some: {
-                            distanciaId: 3
+                            eventoId: Number(eventoId),
+                            distanciaId: 3, // Asegura que la inscripción sea para 10k
                         }
                     }
                 }
@@ -394,6 +400,7 @@ async function obtenerResultados10k(eventoId) {
                 tiempo: 'asc'
             },
             select: {
+                eventoId: true,
                 usuarioId: true,
                 tiempo: true,
                 lugarGeneral: true,
@@ -404,15 +411,16 @@ async function obtenerResultados10k(eventoId) {
                         apellido: true,
                         inscripciones: {
                             where: {
-                                eventoId: Number(eventoId)
+                                eventoId: Number(eventoId),
+                                distanciaId: 3 // Filtra también las inscripciones por distancia 10k
                             },
                             select: {
+                                numeroCorredor: true,
                                 categoria: {
                                     select: {
                                         nombre: true
                                     }
                                 },
-                                numeroCorredor: true,
                                 distancia: {
                                     select: {
                                         nombre: true
