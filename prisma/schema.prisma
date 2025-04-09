@@ -20,133 +20,149 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id              Int       @id @default(autoincrement())
-  nombre          String
-  apellido        String
-  fecha_nacimiento DateTime
-  edad            Int
-  email           String    @unique
-  contrasena      String
-
-  clubId          Int?
-  club            Clubes?    @relation(fields: [clubId], references: [id])
-
-  // Relación con Roles Generales
-  rolGeneralId    Int
-  rolGeneral      Roles      @relation(fields: [rolGeneralId], references: [id])
-
-  inscripciones   Inscripcion[]
-  resultados      Resultados[]
+model Rol {
+  id       Int       @id @default(autoincrement())
+  nombre   String
+  usuarios Usuario[]
 }
 
-model Roles {
-  id          Int      @id @default(autoincrement())
+model Usuario {
+  id           Int       @id @default(autoincrement())
+  nombre       String
+  apellido     String
+  fecha_nacimiento DateTime
+  edad         Int
+  telefono     String
+  email        String    @unique
+  password     String
+  rolId        Int
+  rol          Rol       @relation(fields: [rolId], references: [id])
+  hijos        Usuario[] @relation("ApoderadoEstudiante")
+  apoderado    Usuario?  @relation("ApoderadoEstudiante", fields: [apoderadoId], references: [id])
+  apoderadoId  Int?
+
+  asistencias         Asistencia[]
+  notas               Nota[]
+  comunicaciones      Comunicacion[]
+  hojaDeVida          HojaDeVida?
+  cursosAsignados     CursoAsignatura[] @relation("UsuarioAsignaturas")
+  talleresInscritos   TallerInscrito[]
+  cursoId   Int?
+  curso     Curso? @relation(fields: [cursoId], references: [id])
+}
+
+model HojaDeVida {
+  id                Int     @id @default(autoincrement())
+  usuarioId         Int     @unique
+  tipoSangre        String
+  alergias          String?
+  contactoEmergencia String
+  documentosMedicos String?
+  anotaciones       String?
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+}
+
+model Curso {
+  id          Int              @id @default(autoincrement())
+  nombre      String
+  nivel       String
+  estudiantes Usuario[]
+  asignaturas CursoAsignatura[]
+  eventos     EventoCalendario[]
+}
+
+model Asignatura {
+  id          Int              @id @default(autoincrement())
   nombre      String
   descripcion String
-
-  usuarios    User[]
+  cursos      CursoAsignatura[]
 }
 
-model Clubes {
-  id         Int       @id @default(autoincrement())
-  nombre     String
-  puntajes   PuntajeClub[]   // Relación para los puntajes anuales
+model CursoAsignatura {
+  id            Int        @id @default(autoincrement())
+  curso_id      Int
+  asignatura_id Int
+  docente_id    Int
 
-  usuarios   User[]
+  curso      Curso      @relation(fields: [curso_id], references: [id])
+  asignatura Asignatura @relation(fields: [asignatura_id], references: [id])
+  docente    Usuario    @relation("UsuarioAsignaturas", fields: [docente_id], references: [id])
+
+  @@unique([curso_id, asignatura_id, docente_id])
+  notas Nota[]
+
 }
 
-model PuntajeClub {
+model Nota {
+  id               Int     @id @default(autoincrement())
+  usuarioId        Int
+  cursoAsignaturaId Int
+  valor            Float
+  fecha            DateTime @default(now())
+
+  usuario          Usuario         @relation(fields: [usuarioId], references: [id])
+  cursoAsignatura  CursoAsignatura @relation(fields: [cursoAsignaturaId], references: [id])
+}
+
+model Asistencia {
+  id         Int      @id @default(autoincrement())
+  usuarioId  Int
+  fecha      DateTime
+  estado     String
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+
+  @@unique([usuarioId, fecha])
+}
+
+model Comunicacion {
+  id         Int      @id @default(autoincrement())
+  titulo     String
+  mensaje    String
+  fecha      DateTime @default(now())
+  tipo       String   // citación, aviso, general
+  archivoURL String?  // link o adjunto
+  usuarioId  Int?
+
+  usuario Usuario? @relation(fields: [usuarioId], references: [id])
+}
+
+model EventoCalendario {
+  id        Int      @id @default(autoincrement())
+  titulo    String
+  fecha     DateTime
+  tipo      String  // prueba, actividad, feriado
+  clima     String?
+  cursoId   Int?
+
+  curso Curso? @relation(fields: [cursoId], references: [id])
+
+}
+
+model Taller {
   id        Int     @id @default(autoincrement())
-  clubId    Int
-  anio      Int
-  puntos    Int     // Puntaje acumulado del club en ese año
-
-  club      Clubes  @relation(fields: [clubId], references: [id])
-
-  @@unique([clubId, anio])  // Un puntaje por club por año
+  nombre    String
+  cupos     Int
+  horario   String
+  profesor  String
+  inscritos TallerInscrito[]
 }
 
-model Eventos {
-  id          Int           @id @default(autoincrement())
-  nombre      String        
-  descripcion String?       
-  fecha       DateTime      
-  lugar       String        
+model TallerInscrito {
+  id        Int     @id @default(autoincrement())
+  tallerId  Int
+  usuarioId Int
 
-  categorias  EventoCategoria[]
-  distancias  EventoDistancia[]
-  inscripciones Inscripcion[]
-  resultados   Resultados[]
+  taller   Taller  @relation(fields: [tallerId], references: [id])
+  usuario  Usuario @relation(fields: [usuarioId], references: [id])
+
+  @@unique([tallerId, usuarioId])
 }
 
-model Categoria {
-  id           Int           @id @default(autoincrement())
-  nombre       String        
-
-  eventos      EventoCategoria[]
-  inscripciones Inscripcion[]
-}
-
-model Distancia {
-  id           Int           @id @default(autoincrement())
-  nombre       String        
-  precio       Int           @default(0)
-
-  eventos      EventoDistancia[]
-  inscripciones Inscripcion[]
-}
-
-model EventoCategoria {
-  eventoId    Int
-  categoriaId Int
-
-  evento      Eventos   @relation(fields: [eventoId], references: [id])
-  categoria   Categoria @relation(fields: [categoriaId], references: [id])
-
-  @@id([eventoId, categoriaId])
-}
-
-model EventoDistancia {
-  eventoId    Int
-  distanciaId Int
-
-  evento      Eventos   @relation(fields: [eventoId], references: [id])
-  distancia   Distancia @relation(fields: [distanciaId], references: [id])
-
-  @@id([eventoId, distanciaId])
-}
-
-model Inscripcion {
-  id              Int       @id @default(autoincrement())  
-  usuarioId       Int
-  eventoId        Int
-  distanciaId     Int
-  categoriaId     Int
-  numeroCorredor  Int?
-  asistencia      Boolean?
-
-  usuario         User      @relation(fields: [usuarioId], references: [id])
-  evento          Eventos   @relation(fields: [eventoId], references: [id])
-  distancia       Distancia @relation(fields: [distanciaId], references: [id])
-  categoria       Categoria @relation(fields: [categoriaId], references: [id])
-
-  fechaInscripcion DateTime @default(now())
-
-  @@unique([usuarioId, eventoId])  
-}
-
-model Resultados {
-  id             Int       @id @default(autoincrement())  
-  usuarioId      Int
-  eventoId       Int
-  tiempo         Int       
-  lugarGeneral   Int       
-  lugarCategoria Int       
-  puntaje        Int?      
-
-  usuario        User      @relation(fields: [usuarioId], references: [id])
-  evento         Eventos   @relation(fields: [eventoId], references: [id])
-
-  @@unique([usuarioId, eventoId])
+model Reporte {
+  id         Int      @id @default(autoincrement())
+  tipo       String   
+  contenido  String   
+  fecha      DateTime @default(now())
 }

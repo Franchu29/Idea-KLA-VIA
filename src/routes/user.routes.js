@@ -4,17 +4,19 @@ const authMiddleware = require('../services/auth_middlewares');
 
 const router = Router();
 
-router.get('/', userController.renderIndex);
-router.post('/login', userController.login);
+router.get('/', userController.renderLanding);
 
-router.get('/inicio', authMiddleware([1, 2, 3]), userController.inicio);
+router.get('/login', userController.renderIndex);
+router.post('/auth_login', userController.login);
+
+router.get('/inicio', userController.inicio);
 
 //Rutas de Crear Usuario
-router.get('/create_user_render', authMiddleware([1, 2]), userController.createUserRender);
+router.get('/create_user_render', userController.createUserRender);
 router.post('/create_user', userController.createUser);
 
 //Rutas de Ver Usuarios
-router.get('/views_user', authMiddleware([1, 2]), userController.views_user);
+router.get('/views_user', userController.views_user);
 
 //Rutas de Eliminar Usuario
 router.post('/delete_user/:id', userController.deleteUser); 

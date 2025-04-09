@@ -5,6 +5,10 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { enviarCorreoRecuperacion, enviarCorreoActualizacionRol } = require('../services/email_services');
 
+exports.renderLanding = (req, res) => {
+    res.render('landing.ejs');
+};
+
 exports.renderIndex = (req, res) => {
     res.clearCookie('token');
     console.log('MOSTRANDO LOGIN');
@@ -12,29 +16,29 @@ exports.renderIndex = (req, res) => {
 };
 
 exports.login = async (req, res) => {
-    const { email, contrasena } = req.body;
-    console.log('Contraseña recibida:', contrasena);
+    const { email, password } = req.body;
+    console.log('Contraseña recibida:', password);
 
     try {
         // Buscar el usuario por email
-        const user = await prisma.user.findUnique({
+        const usuario = await prisma.usuario.findUnique({
             where: { email: email },
         });
 
-        if (!user) {
+        if (!usuario) {
             console.log('Usuario no encontrado');
             return res.render('index.ejs', { errorMessage: 'Usuario no encontrado' });
         }
 
         // Verificar si el usuario tiene rolGeneralId = 4 y denegar el acceso
-        if (user.rolGeneralId === 4) {
+        if (usuario.rolId === 4) {
             console.log('Acceso denegado para usuarios con rolGeneralId = 4');
             return res.render('index.ejs', { errorMessage: 'Acceso denegado. Valide su correo o solicite otra vez el correo.' });
         }
 
         // Verificar la contraseña
-        const validContrasena = await bcrypt.compare(contrasena, user.contrasena);
-        console.log('Contraseña cifrada en la base de datos:', user.contrasena);
+        const validContrasena = await bcrypt.compare(password, usuario.password);
+        console.log('Contraseña cifrada en la base de datos:', usuario.password);
         console.log('Contraseña comparada:', validContrasena);
 
         if (!validContrasena) {
@@ -44,7 +48,7 @@ exports.login = async (req, res) => {
 
         // Generar el token JWT
         const token = jwt.sign(
-            { userId: user.id, email: user.email, role: user.rolGeneralId }, 
+            { usuarioId: usuario.id, email: usuario.email, role: usuario.rolId  }, 
             process.env.JWT_SECRET, 
             { expiresIn: '1h' }
         );
@@ -52,7 +56,7 @@ exports.login = async (req, res) => {
 
         // Almacena el token en cookies y redirige al inicio
         res.cookie('token', token, { httpOnly: true }); // Asegúrate de tener httpOnly para mayor seguridad
-        res.redirect('/inicio'); // Asegúrate de que esta ruta esté configurada en tu servidor
+        res.redirect('/inicio');
 
     } catch (error) {
         console.error('Error en el proceso de login:', error);
@@ -61,38 +65,8 @@ exports.login = async (req, res) => {
 };
 
 exports.inicio = async (req, res) => {
-    try {
-        // Obtener los 3 siguientes eventos
-        const eventosFuturos = await prisma.eventos.findMany({
-            where: {
-                fecha: {
-                    gt: new Date()  // Solo eventos con fecha futura
-                }
-            },
-            orderBy: {
-                fecha: 'asc'  // Ordenar por fecha ascendente
-            },
-            take: 3  // Tomar los 3 primeros
-        });
-
-        // Obtener los clubes con su puntaje para el año actual
-        const anioActual = new Date().getFullYear();
-        const clubesConPuntajes = await prisma.clubes.findMany({
-            include: {
-                puntajes: {
-                    where: {
-                        anio: anioActual  // Filtrar los puntajes por el año actual
-                    }
-                }
-            }
-        });
-
-        // Pasar los datos a la vista
-        res.render('inicio.ejs', { eventosFuturos, clubesConPuntajes });
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Hubo un error al obtener los eventos, clubes y usuarios.');
-    }
+    res.render('inicio.ejs');
+    console.log('MOSTRANDO INICIO');
 };
 
 //Muestra la vista de crear usuario
@@ -121,45 +95,40 @@ exports.createUser = async (req, res) => {
     try {
         console.log("CREANDO EL USUARIO:", req.body);
 
-        const { nombre, apellido, email, fecha_nacimiento, contrasena, rolGeneralId } = req.body;
+        const { nombre, apellido, fecha_nacimiento, telefono, email, password, rolId } = req.body;
 
         // Valida y convierte la fecha de nacimiento
         const fechaNacimiento = new Date(fecha_nacimiento);
         if (isNaN(fechaNacimiento.getTime())) {
             return res.status(400).json({ error: 'Fecha de nacimiento inválida' });
         }
-
-        // Calcula la edad en base a la fecha de nacimiento
+        
         const edad = calcularEdad(fechaNacimiento);
-        console.log('Edad calculada:', edad);
-
-        // Cifra la contraseña antes de guardarla
-        const hashedPassword = await bcrypt.hash(contrasena, 10);
-
-        // Crea el usuario en la base de datos
-        const newUser = await prisma.user.create({
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const rolIdInt = parseInt(rolId);
+        
+        const newUsuario = await prisma.usuario.create({
             data: {
                 nombre,
                 apellido,
                 fecha_nacimiento: fechaNacimiento,
                 edad,
+                telefono,
                 email,
-                contrasena: hashedPassword,
-                rolGeneral: {
-                    connect: { id: parseInt(rolGeneralId, 10) }
-                }
+                password: hashedPassword,
+                rolId: rolIdInt
             }
-        });
+        });        
 
         // Genera el token para la actualización de rol
-        const token = jwt.sign({ email: newUser.email }, process.env.JWT_SECRET, { expiresIn: '15m' });
+        const token = jwt.sign({ email: newUsuario.email }, process.env.JWT_SECRET, { expiresIn: '15m' });
 
         // Envía el correo de actualización de rol
-        await enviarCorreoActualizacionRol(newUser.email, token);
+        await enviarCorreoActualizacionRol(newUsuario.email, token);
         console.log('Correo de actualización de rol enviado.');
 
         // Redirige al usuario después de la creación
-        res.redirect('/');
+        res.redirect('/login');
     } catch (error) {
         console.error('Error al crear el usuario:', error);
         res.status(500).json({ error: 'Error al crear el usuario' });
@@ -169,7 +138,7 @@ exports.createUser = async (req, res) => {
 //Muestra la vista de ver usuarios
 exports.views_user = async (req, res) => {
     try {
-        const users = await prisma.user.findMany();
+        const users = await prisma.usuario.findMany();
         res.render('views_user.ejs', { users });
     } catch (error) {
         console.error('Error al obtener los usuarios:', error);
@@ -280,62 +249,19 @@ exports.editUser = async (req, res) => {
 exports.mostrarPerfil = async (req, res) => {
     try {
         const userId = req.userId; // Obtener el userId del req (establecido por el middleware)
+        console.log('ID DEL USUARIO:', userId);
 
         // Obtener los datos del usuario desde la base de datos, incluyendo el rol y el club
-        const user = await prisma.user.findUnique({
+        const user = await prisma.usuario.findUnique({
             where: { id: userId },
-            include: {
-                rolGeneral: true, // Incluir el rol del usuario
-                club: true,       // Incluir el club al que pertenece el usuario (si tiene)
-            },
         });
 
         if (!user) {
             return res.render('index.ejs', { errorMessage: 'Usuario no encontrado' });
         }
 
-        // Obtener las inscripciones del usuario
-        const inscripciones = await prisma.inscripcion.findMany({
-            where: { usuarioId: userId },
-            include: {
-                evento: true, // Obtener los detalles del evento
-                categoria: true, // Obtener los detalles de la categoría
-                distancia: true, // Obtener los detalles de la distancia
-            },
-        });
-
-        // Obtener los resultados de las inscripciones del usuario
-        const resultados = await prisma.resultados.findMany({
-            where: {
-              usuarioId: 1, // Suponiendo que buscas los resultados del usuario con id 1
-            },
-            include: {
-              evento: {
-                include: {
-                  distancias: {
-                    include: {
-                      distancia: true, // Incluye las distancias relacionadas con el evento
-                    },
-                  },
-                },
-              },
-            },
-          });             
-
-        // Calcular la suma de los puntajes agrupados por año
-        const puntajesPorAno = resultados.reduce((acumulado, resultado) => {
-            const anoEvento = new Date(resultado.evento.fecha).getFullYear();
-            if (resultado.puntaje !== null) {
-                if (!acumulado[anoEvento]) {
-                    acumulado[anoEvento] = 0;
-                }
-                acumulado[anoEvento] += resultado.puntaje;
-            }
-            return acumulado;
-        }, {});
-
         // Renderizar la vista de perfil con los datos del usuario, inscripciones, resultados y puntajes agrupados por año
-        res.render('perfil.ejs', { user, inscripciones, resultados, puntajesPorAno });
+        res.render('perfil.ejs', { user });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Error en el servidor' });
