@@ -11,10 +11,11 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // Middleware para archivos estáticos
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'imagenes')));
 app.use('/styles', express.static(path.join(__dirname, 'views', 'styles')));
 app.use(cookieParser());
-
+app.use(express.static(path.join(__dirname, 'src', 'imagenes')));
+app.use(express.static("imagenes"))
 // Middleware para decodificar datos de formularios
 app.use(express.urlencoded({ extended: false }));
 
