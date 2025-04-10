@@ -20,149 +20,163 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Rol {
-  id       Int       @id @default(autoincrement())
-  nombre   String
-  usuarios Usuario[]
+model Colegio {
+  id        Int                  @id @default(autoincrement())
+  nombre    String
+  direccion String?
+  telefono  String?
+  email     String?
+
+  cursos    Curso[]
+  talleres  Taller[]
+  eventos   EventoCalendario[]
+  estudiantes Estudiante[]
+  docentes    Docente[]
 }
 
 model Usuario {
-  id           Int       @id @default(autoincrement())
-  nombre       String
-  apellido     String
+  id               Int                @id @default(autoincrement())
+  nombre           String
+  apellido         String
   fecha_nacimiento DateTime
-  edad         Int
-  telefono     String
-  email        String    @unique
-  password     String
-  rolId        Int
-  rol          Rol       @relation(fields: [rolId], references: [id])
-  hijos        Usuario[] @relation("ApoderadoEstudiante")
-  apoderado    Usuario?  @relation("ApoderadoEstudiante", fields: [apoderadoId], references: [id])
-  apoderadoId  Int?
+  edad             Int
+  telefono         String
+  email            String             @unique
+  password         String
+  rolId            Int
 
-  asistencias         Asistencia[]
-  notas               Nota[]
-  comunicaciones      Comunicacion[]
-  hojaDeVida          HojaDeVida?
-  cursosAsignados     CursoAsignatura[] @relation("UsuarioAsignaturas")
-  talleresInscritos   TallerInscrito[]
-  cursoId   Int?
-  curso     Curso? @relation(fields: [cursoId], references: [id])
+  rol              Rol                @relation(fields: [rolId], references: [id])
+
+  estudiante       Estudiante?
+  docente          Docente?
+  apoderado        Apoderado?
+
+  talleresInscritos TallerInscrito[]
 }
 
-model HojaDeVida {
-  id                Int     @id @default(autoincrement())
-  usuarioId         Int     @unique
-  tipoSangre        String
-  alergias          String?
-  contactoEmergencia String
-  documentosMedicos String?
-  anotaciones       String?
+model Rol {
+  id     Int      @id @default(autoincrement())
+  nombre String
+  usuarios Usuario[]
+}
 
-  usuario Usuario @relation(fields: [usuarioId], references: [id])
+model Estudiante {
+  id                 Int           @id @default(autoincrement())
+  usuarioId          Int           @unique
+  apoderadoId        Int?
+  cursoId            Int?
+  colegioId          Int
+
+  // Relaciones
+  usuario            Usuario       @relation(fields: [usuarioId], references: [id])
+  apoderado          Apoderado?    @relation(fields: [apoderadoId], references: [id])
+  curso              Curso?        @relation(fields: [cursoId], references: [id])
+  hojaDeVida         HojaDeVida?   @relation()
+  notas              Nota[]        // Added relation to Nota
+  colegio     Colegio    @relation(fields: [colegioId], references: [id])
+}
+
+model Docente {
+  id         Int      @id @default(autoincrement())
+  usuarioId  Int      @unique
+  colegioId          Int
+
+  usuario    Usuario  @relation(fields: [usuarioId], references: [id])
+  asignaturas CursoAsignatura[]
+  colegio     Colegio    @relation(fields: [colegioId], references: [id])
+}
+
+model Apoderado {
+  id           Int        @id @default(autoincrement())
+  usuarioId    Int        @unique
+
+  usuario      Usuario    @relation(fields: [usuarioId], references: [id])
+  estudiantes  Estudiante[]  // Relación con varios estudiantes
 }
 
 model Curso {
   id          Int              @id @default(autoincrement())
   nombre      String
   nivel       String
-  estudiantes Usuario[]
+  colegioId   Int
+
+  colegio     Colegio          @relation(fields: [colegioId], references: [id])
+  estudiantes Estudiante[]
   asignaturas CursoAsignatura[]
   eventos     EventoCalendario[]
 }
 
 model Asignatura {
-  id          Int              @id @default(autoincrement())
-  nombre      String
-  descripcion String
-  cursos      CursoAsignatura[]
+  id         Int               @id @default(autoincrement())
+  nombre     String
+  descripcion String?
+  cursos     CursoAsignatura[]
 }
 
 model CursoAsignatura {
-  id            Int        @id @default(autoincrement())
-  curso_id      Int
-  asignatura_id Int
-  docente_id    Int
+  id           Int         @id @default(autoincrement())
+  cursoId      Int
+  asignaturaId Int
+  docenteId    Int
 
-  curso      Curso      @relation(fields: [curso_id], references: [id])
-  asignatura Asignatura @relation(fields: [asignatura_id], references: [id])
-  docente    Usuario    @relation("UsuarioAsignaturas", fields: [docente_id], references: [id])
+  curso        Curso       @relation(fields: [cursoId], references: [id])
+  asignatura   Asignatura  @relation(fields: [asignaturaId], references: [id])
+  docente      Docente     @relation(fields: [docenteId], references: [id])
 
-  @@unique([curso_id, asignatura_id, docente_id])
-  notas Nota[]
-
+  notas        Nota[]
 }
 
 model Nota {
-  id               Int     @id @default(autoincrement())
-  usuarioId        Int
-  cursoAsignaturaId Int
-  valor            Float
-  fecha            DateTime @default(now())
+  id                 Int              @id @default(autoincrement())
+  estudianteId       Int
+  cursoAsignaturaId  Int
+  valor              Float
 
-  usuario          Usuario         @relation(fields: [usuarioId], references: [id])
-  cursoAsignatura  CursoAsignatura @relation(fields: [cursoAsignaturaId], references: [id])
+  estudiante         Estudiante       @relation(fields: [estudianteId], references: [id])
+  cursoAsignatura    CursoAsignatura @relation(fields: [cursoAsignaturaId], references: [id])
 }
 
-model Asistencia {
+model Taller {
+  id        Int             @id @default(autoincrement())
+  nombre    String
+  cupos     Int
+  horario   String
+  profesor  String
+  colegioId Int
+
+  colegio   Colegio         @relation(fields: [colegioId], references: [id])
+  inscritos TallerInscrito[]
+}
+
+model TallerInscrito {
   id         Int      @id @default(autoincrement())
   usuarioId  Int
-  fecha      DateTime
-  estado     String
+  tallerId   Int
 
-  usuario Usuario @relation(fields: [usuarioId], references: [id])
-
-  @@unique([usuarioId, fecha])
-}
-
-model Comunicacion {
-  id         Int      @id @default(autoincrement())
-  titulo     String
-  mensaje    String
-  fecha      DateTime @default(now())
-  tipo       String   // citación, aviso, general
-  archivoURL String?  // link o adjunto
-  usuarioId  Int?
-
-  usuario Usuario? @relation(fields: [usuarioId], references: [id])
+  usuario    Usuario  @relation(fields: [usuarioId], references: [id])
+  taller     Taller   @relation(fields: [tallerId], references: [id])
 }
 
 model EventoCalendario {
   id        Int      @id @default(autoincrement())
   titulo    String
   fecha     DateTime
-  tipo      String  // prueba, actividad, feriado
+  tipo      String
   clima     String?
   cursoId   Int?
+  colegioId Int
 
-  curso Curso? @relation(fields: [cursoId], references: [id])
-
+  curso     Curso?   @relation(fields: [cursoId], references: [id])
+  colegio   Colegio  @relation(fields: [colegioId], references: [id])
 }
 
-model Taller {
-  id        Int     @id @default(autoincrement())
-  nombre    String
-  cupos     Int
-  horario   String
-  profesor  String
-  inscritos TallerInscrito[]
-}
+model HojaDeVida {
+  id                Int        @id @default(autoincrement())
+  estudianteId      Int        @unique
 
-model TallerInscrito {
-  id        Int     @id @default(autoincrement())
-  tallerId  Int
-  usuarioId Int
+  observaciones     String?
+  sanciones         String?
+  reconocimientos   String?
 
-  taller   Taller  @relation(fields: [tallerId], references: [id])
-  usuario  Usuario @relation(fields: [usuarioId], references: [id])
-
-  @@unique([tallerId, usuarioId])
-}
-
-model Reporte {
-  id         Int      @id @default(autoincrement())
-  tipo       String   
-  contenido  String   
-  fecha      DateTime @default(now())
+  estudiante        Estudiante @relation(fields: [estudianteId], references: [id])
 }
