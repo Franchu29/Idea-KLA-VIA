@@ -1,0 +1,57 @@
+<%- include('./partials/header'); %>  
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asignaturas</title>
+    <link rel="stylesheet" href="//cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="//cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $('#tabla-mostrar-usuarios').DataTable();
+        });
+    </script>
+</head>
+<body>
+    <body>
+        <h1>Lista de Asignaturas</h1>
+    
+        <% if (asignaturas.length > 0) { %>
+            <table id="tabla-mostrar-usuarios" class="w3-table-all w3-card-4">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Editar</th>
+                        <th>Eliminar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% asignaturas.forEach(asignaturas => { %>
+                        <tr>
+                            <td><%= asignaturas.id %></td>
+                            <td><%= asignaturas.nombre %></td>
+                            <td><%= asignaturas.descripcion %></td>
+                            <td>
+                                <form action="/asignatura/editAsignaturaRender/<%= asignaturas.id%>" method="get">
+                                    <button type="submit">Editar</button>
+                                </form>
+                            </td>
+                            <td>
+                                <form action="/asignatura/deleteAsignatura/<%= asignaturas.id %>" method="post" onsubmit="return confirm('¿Estás seguro que quieres eliminar este usuario?');">
+                                    <button type="submit">Eliminar</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        <% } else { %>
+            <p>No hay asignatuas registradas.</p>
+        <% } %>
+    </body>
+</body>
+</html>
