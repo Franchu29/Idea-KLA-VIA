@@ -46,7 +46,7 @@ nav ul li a:hover {
     border-radius: 5px;
 }
 
-.btn {
+.btn_salir {
     background-color: #e74c3c; /* Botón de salir con color */
     color: white;
     padding: 10px 20px;
@@ -56,8 +56,37 @@ nav ul li a:hover {
     transition: background-color 0.3s ease;
 }
 
-.btn:hover {
+.btn_salir:hover {
     background-color: #c0392b;
+}
+
+.btn_perfil {
+    background-color: #2198cc; /* Botón de salir con color */
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-left: 30px;
+    transition: background-color 0.3s ease;
+}
+
+.btn_perfil:hover {
+    background-color: #155a85;
+}
+
+
+.btn_reportes {
+    background-color: #e7e70e; /* Botón de salir con color */
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-left: 30px;
+    transition: background-color 0.3s ease;
+}
+
+.btn_reportes:hover {
+    background-color: #b2bd1c;
 }
 
 /* Estilos para el dropdown */
