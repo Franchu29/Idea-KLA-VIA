@@ -4,20 +4,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Crear Curso</title>
     <link rel="stylesheet" href="/styles/style_formulario.css">
 </head>
 <body>
     <h1>Crear Curso</h1>
-        <form action="/curso/crearCurso" method="POST">
-            <input type="text" name="nombre" placeholder="Nombre" required />
-            <input type="text" name="nivel" placeholder="Nivel" required />
-            <select name="colegioId" required>
-                <% colegios.forEach(colegio => { %>
+    <form action="/curso/crearCurso" method="POST">
+        <label for="nombre">Nombre:</label>
+        <input type="text" name="nombre" placeholder="Nombre" required />
+
+        <label for="nivel">Nivel:</label>
+        <input type="text" name="nivel" placeholder="Nivel" required />
+
+        <label for="colegioId">Colegio:</label>
+        <select name="colegioId" required>
+            <% colegios.forEach(colegio => { %>
                 <option value="<%= colegio.id %>"><%= colegio.nombre %></option>
-                <% }); %>
-            </select>
-            <button type="submit">Guardar</button>
-        </form>
+            <% }); %>
+        </select>
+
+        <button type="submit">Guardar</button>
+    </form>
 </body>
 </html>
