@@ -14,25 +14,23 @@
     
         <label for="apellido">Apellido:</label>
         <input type="text" id="apellido" name="apellido" value="<%= user.apellido %>" required>
-    
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" value="<%= user.email %>" required>
-    
+
         <label for="fecha_nacimiento">Fecha de Nacimiento:</label>
         <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" value="<%= user.fecha_nacimiento ? new Date(user.fecha_nacimiento).toISOString().split('T')[0] : '' %>" required>
+    
+        <label for="telefono">Número Telefónico:</label>
+        <input type="text" id="telefono" name="telefono" value="<%= user.telefono %>" required>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" value="<%= user.email %>" required>
         
         <label for="edad">Edad:</label>
         <input type="number" id="edad" name="edad" value="<%= user.edad %>" required>
     
-        <label for="contrasena">Contraseña:</label>
-        <input type="password" id="contrasena" name="contrasena" placeholder="Dejar en blanco si no desea cambiarla">
-    
-        <label for="rolGeneralId">Rol:</label>
-        <select id="rolGeneralId" name="rolGeneralId" required>
-            <% roles.forEach(function(rol) { %>
-                <option value="<%= rol.id %>" <%= user.rolGeneralId === rol.id ? 'selected' : '' %>><%= rol.nombre %></option>
-            <% }) %>
-        </select>
+        <label for="password">Contraseña:</label>
+        <input type="password" id="password" name="password" placeholder="Dejar en blanco si no desea cambiarla">
+
+        <input type="hidden" id="rolId" name="rolId" value="1">
 
         <button type="submit">Guardar cambios</button>
     </form>    

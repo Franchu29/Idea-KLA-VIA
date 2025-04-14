@@ -1,0 +1,25 @@
+table.dataTable {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: #ffffff;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Elimina el border-bottom para que se vea unido */
+table.dataTable thead th {
+    padding: 12px;
+    text-align: left;
+    font-weight: bold;
+    background-color: #39937a;
+    color: white;
+    border-bottom: none;
+}
+
+/* Estilo de celdas del body */
+table.dataTable tbody td {
+    padding: 10px 12px;
+    border-top: 1px solid #ddd;
+}
