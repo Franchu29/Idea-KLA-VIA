@@ -9,7 +9,7 @@ router.get('/', userController.renderLanding);
 router.get('/login', userController.renderIndex);
 router.post('/auth_login', userController.login);
 
-router.get('/inicio', userController.inicio);
+router.get('/inicio', authMiddleware([1, 2]) , userController.inicio);
 
 //Rutas de Crear Usuario
 router.get('/create_user_render', userController.createUserRender);
@@ -19,7 +19,7 @@ router.post('/create_user', userController.createUser);
 router.get('/views_user', userController.views_user);
 
 //Rutas de Eliminar Usuario
-router.post('/delete_user/:id', userController.deleteUser); 
+router.post('/delete_user/:id', userController.deleteUser);
 
 //Rutas de Editar Usuario
 router.get('/edit_user_render/:id', authMiddleware([1, 2]), userController.editUserRender);

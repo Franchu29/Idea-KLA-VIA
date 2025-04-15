@@ -124,3 +124,20 @@ nav ul li a:hover {
     background-color: #34495e;
     border-radius: 5px;
 }
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    margin-left: 50px;
+}
+
+.logo-img {
+    height: 40px;
+    margin-right: 10px;
+}
+
+.logo {
+    color: #ecf0f1;
+    font-size: 24px;
+    margin: 0;
+}
