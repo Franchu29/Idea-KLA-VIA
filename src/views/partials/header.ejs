@@ -11,6 +11,10 @@
 </head>
 <body>
   <div class="containerheader">
+      <!-- Logo a la izquierda -->
+    <div class="logo-container">
+      <img src="/logo.png" alt="Logo EduSoft" class="logo-img">
+    </div>
     <nav>
       <ul>
         <li><a href="/inicio">Inicio</a></li>
@@ -56,11 +60,11 @@
 
       <!-- Ícono de usuario y enlace a Mi Perfil -->
       <div class="user-profile">
-        <a href="/perfil" class="btn_perfil">
-          <i class="fas fa-user"></i> Mi Perfil
-        </a>
+        <a href="/perfil" class="btn_perfil">Mi Perfil</a>
+        <i class="fas fa-user"></i> <%= userName %> (<%= userRoleName %>)
         <a href="/" class="btn_salir">Salir</a>
       </div>
+
     </nav>  
   </div>
 </body>
