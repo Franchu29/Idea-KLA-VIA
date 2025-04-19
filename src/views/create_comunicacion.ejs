@@ -1,0 +1,47 @@
+<%- include('./partials/header'); %>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Crear Evento de Calendario</title>
+  <link rel="stylesheet" href="/styles/style_formulario.css">
+</head>
+<body>
+  <div class="form-container">
+    <h2>Crear Evento de Calendario</h2>
+    <form action="/colegio/createComunicacion" method="POST">
+      <label for="titulo">Título del Evento:</label>
+      <input type="text" name="titulo" id="titulo" required>
+
+      <label for="fecha">Fecha:</label>
+      <input type="datetime-local" name="fecha" id="fecha" required>
+
+      <label for="tipo">Tipo de Evento:</label>
+      <input type="text" name="tipo" id="tipo" required>
+
+      <label for="clima">Clima (opcional):</label>
+      <input type="text" name="clima" id="clima">
+
+      <label for="colegioId">Colegio:</label>
+      <select name="colegioId" required>
+        <option value="">Selecciona un colegio</option>
+        <% colegios.forEach(c => { %>
+          <option value="<%= c.id %>"><%= c.nombre %></option>
+        <% }); %>
+      </select>
+
+      <label for="cursoId">Curso (opcional):</label>
+      <select name="cursoId">
+        <option value="">Selecciona un curso</option>
+        <% cursos.forEach(curso => { %>
+          <option value="<%= curso.id %>">
+            <%= curso.nombre %> - <%= curso.nivel %> (<%= curso.colegio.nombre %>)
+          </option>
+        <% }); %>
+      </select>
+
+      <button type="submit">Crear Evento</button>
+    </form>
+  </div>
+</body>
+</html>

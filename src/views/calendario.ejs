@@ -1,0 +1,48 @@
+<%- include('./partials/header'); %>  
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Calendario</title>
+  <link rel="stylesheet" href="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.css" />
+  <script src="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.js"></script>
+  <link rel="stylesheet" href="/styles/style_calendario.css">
+</head>
+<body>
+  <h1>Calendario</h1>
+
+  <div id="calendar" style="height: 800px; margin: 20px;"></div>
+
+  <!-- Pasamos los eventos como atributo de un div oculto -->
+  <div id="eventosData" data-json="<%= eventosJson %>" style="display: none;"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const rawData = document.getElementById('eventosData').dataset.json;
+      const eventos = JSON.parse(rawData);
+      console.log("Eventos parseados:", eventos);
+
+      const calendar = new tui.Calendar('#calendar', {
+        defaultView: 'month',
+        taskView: false,
+        scheduleView: true,
+        useDetailPopup: true,
+        useFormPopup: false,
+        isReadOnly: true, // 🔥 Esto oculta "Edit", "Delete" y evita cambios
+        calendars: [
+          {
+            id: '1',
+            name: 'Eventos',
+            color: '#ffffff',
+            bgColor: '#007bff',
+            dragBgColor: '#007bff',
+            borderColor: '#007bff'
+          }
+        ]
+      });
+
+      calendar.createEvents(eventos);
+    });
+  </script>
+</body>
+</html>

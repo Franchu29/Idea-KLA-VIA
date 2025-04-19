@@ -1,0 +1,25 @@
+
+  /* Cambiar color de fondo del calendario */
+  #calendar {
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    padding: 10px;
+  }
+
+  /* Cambiar el color del título del evento */
+  .toastui-calendar-event-time {
+    color: red !important;
+    font-weight: bold;
+  }
+
+  /* Cambiar el fondo del evento */
+  .toastui-calendar-time {
+    background-color: #28a745 !important;
+    color: white !important;
+  }
+
+  /* Quitar bordes innecesarios */
+  .toastui-calendar-panel {
+    border: none !important;
+  }
+  
