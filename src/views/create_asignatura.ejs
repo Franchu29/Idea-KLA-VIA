@@ -1,0 +1,22 @@
+<%- include('./partials/header'); %>  
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Asignatura</title>
+    <link rel="stylesheet" href="/styles/style_formulario.css">
+</head>
+<body>
+    <h1>Crear Asignatura</h1>
+    <form action="/asignatura/createAsignatura" method="POST">
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" name="nombre" required>
+    
+        <label for="descripcion">Descripción:</label>
+        <input type="text" id="descripcion" name="descripcion" required>
+    
+        <button type="submit">Crear Asignatura</button>
+    </form>    
+</body>
+</html>

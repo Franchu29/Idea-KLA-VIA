@@ -1,185 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        .container {
-            background-color: #fff;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-            padding: 20px;
-            width: 300px;
-            text-align: center;
-        }
-
-        .container h2 {
-            margin-bottom: 20px;
-        }
-
-        .container input[type="text"],
-        .container input[type="password"],
-        .container input[type="email"],
-        .container input[type="date"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-        }
-
-        .container input[type="submit"] {
-            width: 100%;
-            background-color: #4CAF50;
-            color: #fff;
-            padding: 10px;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-
-        .container input[type="submit"]:hover {
-            background-color: #45a049;
-        }
-
-        .register-btn, .forgot-password-btn {
-            background-color: #007bff;
-            color: #fff;
-            padding: 10px;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            margin-top: 10px;
-            width: 100%;
-        }
-
-        .register-btn:hover, .forgot-password-btn:hover {
-            background-color: #0056b3;
-        }
-
-        .register-form, .forgot-password-form, .validation-form {
-            display: none;
-            margin-top: 20px;
-        }
-
-        .floating-message {
-            position: fixed;
-            top: 20px; /* Cambié la posición para que esté en la parte superior */
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #f44336; /* Color de fondo del mensaje (puedes cambiarlo) */
-            color: #fff; /* Color del texto */
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 16px;
-            z-index: 9999; /* Asegura que el mensaje esté sobre otros elementos */
-            display: none; /* Inicialmente oculto */
-        }
-
-        .floating-message.error {
-            background-color: #f44336; /* Rojo para error */
-        }
-
-        .floating-message.success {
-            background-color: #4CAF50; /* Verde para éxito */
-        }
-
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login</title>
+  <link rel="stylesheet" href="/styles/style_login.css" />
 </head>
 <body>
-    <div class="floating-message" id="floatingMessage"></div>
-    <div class="container">
-        <h2>Login</h2>
-        <% if (typeof errorMessage !== 'undefined') { %>
-            <p class="error-message"><%= errorMessage %></p>
-        <% } %>
-        <form action="/auth_login" method="POST">
-            <input type="text" name="email" placeholder="Email" required>
-            <input type="password" name="password" placeholder="Contraseña" required>
-            <input type="submit" value="Login">
-        </form>
+  <div class="floating-message" id="floatingMessage"></div>
+  <div class="container">
+    <h2>Login</h2>
+    <% if (typeof errorMessage !== 'undefined') { %>
+      <p class="error-message"><%= errorMessage %></p>
+    <% } %>
 
-        <button class="register-btn" onclick="toggleForm('registerForm')">Registrarse</button>
+    <!-- LOGIN FORM -->
+    <form action="/auth_login" method="POST">
+      <input type="text" name="email" placeholder="Email" required />
+      <input type="password" name="password" placeholder="Contraseña" required />
+      <input type="submit" value="Login" />
+    </form>
 
-        <!-- Formulario de registro -->
-        <div class="register-form" id="registerForm">
-            <h2>Registro</h2>
-            <form action="/create_user" method="POST">
-                <input type="text" name="nombre" placeholder="Nombre" required>
-                <input type="text" name="apellido" placeholder="Apellido" required>
-                <input type="date" name="fecha_nacimiento" placeholder="Fecha Nacimiento" required>
-                <input type="text" name="telefono" placeholder="Número Telefónico" required>
-                <input type="email" name="email" placeholder="Email" required>
-                <input type="password" name="password" placeholder="Contraseña" required>
-                <input type="hidden" id="rolId" name="rolId" value="1">
-                <input type="submit" value="Registrar">
-            </form>
+    <!-- REGISTRARSE BOTON -->
+    <button type="button" class="register-btn" onclick="toggleForm('registerForm')">Registrarse</button>
+
+    <!-- FORMULARIO DE REGISTRO -->
+    <div class="register-form" id="registerForm" style="display: none;">
+      <h2>Registro</h2>
+      <form action="/create_user" method="POST">
+        <input type="text" name="nombre" placeholder="Nombre" required />
+        <input type="text" name="apellido" placeholder="Apellido" required />
+        <input type="date" name="fecha_nacimiento" required />
+        <input type="text" name="telefono" placeholder="Número Telefónico" required />
+        <input type="email" name="email" placeholder="Email" required />
+        <input type="password" name="password" placeholder="Contraseña" required />
+
+        <!-- Tipo de perfil -->
+        <select name="tipoPerfil" id="tipoPerfil" required onchange="mostrarCamposPerfil(this.value)">
+          <option value="">Selecciona tu perfil</option>
+          <option value="estudiante">Estudiante</option>
+          <option value="docente">Docente</option>
+          <option value="apoderado">Apoderado</option>
+        </select>
+
+        <!-- Selector de colegio (único) -->
+        <select name="colegioId" id="colegioId" style="display: none;">
+          <option value="">Selecciona Colegio</option>
+          <% colegios.forEach(colegio => { %>
+            <option value="<%= colegio.id %>"><%= colegio.nombre %></option>
+          <% }); %>
+        </select>
+
+        <!-- Campos adicionales para ESTUDIANTE -->
+        <div id="camposEstudiante" style="display:none;">
+          <select name="cursoId">
+            <option value="">Selecciona Curso</option>
+            <% cursos.forEach(curso => { %>
+              <option value="<%= curso.id %>"><%= curso.nombre %> - <%= curso.nivel %> (<%= curso.colegio.nombre %>)</option>
+            <% }); %>
+          </select>
+          <input type="number" name="apoderadoId" placeholder="ID del Apoderado (opcional)">
         </div>
 
-        <!-- Enlaces de recuperación de contraseña -->
-        <p><a href="#" onclick="toggleForm('forgotPasswordForm')">¿Olvidaste tu contraseña?</a></p>
-
-        <div class="forgot-password-form" id="forgotPasswordForm">
-            <h2>Recuperar Contraseña</h2>
-            <form action="/recuperar_contrasena" method="POST">
-                <input type="email" name="email" placeholder="Ingresa tu Email" required>
-                <input type="submit" value="Recuperar Contraseña">
-            </form>
+        <!-- Campos adicionales para DOCENTE -->
+        <div id="camposDocente" style="display:none;">
+          <!-- Puedes agregar más campos si lo deseas -->
         </div>
 
-        <!-- Validación de cuenta -->
-        <p><a href="#" onclick="toggleForm('validationForm')">¿Problemas con validar tu cuenta?</a></p>
-
-        <div class="validation-form" id="validationForm">
-            <h2>Reenviar Correo de Validación</h2>
-            <form action="/enviar_correo_cambio_rol" method="POST">
-                <input type="email" name="email" placeholder="Ingresa tu Email" required>
-                <input type="submit" value="Enviar Correo de Validación">
-            </form>
+        <!-- Campos adicionales para APODERADO -->
+        <div id="camposApoderado" style="display:none;">
+          <!-- Por ahora vacío -->
         </div>
 
-    <script>
-        function toggleForm(formId) {
-            const form = document.getElementById(formId);
-            form.style.display = form.style.display === "none" || form.style.display === "" ? "block" : "none";
-        }
-    
-        function showFloatingMessage(message, isError = false) {
-        const floatingMessage = document.getElementById('floatingMessage');
-        floatingMessage.textContent = message;
-        floatingMessage.classList.toggle('error', isError);
-        floatingMessage.classList.toggle('success', !isError);
-        floatingMessage.style.display = 'block';
+        <!-- Rol oculto -->
+        <input type="hidden" name="rolId" id="rolId" />
 
-        setTimeout(() => {
-            floatingMessage.style.display = 'none';
-        }, 3000);
+        <input type="submit" value="Registrar" />
+      </form>
+    </div>
+
+    <!-- Recuperar contraseña -->
+    <p><a href="#" onclick="toggleForm('forgotPasswordForm')">¿Olvidaste tu contraseña?</a></p>
+    <div class="forgot-password-form" id="forgotPasswordForm" style="display:none;">
+      <h2>Recuperar Contraseña</h2>
+      <form action="/recuperar_contrasena" method="POST">
+        <input type="email" name="email" placeholder="Ingresa tu Email" required />
+        <input type="submit" value="Recuperar Contraseña" />
+      </form>
+    </div>
+
+    <!-- Validar cuenta -->
+    <p><a href="#" onclick="toggleForm('validationForm')">¿Problemas con validar tu cuenta?</a></p>
+    <div class="validation-form" id="validationForm" style="display:none;">
+      <h2>Reenviar Correo de Validación</h2>
+      <form action="/enviar_correo_cambio_rol" method="POST">
+        <input type="email" name="email" placeholder="Ingresa tu Email" required />
+        <input type="submit" value="Enviar Correo de Validación" />
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function toggleForm(formId) {
+      const form = document.getElementById(formId);
+      form.style.display = form.style.display === "none" || form.style.display === "" ? "block" : "none";
     }
 
-    
-        // Asigna las variables de EJS a variables de JavaScript
-        var successMessage = "<%= typeof successMessage !== 'undefined' ? successMessage : '' %>";
-        var errorMessage = "<%= typeof errorMessage !== 'undefined' ? errorMessage : '' %>";
-    
-        // Mostrar los mensajes si están definidos
-        if (successMessage) {
-            showFloatingMessage(successMessage);
-        }
-    
-        if (errorMessage) {
-            showFloatingMessage(errorMessage, true);
-        }
-    </script>    
-    
+    function showFloatingMessage(message, isError = false) {
+      const floatingMessage = document.getElementById("floatingMessage");
+      floatingMessage.textContent = message;
+      floatingMessage.classList.toggle("error", isError);
+      floatingMessage.classList.toggle("success", !isError);
+      floatingMessage.style.display = "block";
+
+      setTimeout(() => {
+        floatingMessage.style.display = "none";
+      }, 3000);
+    }
+
+    var successMessage = "<%= typeof successMessage !== 'undefined' ? successMessage : '' %>";
+    var errorMessage = "<%= typeof errorMessage !== 'undefined' ? errorMessage : '' %>";
+
+    if (successMessage) showFloatingMessage(successMessage);
+    if (errorMessage) showFloatingMessage(errorMessage, true);
+
+    function mostrarCamposPerfil(tipo) {
+    document.getElementById("camposEstudiante").style.display = tipo === "estudiante" ? "block" : "none";
+    document.getElementById("camposDocente").style.display = tipo === "docente" ? "block" : "none";
+    document.getElementById("camposApoderado").style.display = tipo === "apoderado" ? "block" : "none";
+
+    // Mostrar/ocultar colegio
+    const colegioSelect = document.getElementById("colegioId");
+    if (tipo === "estudiante" || tipo === "docente") {
+      colegioSelect.style.display = "block";
+      colegioSelect.setAttribute("required", true);
+    } else {
+      colegioSelect.style.display = "none";
+      colegioSelect.removeAttribute("required");
+      colegioSelect.value = "";
+    }
+
+    // Asignar rol
+    const rolIdMap = {
+      estudiante: 2,
+      docente: 3,
+      apoderado: 4
+    };
+
+    document.getElementById("rolId").value = rolIdMap[tipo] || '';
+  }
+  </script>
 </body>
 </html>

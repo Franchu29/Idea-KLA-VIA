@@ -1,101 +1,100 @@
-/* Estilos generales para formularios */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f8ff;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    text-align: center;
+    color: #2c6e91;
+    margin-top: 30px;
+}
+
 form {
-    background-color: #ffffff; /* Fondo blanco para el formulario */
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     max-width: 500px;
-    margin: 20px auto; /* Centra el formulario */
+    margin: 40px auto;
+    padding: 25px 30px;
+    background-color: #ffffff;
+    border: 2px solid #2c6e91;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
-/* Estilos para las etiquetas de los campos */
-form label {
+label {
     display: block;
+    margin-bottom: 8px;
+    color: #2c6e91;
     font-weight: bold;
-    color: #2c3e50;
-    margin-bottom: 5px;
 }
 
-/* Estilos para los campos de entrada */
-form input[type="text"],
-form input[type="date"],
-form input[type="number"],
-form input[type="file"],
-form input[type="email"],
-form input[type="password"],
-form textarea,
-form select {
+input[type="text"],
+select {
     width: 100%;
     padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 14px;
+    margin-bottom: 20px;
+    border: 1px solid #cccccc;
+    border-radius: 6px;
     box-sizing: border-box;
-    transition: border-color 0.3s;
-}
-
-/* Estilos para el enfoque en los campos de entrada */
-form input[type="text"]:focus,
-form input[type="date"]:focus,
-form input[type="number"]:focus,
-form input[type="file"]:focus,
-form input[type="email"]:focus,
-form input[type="password"]:focus,
-form textarea:focus,
-form select:focus {
-    border-color: #3498db; /* Color del borde al enfocar */
-    outline: none;
-}
-
-/* Estilos para checkboxes y radios */
-form .checkbox-group,
-form .radio-group {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 15px;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-}
-
-form .checkbox-group label,
-form .radio-group label {
-    font-weight: normal;
-    margin-bottom: 5px;
-    color: #333;
-}
-
-/* Estilos para el botón de envío */
-form button[type="submit"] {
-    background-color: #3498db;
-    color: #ffffff;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
     font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
+}
+
+input[type="date"],
+select {
     width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #cccccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+input[type="datetime-local"],
+select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #cccccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+input[type="email"],
+select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #cccccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+input[type="password"],
+select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #cccccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+button {
+    background-color: #39937a;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 6px;
     transition: background-color 0.3s ease;
+    width: 100%;
 }
 
-form button[type="submit"]:hover {
-    background-color: #2980b9;
-}
-
-/* Estilos para el selector de archivo */
-form input[type="file"] {
-    padding: 5px;
-    font-size: 14px;
-}
-
-/* Estilos para mensajes de error o ayuda */
-form .error-message,
-form .help-text {
-    font-size: 13px;
-    color: #e74c3c;
-    margin-top: -10px;
-    margin-bottom: 10px;
+button:hover {
+    background-color: #2c6e91;
 }
