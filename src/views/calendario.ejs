@@ -1,48 +1,130 @@
-<%- include('./partials/header'); %>  
 <!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Calendario</title>
-  <link rel="stylesheet" href="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.css" />
-  <script src="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.js"></script>
-  <link rel="stylesheet" href="/styles/style_calendario.css">
-</head>
-<body>
-  <h1>Calendario</h1>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.js"></script>
+    <style>
+      /* Estilos generales del modal */
+      .modal {
+        display: none; /* Oculto por defecto */
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.6);
+        justify-content: center;
+        align-items: center;
+      }
+    
+      .modal-content {
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        max-width: 500px;
+        width: 90%;
+        animation: fadeIn 0.3s ease-in-out;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+    
+      .modal-content h2 {
+        margin-top: 0;
+        font-size: 24px;
+        color: #333;
+      }
+    
+      .modal-content p {
+        margin: 10px 0;
+        color: #555;
+        font-size: 16px;
+      }
+    
+      .modal-content button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 15px;
+      }
+    
+      .modal-content button:hover {
+        background-color: #0056b3;
+      }
+    
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+    </style>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var calendarEl = document.getElementById("calendar");
 
-  <div id="calendar" style="height: 800px; margin: 20px;"></div>
+        // Convertir el JSON que pasamos desde el servidor a un objeto JavaScript
+        var eventos = JSON.parse('<%- eventos %>');  // Asegúrate de que 'eventos' esté correctamente inyectado
 
-  <!-- Pasamos los eventos como atributo de un div oculto -->
-  <div id="eventosData" data-json="<%= eventosJson %>" style="display: none;"></div>
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+          initialView: "dayGridMonth",
+          events: eventos,
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const rawData = document.getElementById('eventosData').dataset.json;
-      const eventos = JSON.parse(rawData);
-      console.log("Eventos parseados:", eventos);
+          // Manejar el clic en un evento
+          eventClick: function (info) {
+            var evento = info.event;
 
-      const calendar = new tui.Calendar('#calendar', {
-        defaultView: 'month',
-        taskView: false,
-        scheduleView: true,
-        useDetailPopup: true,
-        useFormPopup: false,
-        isReadOnly: true, // 🔥 Esto oculta "Edit", "Delete" y evita cambios
-        calendars: [
-          {
-            id: '1',
-            name: 'Eventos',
-            color: '#ffffff',
-            bgColor: '#007bff',
-            dragBgColor: '#007bff',
-            borderColor: '#007bff'
-          }
-        ]
+            var modal = document.getElementById("myModal");
+            var modalContent = document.getElementById("modalContent");
+
+            modalContent.innerHTML = `
+              <h2>${evento.title}</h2>
+              <p><strong>Fecha:</strong> ${evento.start.toLocaleString()}</p>
+              <p><strong>Tipo:</strong> ${evento.extendedProps.tipo}</p>
+              <p><strong>Curso:</strong> ${evento.extendedProps.curso}</p>
+              <p><strong>Colegio:</strong> ${evento.extendedProps.colegio}</p>
+              <button id="closeModal">Cerrar</button>
+            `;
+
+            modal.style.display = "flex"; // Solo mostrar aquí
+
+            // Cerrar al hacer clic en el botón
+            document.getElementById("closeModal").onclick = function () {
+              modal.style.display = "none";
+            };
+          }     
+
+        });
+
+        calendar.render();
       });
 
-      calendar.createEvents(eventos);
-    });
-  </script>
-</body>
+      window.onclick = function (event) {
+        var modal = document.getElementById("myModal");
+        if (event.target === modal) {
+          modal.style.display = "none";
+        }
+      };
+    </script>
+  </head>
+  <body>
+    <div id="calendar"></div>
+
+    <!-- El Modal -->
+<!-- El Modal -->
+<div id="myModal" class="modal">
+  <div class="modal-content" id="modalContent">
+    <!-- Contenido dinámico se inyecta aquí al hacer clic -->
+  </div>
+</div>
+
+  </body>
 </html>
