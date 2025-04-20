@@ -137,35 +137,30 @@ function formatDateTime(fecha) {
 }
 
 exports.renderCalendario = async (req, res) => {
-  const eventos = await prisma.eventoCalendario.findMany({
-    include: {
-      curso: true,
-      colegio: true
-    }
-  });
-
-  const eventosFormateados = eventos.map(evento => {
-    const startDate = new Date(evento.fecha);
-    const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
-  
-    return {
-      id: String(evento.id),
-      calendarId: '1',
-      title: evento.titulo,
-      category: 'time',
-      start: startDate.toISOString(),
-      end: endDate.toISOString(),
-      raw: {
-        tipo: evento.tipo,
-        clima: evento.clima,
-        colegio: evento.colegio.nombre,
-        curso: evento.curso ? evento.curso.nombre : 'Sin curso'
+  try {
+    // Obtener los eventos desde la base de datos
+    const eventos = await prisma.eventoCalendario.findMany({
+      include: {
+        curso: true,
+        colegio: true
       }
-    };
-  });  
+    });    
 
-  // Pasamos como string JSON escapado para evitar errores
-  res.render('calendario', {
-    eventosJson: JSON.stringify(eventosFormateados).replace(/</g, '\\u003c')
-  });
+    // Formatear los eventos para FullCalendar
+    const eventosFormateados = eventos.map(evento => ({
+      title: evento.titulo,
+      start: evento.fecha,
+      extendedProps: {
+        tipo: evento.tipo,
+        curso: evento.curso?.nombre || 'Sin nombre',
+        colegio: evento.colegio?.nombre || 'Sin nombre'
+      }
+    }));    
+
+    // Renderizar la vista 'calendario.ejs' sin necesidad de usar EJS para pasar los eventos
+    res.render('calendario', { eventos: JSON.stringify(eventosFormateados) });
+  } catch (error) {
+    console.error('Error al obtener eventos:', error);
+    res.status(500).json({ error: 'Error al obtener los eventos' });
+  }
 };
