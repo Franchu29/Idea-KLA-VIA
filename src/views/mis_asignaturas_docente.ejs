@@ -1,0 +1,82 @@
+<%- include('./partials/header'); %>  
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asignaturas</title>
+    <link rel="stylesheet" href="//cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="//cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="/styles/style_tabla.css">
+    <script>
+        $(document).ready(function(){
+            $('#tabla-mostrar-usuarios').DataTable();
+        });
+    </script>
+</head>
+<body>
+
+<% if (esAdministrador) { %>
+    <h2>Asignaturas de todos los docentes</h2>
+    <% if (docentes.length > 0) { %>
+        <table id="tabla-mostrar-usuarios" class="w3-table-all w3-card-4">
+            <thead>
+                <tr>
+                    <th>Docente</th>
+                    <th>Asignatura</th>
+                    <th>Curso</th>
+                    <th>Nivel</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% docentes.forEach(docente => { %>
+                    <% docente.asignaturas.forEach(asig => { %>
+                        <tr>
+                            <td><%= docente.usuario.nombre %> <%= docente.usuario.apellido %></td>
+                            <td><%= asig.asignatura.nombre %></td>
+                            <td><%= asig.curso.nombre %></td>
+                            <td><%= asig.curso.nivel %></td>
+                        </tr>
+                    <% }) %>
+                <% }) %>
+            </tbody>
+        </table>
+    <% } else { %>
+        <p>No hay asignaturas asignadas a los docentes.</p>
+    <% } %>
+
+<% } else { %>
+    <h2>Asignaturas de <%= docente.usuario.nombre %> <%= docente.usuario.apellido %></h2>
+    <% if (docente.asignaturas && docente.asignaturas.length > 0) { %>
+        <table id="tabla-mostrar-usuarios" class="w3-table-all w3-card-4">
+            <thead>
+                <tr>
+                    <th>Asignatura</th>
+                    <th>Curso</th>
+                    <th>Nivel</th>
+                    <th>Eliminar</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% docente.asignaturas.forEach(asig => { %>
+                    <tr>
+                        <td><%= asig.asignatura.nombre %></td>
+                        <td><%= asig.curso.nombre %></td>
+                        <td><%= asig.curso.nivel %></td>
+                        <td>
+                            <form action="/asignatura/eliminarAsignaturaDocente/<%= asig.id %>" method="post" onsubmit="return confirm('¿Estás seguro que quieres eliminar esta asignación?');">
+                                <button type="submit">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    <% } else { %>
+        <p>No tiene asignaturas a cargo.</p>
+    <% } %>
+<% } %>
+
+</body>
+</html>

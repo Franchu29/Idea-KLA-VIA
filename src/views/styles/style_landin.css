@@ -5,49 +5,74 @@
   box-sizing: border-box;
 }
 
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  line-height: 1.6;
-  background-color: #f4faff;
-  color: #333;
-}
-
-/* Colores principales */
+/* Variables de color */
 :root {
-  --color-primario: #2f80ed;   /* Azul */
-  --color-secundario: #27ae60; /* Verde */
-  --color-terciario: #ae2727; /* Rojo */
+  --color-primario: #89b56b;
+  --color-secundario: #3f6844;
+  --color-terciario: #5daa68;
   --color-fondo: #f4faff;
   --color-texto: #333;
   --color-blanco: #fff;
   --color-gris-claro: #e0e0e0;
 }
 
-/* Container */
+.btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: var(--color-primario);
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.btn:hover {
+  background-color: var(--color-secundario) /* azul más oscuro al pasar el mouse */
+}
+
+
+/* Base */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  background-color: var(--color-fondo);
+  color: var(--color-texto);
+}
+
+h3 {
+  color: var(--color-primario);
+  margin-bottom: 1rem;
+}
+
+/* Estructura */
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 1rem;
 }
 
-/* Header */
-header {
-  height: 115px; /* ajusta según necesites */
-  background-color: var(--color-blanco);
-  color: var(--color-blanco);
- 
+section {
+  padding: 3rem 0;
 }
 
-.logo {
-  font-size: 2rem;
-  font-weight: bold;
+/* Header */
+header {
+  height: 115px;
+  background-color: var(--color-fondo);
+  color: var(--color-blanco);
+}
+
+.header-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 nav ul {
   list-style: none;
   display: flex;
   gap: 1rem;
-  justify-content: flex-end;
 }
 
 nav a {
@@ -58,52 +83,67 @@ nav a {
 }
 
 nav a:hover {
-  color: var(--color-secundario);
+  color: var(--color-terciario);
+}
+
+/* Logo */
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.logo-img {
+  height: 70px;
 }
 
 /* Hero */
 .hero {
-  background: linear-gradient(135deg, var(--color-primario), var(--color-secundario));
-  color: var(--color-blanco);
-  padding: 4rem 0;
-  text-align: center;
+  width: 100%;
+  min-height: 90vh;
+  display: flex;
+  align-items: center;
+  background: #f5f7fb;
+  padding: 60px 20px;
 }
 
-.hero .btn {
-  display: inline-block;
-  margin-top: 1rem;
-  background-color: var(--color-blanco);
+.hero-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.hero-text,
+.hero-image {
+  flex: 1 1 500px;
+  padding: 20px;
+}
+
+.hero-text h2 {
+  font-size: 2.5rem;
   color: var(--color-primario);
-  padding: 0.75rem 1.5rem;
-  border-radius: 30px;
-  text-decoration: none;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
+  margin-bottom: 20px;
 }
 
-.hero .btn:hover {
-  background-color: var(--color-gris-claro);
+.hero-text p {
+  font-size: 1.2rem;
+  color: var(--color-secundario);
+  margin-bottom: 30px;
 }
 
-/* Secciones */
-section {
-  padding: 3rem 0;
+.hero-image img {
+  width: 100%;
+  max-width: 450px;
 }
 
-h3 {
-  color: var(--color-primario);
-  margin-bottom: 1rem;
+/* Producto */
+.circles-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.producto ul,
-.planes ul {
-  list-style: none;
-  padding-left: 0;
-}
-
-.producto li,
-.planes li {
-  margin-bottom: 0.5rem;
+.circle .ticket {
   font-size: 1.1rem;
 }
 
@@ -125,11 +165,6 @@ h3 {
   transition: transform 0.3s ease;
 }
 
-.plan-basico {
-  font-family: "Times New Roman", serif;
-
-}
-
 .card:hover {
   transform: translateY(-5px);
 }
@@ -142,6 +177,10 @@ h3 {
 .card h5 {
   color: var(--color-terciario);
   margin-bottom: 0.5rem;
+}
+
+.plan-basico {
+  font-family: "Times New Roman", serif;
 }
 
 /* Footer */
@@ -157,19 +196,71 @@ footer a {
   text-decoration: underline;
 }
 
-/* Estilo para logo con imagen */
-/* Logo */
-.logo-container {
+.nuevo-layout {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding-top: 10px;  /* Ajusta este valor según sea necesario */
+  flex-wrap: wrap;
+  background: #f9f9f9; /* Color de fondo suave para diferenciar */
+  padding: 40px;
+  border-radius: 15px; /* Bordes redondeados */
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Sombra sutil */
 }
 
-.logo-img {
-  width: 13%;
-  height: auto;
-  transform: translateY(30px); /* Ajusta este valor según sea necesario */
+.nuevo-layout .producto-text {
+  flex: 1 1 50%; /* Cada lado ocupa el 50% */
+  padding: 20px;
 }
 
+.circles-container {
+  margin-top: 20px;
+}
 
+.circle {
+  margin-bottom: 15px;
+}
+
+/* Sección de la empresa */
+#empresa {
+  background-color: #f8f9fa; /* Fondo clarito para diferenciarlo del resto */
+  padding: 80px 20px; /* Espaciado arriba y abajo */
+  text-align: center; /* Centrar texto */
+}
+
+#empresa .container {
+  max-width: 900px; /* Limitar ancho para que no se vea tan ancho en pantallas grandes */
+  margin: 0 auto;
+}
+
+#empresa h3 {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 10px;
+}
+
+#empresa h3::after {
+  content: "";
+  position: absolute;
+  width: 50%;
+  height: 3px;
+  background-color: var(--color-primario); /* Usa tu color principal si quieres */
+  bottom: 0;
+  left: 25%;
+}
+
+#empresa p {
+  font-size: 1.2rem;
+  color: #555; /* Gris suave para lectura */
+  line-height: 1.8; /* Altura de línea para mejor legibilidad */
+  padding: 0 10px;
+}
+
+/* Opcional: animación suave al hacer scroll */
+#empresa[data-aos="fade-right"] {
+  opacity: 0;
+  transform: translateX(-50px);
+  transition: all 0.6s ease;
+}
+
+#empresa[data-aos="fade-right"].aos-animate {
+  opacity: 1;
+  transform: translateX(0);
+}

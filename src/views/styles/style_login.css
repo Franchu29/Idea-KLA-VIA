@@ -1,4 +1,3 @@
-/* Reset básico */
 * {
     margin: 0;
     padding: 0;
@@ -13,6 +12,16 @@
     --gris-claro: #f0f4f8;
     --gris-texto: #555;
     --rojo: #e74c3c;
+  }
+
+  :root {
+    --color-primario: #89b56b;
+    --color-secundario: #3f6844;
+    --color-terciario: #5daa68;
+    --color-fondo: #f4faff;
+    --color-texto: #333;
+    --color-blanco: #fff;
+    --color-gris-claro: #e0e0e0;
   }
   
   /* Body */
@@ -41,7 +50,7 @@
   /* Títulos */
   h2 {
     text-align: center;
-    color: var(--azul);
+    color: var(--color-primario);
     margin-bottom: 1.5rem;
   }
   
@@ -65,7 +74,7 @@
   
   /* Botón de enviar */
   input[type="submit"] {
-    background-color: var(--verde);
+    background-color: var(--color-primario);
     color: var(--blanco);
     border: none;
     cursor: pointer;
@@ -73,7 +82,7 @@
   }
   
   input[type="submit"]:hover {
-    background-color: #219150;
+    background-color: var(--color-terciario);
   }
   
   /* Botón de registro */
@@ -145,3 +154,71 @@
     font-weight: bold;
   }
   
+  select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f8f8f8;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+  }
+  
+  select:focus {
+    border-color: #007BFF;
+    outline: none;
+    background-color: #fff;
+  }
+
+  /* Animación de entrada suave */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    max-height: 0;
+    opacity: 0;
+  }
+  to {
+    max-height: 1000px;
+    opacity: 1;
+  }
+}
+
+@keyframes floatingMessageFade {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Aplicar animación al contenedor principal */
+.container {
+  animation: fadeIn 0.8s ease forwards;
+}
+
+/* Formularios secundarios cuando se abren */
+.register-form,
+.forgot-password-form,
+.validation-form {
+  overflow: hidden;
+  animation: slideDown 0.5s ease forwards;
+}
+
+/* Mensajes flotantes */
+.floating-message {
+  animation: floatingMessageFade 0.5s ease forwards;
+}

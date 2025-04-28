@@ -1,4 +1,4 @@
-<%- include('./partials/header'); %>
+<%- include('./partials/header'); %>  
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,34 +15,40 @@
         });
     </script>
 </head>
-<body>
     <body>
-        <h1>Lista de Asignaturas</h1>
+        <h1>Lista de Colegios
+        </h1>
     
-        <% if (asignaturas.length > 0) { %>
+        <% if (comunicacion.length > 0) { %>
             <table id="tabla-mostrar-usuarios" class="w3-table-all w3-card-4">
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Descripción</th>
+                        <th>titulo</th>
+                        <th>fecha</th>
+                        <th>tipo</th>
+                        <th>Curso</th>
+                        <th>Colegio</th>
                         <th>Editar</th>
                         <th>Eliminar</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <% asignaturas.forEach(asignaturas => { %>
+                    <% comunicacion.forEach(comunicacion => { %>
                         <tr>
-                            <td><%= asignaturas.id %></td>
-                            <td><%= asignaturas.nombre %></td>
-                            <td><%= asignaturas.descripcion %></td>
+                            <td><%= comunicacion.id %></td>
+                            <td><%= comunicacion.titulo %></td>
+                            <td><%= comunicacion.fechaFormateada %></td>
+                            <td><%= comunicacion.tipo %></td>
+                            <td><%= comunicacion.cursoId  %></td>
+                            <td><%= comunicacion.colegioId  %></td>
                             <td>
-                                <form action="/asignatura/editAsignaturaRender/<%= asignaturas.id%>" method="get">
+                                <form action="/comunicacion/editAsignaturaRender/<%= comunicacion.id%>" method="get">
                                     <button type="submit">Editar</button>
                                 </form>
                             </td>
                             <td>
-                                <form action="/asignatura/deleteAsignatura/<%= asignaturas.id %>" method="post" onsubmit="return confirm('¿Estás seguro que quieres eliminar este usuario?');">
+                                <form action="/comunicacion/deleteColegio/<%= comunicacion.id %>" method="post" onsubmit="return confirm('¿Estás seguro que quieres eliminar este usuario?');">
                                     <button type="submit">Eliminar</button>
                                 </form>
                             </td>
@@ -51,8 +57,7 @@
                 </tbody>
             </table>
         <% } else { %>
-            <p>No hay asignatuas registradas.</p>
+            <p>No hay comunicaciones registradas.</p>
         <% } %>
     </body>
-</body>
 </html>
