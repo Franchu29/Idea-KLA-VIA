@@ -31,8 +31,8 @@ const enviarCorreoActualizacionRol = async (correoDestino, token) => {
     const mailOptions = {
         from: process.env.EMAIL_USER,
         to: correoDestino,
-        subject: 'Verificación de Cuenta',
-        html: `<p>Para poder verificar la cuenta registrada en la plataforma de Corre 60 ingrese al Link:</p>
+        subject: 'TESTINGGGGGGG',
+        html: `<p>TESTINGGGGGGG:</p>
                <a href="http://localhost:3000/actualizar_rol/${token}">Actualizar Rol</a>`
     };
 
