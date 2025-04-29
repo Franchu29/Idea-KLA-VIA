@@ -9,34 +9,105 @@
   <!-- Iconos -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
-<body>
-  <div class="containerheader">
-    <nav>
-      <ul>
-        <li><a href="/inicio">Inicio</a></li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Usuarios</a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="/views_user">Mostrar Usuarios</a></li>
-            <li><a class="dropdown-item" href="/create_user_render">Crear Usuarios</a></li>
-          </ul>
-        </li>
-      </ul>
-
-      <div class="user-profile">
-        <a href="/events/reportes" class="btn">
-          <i class="fas fa-chart-bar"></i> Reportes
-        </a>
-      </div>      
-
-      <!-- Ícono de usuario y enlace a Mi Perfil -->
-      <div class="user-profile">
-        <a href="/perfil" class="btn">
-          <i class="fas fa-user"></i> Mi Perfil
-        </a>
-        <a href="/" class="btn">Salir</a>
+  <div class="header-container">
+    <div class="containerheader">
+        <!-- Logo a la izquierda -->
+      <div class="logo-container">
+        <img src="/logo.png" alt="Logo EduSoft" class="logo-img">
       </div>
-    </nav>  
+      <nav>
+        <ul>
+          <li><a href="/inicio">Inicio</a></li>
+
+          <!-- Apartado de Usuarios -->
+          <% if (userRoleName === 'Docente' || userRoleName === 'Administrador') { %>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Usuarios</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/views_user">Mostrar Usuarios</a></li>
+                <% if (userRoleName === 'Administrador') { %>
+                  <li><a class="dropdown-item" href="/create_user_render">Crear Usuarios</a></li>
+                <% } %>
+              </ul>
+            </li>
+          <% } %>        
+
+          <!-- Apartado de Asignaturas -->
+          <% if (userRoleName === 'Docente' || userRoleName === 'Administrador') { %>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Asignaturas</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/asignatura/renderAsignatura">Ver Asignaturas</a></li>
+                <% if (userRoleName === 'Administrador') { %>
+                  <li><a class="dropdown-item" href="/asignatura/createAsignaturaRender">Crear Asignaturas</a></li>
+                <% } %>
+              </ul>
+            </li>
+          <% } %> 
+
+          <!-- Apartado de Colegios -->
+          <% if (userRoleName === 'Administrador') { %>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Colegios</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/colegio/renderColegio">Ver Colegios</a></li>
+                <li><a class="dropdown-item" href="/colegio/createColegioRender">Crear Colegios</a></li>
+              </ul>
+            </li>
+          <% } %> 
+
+          <!-- Apartado de Cursos -->
+          <% if (userRoleName === 'Administrador') { %>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Cursos</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/curso/renderCurso">Ver Cursos</a></li>
+                <li><a class="dropdown-item" href="/curso/renderCrearCurso">Crear Curso</a></li>
+              </ul>
+            </li>
+          <% } %>
+          
+          <!-- Apartado de Mis Clases Docente -->
+          <% if (userRoleName === 'Docente' || userRoleName === 'Administrador') { %>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Mis Asignaturas</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/asignatura/verAsignaturasDocente">Ver Mis Asignaturas</a></li>
+                <li><a class="dropdown-item" href="/asignatura/renderTomaAsignaturaDocente">Tomar Asignatura</a></li>
+              </ul>
+            </li>
+          <% } %>
+
+          <!-- Apartado de Comunicaciones   -->
+          <% if (userRoleName === 'Docente' || userRoleName === 'Administrador' || userRoleName === 'Estudiante') { %>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Comunicaciones</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/colegio/renderComunicacion">Ver Mis Comunicaciones</a></li>
+                <li><a class="dropdown-item" href="/colegio/createComunicacionRender">Crear Comunicacion</a></li>
+                <li><a class="dropdown-item" href="/colegio/calendario">Calendario</a></li>
+              </ul>
+            </li>
+          <% } %>
+        </ul>
+
+        <!-- Apartado de Reportes --> 
+        <% if (userRoleName === 'Docente' || userRoleName === 'Administrador') { %>
+          <div class="user-profile">
+            <a href="/events/reportes" class="btn_reportes">
+              <i class="fas fa-chart-bar"></i> Reportes
+            </a>
+          </div> 
+        <% } %>
+
+        <!-- Ícono de usuario y enlace a Mi Perfil -->
+        <div class="user-profile">
+          <a href="/perfil" class="btn_perfil">Mi Perfil</a>
+          <i class="fas fa-user"></i> <%= userName %> (<%= userRoleName %>)
+          <a href="/" class="btn_salir">Salir</a>
+        </div>
+
+      </nav>  
+    </div>
   </div>
-</body>
 </html>

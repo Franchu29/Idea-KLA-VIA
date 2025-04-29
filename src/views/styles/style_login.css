@@ -1,0 +1,224 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  /* Variables */
+  :root {
+    --azul: #2f80ed;
+    --verde: #27ae60;
+    --blanco: #ffffff;
+    --gris-claro: #f0f4f8;
+    --gris-texto: #555;
+    --rojo: #e74c3c;
+  }
+
+  :root {
+    --color-primario: #89b56b;
+    --color-secundario: #3f6844;
+    --color-terciario: #5daa68;
+    --color-fondo: #f4faff;
+    --color-texto: #333;
+    --color-blanco: #fff;
+    --color-gris-claro: #e0e0e0;
+  }
+  
+  /* Body */
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: url('/fondo_login.png') no-repeat center center fixed;
+    background-size: cover;
+    color: var(--gris-texto);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem;
+  }
+  
+  /* Contenedor principal */
+  .container {
+    background-color: var(--blanco);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    width: 100%;
+  }
+  
+  /* Títulos */
+  h2 {
+    text-align: center;
+    color: var(--color-primario);
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Formularios */
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="date"],
+  input[type="submit"] {
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+  }
+  
+  /* Botón de enviar */
+  input[type="submit"] {
+    background-color: var(--color-primario);
+    color: var(--blanco);
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  input[type="submit"]:hover {
+    background-color: var(--color-terciario);
+  }
+  
+  /* Botón de registro */
+  .register-btn {
+    background-color: var(--azul);
+    color: var(--blanco);
+    border: none;
+    padding: 0.75rem;
+    width: 100%;
+    margin-top: 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .register-btn:hover {
+    background-color: #2563eb;
+  }
+  
+  /* Enlaces */
+  p a {
+    color: var(--azul);
+    text-decoration: none;
+    font-size: 0.9rem;
+  }
+  
+  p a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Formularios secundarios */
+  .register-form,
+  .forgot-password-form,
+  .validation-form {
+    display: none;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #ddd;
+  }
+  
+  /* Mensajes flotantes */
+  .floating-message {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-weight: bold;
+    display: none;
+    z-index: 999;
+  }
+  
+  .floating-message.success {
+    background-color: var(--verde);
+    color: var(--blanco);
+  }
+  
+  .floating-message.error {
+    background-color: var(--rojo);
+    color: var(--blanco);
+  }
+  
+  /* Mensaje de error */
+  .error-message {
+    color: var(--rojo);
+    text-align: center;
+    margin-bottom: 1rem;
+    font-weight: bold;
+  }
+  
+  select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f8f8f8;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+  }
+  
+  select:focus {
+    border-color: #007BFF;
+    outline: none;
+    background-color: #fff;
+  }
+
+  /* Animación de entrada suave */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    max-height: 0;
+    opacity: 0;
+  }
+  to {
+    max-height: 1000px;
+    opacity: 1;
+  }
+}
+
+@keyframes floatingMessageFade {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Aplicar animación al contenedor principal */
+.container {
+  animation: fadeIn 0.8s ease forwards;
+}
+
+/* Formularios secundarios cuando se abren */
+.register-form,
+.forgot-password-form,
+.validation-form {
+  overflow: hidden;
+  animation: slideDown 0.5s ease forwards;
+}
+
+/* Mensajes flotantes */
+.floating-message {
+  animation: floatingMessageFade 0.5s ease forwards;
+}
