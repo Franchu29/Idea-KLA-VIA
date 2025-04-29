@@ -1,12 +1,32 @@
 /* Estilos para el header */
-body {
-    margin: 0;
-    font-family: 'Arial', sans-serif;
-    background-color: #f4f4f9;
+.header-container {
+    --color-primario: #89b56b;
+    --color-secundario: #3f6844;
+    --color-terciario: #5daa68;
+    --color-fondo: #f4faff;
+    --color-texto: #333;
+    --color-blanco: #fff;
+    --color-gris-claro: #e0e0e0;
 }
 
-.containerheader {
-    background-color: #2c3e50; /* Color de fondo del header */
+.header-container h1, .header-container h2, .header-container h3 {
+    color: var(--color-secundario);
+    text-align: center;
+}
+
+.header-container h1 {
+    margin-top: 20px;
+}
+
+.header-container p {
+    text-align: center;
+    margin-top: 20px;
+    color: var(--color-secundario);
+    font-weight: 500;
+}
+
+.header-container .containerheader {
+    background-color: #f2f2f2; /* Color de fondo del header */
     padding: 20px 0;
     position: sticky;
     top: 0;
@@ -14,26 +34,26 @@ body {
     z-index: 1000;
 }
 
-nav {
+.header-container nav {
     display: flex;
     justify-content: flex-end; /* Alinea los elementos a la derecha */
     align-items: center;
     padding: 0 50px;
 }
 
-nav ul {
+.header-container nav ul {
     list-style-type: none;
     margin: 0;
     padding: 0;
     display: flex;
 }
 
-nav ul li {
+.header-container nav ul li {
     margin-left: 30px; /* Espacio entre los elementos del menú */
 }
 
-nav ul li a {
-    color: #ecf0f1; /* Color del texto */
+.header-container nav ul li a {
+    color: var(--color-texto);
     text-decoration: none;
     font-size: 16px;
     font-weight: bold;
@@ -41,12 +61,12 @@ nav ul li a {
     transition: background-color 0.3s ease;
 }
 
-nav ul li a:hover {
-    background-color: #34495e; /* Color de fondo al pasar el mouse */
+.header-container nav ul li a:hover {
+    background-color: var(--color-primario);
     border-radius: 5px;
 }
 
-.btn {
+.header-container .btn_salir {
     background-color: #e74c3c; /* Botón de salir con color */
     color: white;
     padding: 10px 20px;
@@ -56,23 +76,51 @@ nav ul li a:hover {
     transition: background-color 0.3s ease;
 }
 
-.btn:hover {
+.header-container .btn_salir:hover {
     background-color: #c0392b;
 }
 
+.header-container .btn_perfil {
+    background-color: #2198cc; /* Botón de salir con color */
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-left: 30px;
+    transition: background-color 0.3s ease;
+}
+
+.header-container .btn_perfil:hover {
+    background-color: #155a85;
+}
+
+.header-container .btn_reportes {
+    background-color: #e7e70e; /* Botón de salir con color */
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-left: 30px;
+    transition: background-color 0.3s ease;
+}
+
+.header-container .btn_reportes:hover {
+    background-color: #b2bd1c;
+}
+
 /* Estilos para el dropdown */
-.nav-item.dropdown {
+.header-container .nav-item.dropdown {
     position: relative;
 }
 
-.nav-item.dropdown:hover .dropdown-menu {
+.header-container .nav-item.dropdown:hover .dropdown-menu {
     display: block;
 }
 
-.dropdown-menu {
+.header-container .dropdown-menu {
     display: none;
     position: absolute;
-    background-color: #2c3e50;
+    background-color: var(--color-blanco);
     top: 100%;
     right: 0;
     min-width: 160px;
@@ -81,17 +129,54 @@ nav ul li a:hover {
     z-index: 100;
 }
 
-.dropdown-menu li {
+.header-container .dropdown-menu li {
     padding: 10px 20px;
 }
 
-.dropdown-menu li a {
-    color: #ecf0f1;
+.header-container .dropdown-menu li a {
+    color: var(--color-texto);
     font-size: 14px;
     display: block;
 }
 
-.dropdown-menu li a:hover {
-    background-color: #34495e;
+.header-container .dropdown-menu li a:hover {
+    background-color: var(--color-primario);
     border-radius: 5px;
+}
+
+.header-container .logo-container {
+    display: flex;
+    align-items: center;
+    margin-left: 50px;
+}
+
+.header-container .logo-img {
+    height: 40px;
+    margin-right: 10px;
+}
+
+.header-container .logo {
+    color: #ecf0f1;
+    font-size: 24px;
+    margin: 0;
+}
+
+.header-container body {
+    background-color: var(--color-fondo);
+    font-family: 'Arial', sans-serif;
+    color: var(--color-texto);
+    margin: 0;
+    padding: 0;
+}
+
+.header-container .container ul {
+    list-style: none;
+    padding: 0;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: var(--color-fondo);
 }

@@ -5,11 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>EduSoft - Plataforma Educativa</title>
   <link rel="stylesheet" href="/styles/style_landin.css">
+  <link rel="icon" href="/images/logo.png" type="image/png">
+  <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet"> <!-- AOS CSS -->
 </head>
 <body>
-  <header>
-    <div class="container">
-      <h1 class="logo">EduSoft</h1>
+  <header data-aos="fade-down">
+    <div class="container header-flex">
+      <div class="logo-container">
+        <img src="logo.png" alt="Logo EduSoft" class="logo-img">
+      </div>
       <nav>
         <ul>
           <li><a href="#producto">Producto</a></li>
@@ -23,38 +27,78 @@
   </header>
 
   <section class="hero">
-    <div class="container">
-      <h2>Gestión escolar moderna y eficiente</h2>
-      <p>Organiza, planifica y evalúa con nuestra plataforma todo-en-uno para instituciones educativas.</p>
-      <a href="#producto" class="btn">Ver producto</a>
+    <div class="container hero-flex">
+      
+      <div class="hero-text" data-aos="fade-right" data-aos-delay="200">
+        <h2>Gestión escolar moderna y eficiente</h2>
+        <p>Organiza, planifica y evalúa con nuestra plataforma todo-en-uno para instituciones educativas.</p>
+        <a href="#producto" class="btn">Ver producto</a>
+      </div>
+  
+      <div class="hero-image" data-aos="fade-left" data-aos-delay="500">
+        <img src="landing.svg" alt="Niña sobre libros" />
+      </div>
+  
     </div>
-  </section>
+  </section>    
 
-  <section id="producto" class="producto">
-    <div class="container">
-      <h3>¿Qué ofrece EduSoft?</h3>
-      <ul>
-        <li>✔️ Registro de notas y asistencia</li>
-        <li>✔️ Planificación de clases y unidades</li>
-        <li>✔️ Comunicación entre docentes y apoderados</li>
-        <li>✔️ Reportes inteligentes</li>
-      </ul>
+  <section id="producto" class="producto" data-aos="fade-up">
+    <div class="container producto-flex nuevo-layout">
+      <!-- Parte izquierda -->
+      <div class="producto-text" data-aos="fade-right" data-aos-delay="200">
+        <h3>¿Qué ofrece EduSoft?</h3>
+        <div class="circles-container">
+          <div class="circle" data-aos="fade-up" data-aos-delay="300">
+            <span class="ticket">✔️ Registro de notas y asistencia</span>
+          </div>
+          <div class="circle" data-aos="fade-up" data-aos-delay="400">
+            <span class="ticket">✔️ Planificación de clases y unidades</span>
+          </div>
+          <div class="circle" data-aos="fade-up" data-aos-delay="500">
+            <span class="ticket">✔️ Comunicación entre docentes y apoderados</span>
+          </div>
+          <div class="circle" data-aos="fade-up" data-aos-delay="600">
+            <span class="ticket">✔️ Reportes inteligentes</span>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Parte derecha -->
+      <div class="producto-text" data-aos="fade-left" data-aos-delay="200">
+        <h3>Ventajas de usar EduSoft</h3>
+        <div class="circles-container">
+          <div class="circle" data-aos="fade-up" data-aos-delay="300">
+            <span class="ticket">📊 Panel de control intuitivo para docentes</span>
+          </div>
+          <div class="circle" data-aos="fade-up" data-aos-delay="400">
+            <span class="ticket">🔐 Seguridad de datos con cifrado de extremo a extremo</span>
+          </div>
+          <div class="circle" data-aos="fade-up" data-aos-delay="500">
+            <span class="ticket">🌐 Acceso 24/7 desde cualquier dispositivo</span>
+          </div>
+          <div class="circle" data-aos="fade-up" data-aos-delay="600">
+            <span class="ticket">🧑‍🏫 Soporte especializado en educación</span>
+          </div>
+        </div>
+      </div>
     </div>
-  </section>
+  </section>  
 
-  <section id="planes" class="planes">
+  <section id="planes" class="planes" data-aos="fade-up">
     <div class="container">
       <h3>Planes</h3>
       <div class="plan-cards">
-        <div class="card">
-          <h4>Básico</h4>
-          <p>$9.990 / mes</p>
-          <ul>
-            <li>1 curso</li>
-            <li>Soporte limitado</li>
-          </ul>
+        <div class="card" data-aos="zoom-in" data-aos-delay="100">
+          <div class="plan-basico">
+            <h3>Básico</h3>
+            <p>$9.990 / mes</p>
+            <ul>
+              <li>1 curso</li>
+              <li>Soporte limitado</li>
+            </ul>
+          </div>
         </div>
-        <div class="card">
+        <div class="card" data-aos="zoom-in" data-aos-delay="200">
           <h4>Pro</h4>
           <p>$24.990 / mes</p>
           <ul>
@@ -62,8 +106,8 @@
             <li>Soporte premium</li>
           </ul>
         </div>
-        <div class="card">
-          <h4>Institucional</h4>
+        <div class="card" data-aos="zoom-in" data-aos-delay="300">
+          <h5>Institucional</h5>
           <p>Contactar</p>
           <ul>
             <li>Cursos ilimitados</li>
@@ -74,18 +118,26 @@
     </div>
   </section>
 
-  <section id="empresa" class="empresa">
+  <section id="empresa" class="empresa" data-aos="fade-right">
     <div class="container">
       <h3>¿Quiénes somos?</h3>
-      <p>Somos un equipo de desarrolladores y educadores con la misión de transformar la educación digital. Llevamos más de 5 años apoyando escuelas en toda Latinoamérica.</p>
+      <p>Somos un equipo apasionado de desarrolladores, educadores y profesionales de la tecnología con una visión clara: transformar la educación a través de la innovación digital. Creemos firmemente que cada institución educativa, sin importar su tamaño o ubicación, merece herramientas modernas que potencien el aprendizaje y simplifiquen la gestión académica.</p>
     </div>
   </section>
 
-  <footer id="contacto">
+  <footer id="contacto" data-aos="fade-up">
     <div class="container">
       <p>© 2025 EduSoft. Todos los derechos reservados.</p>
       <p><a href="mailto:contacto@edusoft.com">contacto@edusoft.com</a></p>
     </div>
   </footer>
+
+  <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script> <!-- AOS JS -->
+  <script>
+    AOS.init({
+      duration: 1000, // duración de las animaciones
+      once: false      // la animación ocurre solo una vez
+    });
+  </script>
 </body>
 </html>
