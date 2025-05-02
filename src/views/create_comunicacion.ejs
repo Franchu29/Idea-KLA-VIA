@@ -1,0 +1,102 @@
+<%- include('./partials/header'); %>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Crear Evento de Calendario</title>
+  <link rel="stylesheet" href="/styles/style_formulario.css">
+  <script>
+    function handleTipoChange() {
+      const tipo = document.getElementById('tipo').value;
+      const colegioField = document.getElementById('colegio-field');
+      const cursoField = document.getElementById('curso-field');
+      const estudianteField = document.getElementById('estudiante-field');
+
+      // Siempre ocultar todo al principio
+      colegioField.style.display = 'none';
+      cursoField.style.display = 'none';
+      estudianteField.style.display = 'none';
+
+      if (tipo === 'Comunicacion Colegio') {
+        colegioField.style.display = 'block';
+      } else if (tipo === 'Comunicacion Curso') {
+        colegioField.style.display = 'block';
+        cursoField.style.display = 'block';
+      } else if (tipo === 'Comunicacion Personal') {
+        colegioField.style.display = 'block';
+        estudianteField.style.display = 'block';
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      handleTipoChange(); // Para que oculte los campos apenas cargue
+    });
+  </script>
+</head>
+<body>
+  <div class="form-container">
+    <h2>Crear Evento de Calendario</h2>
+    <form action="/colegio/createComunicacion" method="POST">
+      <label for="titulo">Título del Evento:</label>
+      <input type="text" name="titulo" id="titulo" required>
+
+      <label for="descripcion">Descripción del Evento:</label>
+      <textarea name="descripcion" id="descripcion" rows="5" maxlength="1000" required></textarea>       
+
+      <label for="fecha">Fecha:</label>
+      <input type="datetime-local" name="fecha" id="fecha" required>
+
+      <label for="tipo">Tipo de Evento:</label>
+      <select name="tipo" id="tipo" onchange="handleTipoChange()" required>
+        <option value="">Selecciona un tipo</option>
+        <option value="Comunicacion Colegio">Comunicación Colegio</option>
+        <option value="Comunicacion Curso">Comunicación Curso</option>
+        <option value="Comunicacion Personal">Comunicación Personal</option>
+      </select>
+
+      <!-- Campo colegio solo visible si el usuario es ADMIN o si es Comunicación Colegio -->
+      <div id="colegio-field" style="display: none;">
+        <label for="colegioId">Colegio:</label>
+        <% if (userRole === 'Administrador') { %>
+          <select name="colegioId" required>
+            <option value="">Selecciona un colegio</option>
+            <% colegios.forEach(c => { %>
+              <option value="<%= c.id %>"><%= c.nombre %></option>
+            <% }); %>
+          </select>
+        <% } else if (assignedColegioId) { %> 
+          <!-- Si es docente, asignar su colegio automáticamente -->
+          <input type="hidden" name="colegioId" value="<%= assignedColegioId %>">
+          <p>Tu colegio está asignado automáticamente.</p>
+        <% } %>
+      </div>
+
+      <div id="curso-field" style="display: none;">
+        <label for="cursoId">Curso (opcional):</label>
+        <select name="cursoId">
+          <option value="">Selecciona un curso</option>
+          <% cursos.forEach(curso => { %>
+            <option value="<%= curso.id %>">
+              <%= curso.nombre %> - <%= curso.nivel %> (<%= curso.colegio.nombre %>)
+            </option>
+          <% }); %>
+        </select>
+      </div>
+
+      <div id="estudiante-field" style="display: none;">
+        <label for="estudianteId">Estudiante (opcional):</label>
+        <select name="estudianteId">
+          <option value="">No citar estudiante específico</option>
+          <% estudiantes.forEach(estudiante => { %>
+            <option value="<%= estudiante.id %>">
+              <%= estudiante.usuario.nombre %> - Curso: <%= estudiante.curso.nombre %>
+            </option>
+          <% }) %>
+        </select>
+      </div>
+
+      <button type="submit">Crear Evento</button>
+    </form>
+  </div>
+</body>
+</html>

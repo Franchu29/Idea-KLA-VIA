@@ -1,58 +1,99 @@
-/* Estilos generales */
+/* Reset básico */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Variables de color */
+:root {
+  --color-primario: #89b56b;
+  --color-secundario: #3f6844;
+  --color-terciario: #5daa68;
+  --color-fondo: #f4faff;
+  --color-texto: #333;
+  --color-blanco: #fff;
+  --color-gris-claro: #e0e0e0;
+}
+
+/* Base */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--color-fondo);
+  color: var(--color-texto);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Contenedor principal */
-.profile-container {
-    max-width: 800px;
-    margin: 20px auto;
-    padding: 20px;
+/* Header */
+header {
+  background-color: var(--color-primario);
+  color: var(--color-blanco);
+  padding: 1.5rem 2rem;
+  text-align: center;
 }
 
-/* Secciones del perfil */
-.profile-section {
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    margin-bottom: 20px;
+header h1 {
+  font-size: 2rem;
 }
 
-.profile-section h2 {
-    font-size: 24px;
-    color: #2c3e50;
-    margin-bottom: 15px;
-    text-align: center;
+/* Main */
+main {
+  flex: 1;
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
-.profile-section p {
-    font-size: 16px;
-    color: #333;
-    margin: 8px 0;
+/* Secciones */
+.perfil-info,
+.perfil-actions {
+  background-color: var(--color-blanco);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
-.profile-section ul {
-    list-style-type: none;
-    padding: 0;
+h2 {
+  color: var(--color-primario);
+  margin-bottom: 1rem;
 }
 
-.profile-section ul li {
-    background-color: #ecf0f1;
-    border-radius: 5px;
-    padding: 15px;
-    margin: 10px 0;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+p {
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
 }
 
-.profile-section ul li p {
-    margin: 4px 0;
-    font-size: 15px;
-    color: #34495e;
+/* Botones */
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--color-primario);
+  color: var(--color-blanco);
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  margin-top: 1rem;
 }
 
-.profile-section ul li strong {
-    color: #2c3e50;
+.btn:hover {
+  background-color: var(--color-secundario);
+}
+
+.action-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+/* Footer */
+footer {
+  background-color: var(--color-primario);
+  color: var(--color-blanco);
+  text-align: center;
+  padding: 1.5rem 1rem;
+  font-size: 0.9rem;
 }

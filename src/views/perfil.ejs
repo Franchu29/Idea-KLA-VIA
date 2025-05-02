@@ -1,35 +1,67 @@
 <%- include('./partials/header'); %>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil de Usuario</title>
-    <link rel="stylesheet" href="/styles/style_perfil.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Perfil de Usuario</title>
+  <link rel="stylesheet" href="/styles/style_perfil.css">
+
+  <!-- Animaciones de Framer Motion Lite o simple CSS -->
+  <style>
+    /* Animaciones de entrada */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 1s forwards;
+    }
+
+    .fade-in-delay {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 1.2s forwards;
+      animation-delay: 0.5s;
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
 </head>
+
 <body>
-    <header>
-        <h1>Perfil de Usuario</h1>
-    </header>
+  <header class="fade-in">
+    <h1>Perfil de Usuario</h1>
+  </header>
 
-    <main>
-        <section class="perfil-info">
-            <h2>Información del Usuario</h2>
-            <p><strong>Nombre:</strong> <%= user.nombre %></p>
-            <p><strong>Email:</strong> <%= user.email %></p>
-            <p><strong>Teléfono:</strong> <%= user.telefono %></p>
-        </section>
+  <main>
+    <section class="perfil-info fade-in">
+      <h2>Información del Usuario</h2>
+      <div class="info-item">
+        <p><strong>Nombre:</strong> <%= user.nombre %></p>
+        <p><strong>Apellido:</strong> <%= user.apellido %></p>
+        <p><strong>Fecha de Nacimiento:</strong> <%= new Date(user.fecha_nacimiento).toISOString().split('T')[0] %></p>
+        <p><strong>Edad:</strong> <%= user.edad %></p>
+        <p><strong>Email:</strong> <%= user.email %></p>
+        <p><strong>Teléfono:</strong> <%= user.telefono %></p>
+        <p><strong>Rol:</strong> <%= user.rol.nombre %></p>
+      </div>
+    </section>
 
-        <section class="perfil-actions">
-            <h2>Acciones</h2>
-            <a href="/editar-perfil" class="btn">Editar Perfil</a>
-            <a href="/cerrar-sesion" class="btn">Cerrar Sesión</a>
-        </section>
-    </main>
+    <section class="perfil-actions fade-in-delay">
+        <h2>Acciones</h2>
+        <div class="action-container">
+          <a href="/renderEditarPerfil" class="btn">Editar Perfil</a>
+        </div>
+      </section>      
+  </main>
 
-    <footer>
-        <p>&copy; 2023 Mi Aplicación</p>
-    </footer>
+  <footer class="fade-in-delay">
+    <p>&copy; 2025 Mi Aplicación</p>
+  </footer>
 </body>
 </html>
