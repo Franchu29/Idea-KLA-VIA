@@ -1,0 +1,40 @@
+<%- include('./partials/header'); %>  
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/styles/style_formulario.css">
+</head>
+<body>
+    <form action="/asignatura/TomaAsignaturaDocente" method="POST">
+        <label>Curso:</label>
+        <select name="cursoId">
+          <% cursos.forEach(curso => { %>
+            <option value="<%= curso.id %>"><%= curso.nombre %></option>
+          <% }) %>
+        </select>
+      
+        <label>Asignatura:</label>
+        <select name="asignaturaId">
+          <% asignaturas.forEach(asig => { %>
+            <option value="<%= asig.id %>"><%= asig.nombre %></option>
+          <% }) %>
+        </select>
+      
+        <% if (userRoleName === 'Administrador') { %>
+          <label>Docente:</label>
+          <select name="docenteId">
+            <% docentes.forEach(doc => { %>
+              <option value="<%= doc.id %>"><%= doc.usuario.nombre %> <%= doc.usuario.apellido %></option>
+            <% }) %>
+          </select>
+        <% } else { %>
+          <input type="hidden" name="docenteId" value="<%= currentDocenteId %>">
+        <% } %>
+      
+        <button type="submit">Crear Curso - Asignatura</button>
+      </form>      
+</body>
+</html>

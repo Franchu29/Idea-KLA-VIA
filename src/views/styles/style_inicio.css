@@ -1,0 +1,60 @@
+/* Definición de animaciones */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    0% {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.pagina-inicio h1 {
+    color: var(--color-texto);
+    text-align: center;
+    font-size: 2rem;
+    animation: fadeIn 1.5s ease-in-out;
+}
+
+.pagina-inicio h2, .pagina-inicio h3 {
+    color: var(--color-texto);
+    margin-top: 1.5em;
+    opacity: 0; /* Inicialmente invisible */
+    animation: slideIn 1.5s ease-in-out forwards;
+}
+
+.pagina-inicio ul {
+    list-style-type: disc;
+    padding-left: 20px;
+    opacity: 0;
+    animation: slideIn 1.5s ease-in-out 0.3s forwards;
+}
+
+.pagina-inicio li {
+    margin-bottom: 10px;
+    line-height: 1.5;
+    opacity: 0;
+    animation: slideIn 1.5s ease-in-out 0.6s forwards;
+}
+
+.pagina-inicio p {
+    color: var(--color-fondo);
+    opacity: 0;
+    animation: slideIn 1.5s ease-in-out 0.9s forwards;
+}
+
+/* Esta regla asegura que los elementos tengan animación en el orden correcto */
+.pagina-inicio h2, .pagina-inicio h3, .pagina-inicio ul, .pagina-inicio li, .pagina-inicio p {
+    animation-duration: 1.5s;
+    animation-fill-mode: forwards; /* Mantener el estado final de la animación */
+}

@@ -9,10 +9,26 @@ exports.renderLanding = (req, res) => {
     res.render('landing.ejs');
 };
 
-exports.renderIndex = (req, res) => {
-    res.clearCookie('token');
-    console.log('MOSTRANDO LOGIN');
-    res.render('index.ejs');
+exports.renderIndex = async (req, res) => {
+    try {
+        res.clearCookie('token');
+        console.log('MOSTRANDO LOGIN');
+
+        const colegios = await prisma.colegio.findMany();
+        const cursos = await prisma.curso.findMany({
+            include: {
+                colegio: true
+            }
+        });
+
+        res.render('index.ejs', {
+            colegios,
+            cursos
+        });
+    } catch (error) {
+        console.error('Error al cargar login:', error);
+        res.status(500).send('Error al cargar login');
+    }
 };
 
 exports.login = async (req, res) => {
@@ -31,8 +47,8 @@ exports.login = async (req, res) => {
         }
 
         // Verificar si el usuario tiene rolGeneralId = 4 y denegar el acceso
-        if (usuario.rolId === 4) {
-            console.log('Acceso denegado para usuarios con rolGeneralId = 4');
+        if (usuario.rolId === 1) {
+            console.log('Acceso denegado para usuarios con rolGeneralId = 1');
             return res.render('index.ejs', { errorMessage: 'Acceso denegado. Valide su correo o solicite otra vez el correo.' });
         }
 
@@ -48,14 +64,17 @@ exports.login = async (req, res) => {
 
         // Generar el token JWT
         const token = jwt.sign(
-            { usuarioId: usuario.id, email: usuario.email, role: usuario.rolId  }, 
+            { 
+                usuarioId: usuario.id,
+                role: usuario.rolId  
+            }, 
             process.env.JWT_SECRET, 
             { expiresIn: '1h' }
         );
         console.log('JWT generado:', token);
 
         // Almacena el token en cookies y redirige al inicio
-        res.cookie('token', token, { httpOnly: true }); // Asegúrate de tener httpOnly para mayor seguridad
+        res.cookie('token', token, { httpOnly: true });
         res.redirect('/inicio');
 
     } catch (error) {
@@ -65,8 +84,48 @@ exports.login = async (req, res) => {
 };
 
 exports.inicio = async (req, res) => {
-    res.render('inicio.ejs');
+    const userRol = req.user.rol.nombre;
+    let asignaturas = [];
+    let comunicaciones = [];
+
+    if (userRol === 'Docente') {
+        try {
+            const docente = await prisma.docente.findUnique({
+                where: {
+                    usuarioId: req.user.id, // Usamos el id del usuario logeado
+                },
+                include: {
+                    asignaturas: {
+                        include: {
+                            asignatura: true, // Aquí traemos la Asignatura dentro de CursoAsignatura
+                        }
+                    },
+                    eventos: true, // Comunicaciones (EventoCalendario)
+                }
+            });
+
+            if (docente) {
+                // Ahora sí asignamos bien
+                asignaturas = docente.asignaturas.map((cursoAsignatura) => ({
+                    nombre: cursoAsignatura.asignatura.nombre
+                }));
+
+                comunicaciones = docente.eventos.map((evento) => ({
+                    titulo: evento.titulo,
+                    fecha: evento.fecha.toISOString().split('T')[0], // Solo fecha
+                    descripcion: evento.descripcion || ''
+                }));
+            } else {
+                console.log('No se encontró el docente para este usuario');
+            }
+        } catch (error) {
+            console.error('Error buscando asignaturas o eventos del docente:', error);
+        }
+    }
+
+    res.render('inicio.ejs', { userRol, asignaturas, comunicaciones });
     console.log('MOSTRANDO INICIO');
+    console.log('Usuario:', userRol);
 };
 
 //Muestra la vista de crear usuario
@@ -95,18 +154,31 @@ exports.createUser = async (req, res) => {
     try {
         console.log("CREANDO EL USUARIO:", req.body);
 
-        const { nombre, apellido, fecha_nacimiento, telefono, email, password, rolId } = req.body;
+        const {
+            nombre,
+            apellido,
+            fecha_nacimiento,
+            telefono,
+            email,
+            password,
+            rolId,
+            tipoPerfil,
+            colegioId,
+            cursoId,
+            apoderadoId,
+            colegioIdDocente
+        } = req.body;
 
-        // Valida y convierte la fecha de nacimiento
         const fechaNacimiento = new Date(fecha_nacimiento);
         if (isNaN(fechaNacimiento.getTime())) {
             return res.status(400).json({ error: 'Fecha de nacimiento inválida' });
         }
-        
+
         const edad = calcularEdad(fechaNacimiento);
         const hashedPassword = await bcrypt.hash(password, 10);
         const rolIdInt = parseInt(rolId);
-        
+
+        // Crea el usuario principal
         const newUsuario = await prisma.usuario.create({
             data: {
                 nombre,
@@ -118,16 +190,47 @@ exports.createUser = async (req, res) => {
                 password: hashedPassword,
                 rolId: rolIdInt
             }
-        });        
+        });
 
-        // Genera el token para la actualización de rol
+        // Dependiendo del tipo de perfil, crear en la tabla correspondiente
+        if (tipoPerfil === 'estudiante') {
+            await prisma.estudiante.create({
+                data: {
+                    usuarioId: newUsuario.id,
+                    colegioId: parseInt(colegioId),
+                    cursoId: cursoId ? parseInt(cursoId) : null,
+                    apoderadoId: apoderadoId ? parseInt(apoderadoId) : null
+                }
+            });
+        } else if (tipoPerfil === 'docente') {
+            await prisma.docente.create({
+                data: {
+                    usuario: {
+                        connect: { id: newUsuario.id }
+                    },
+                    colegio: {
+                        connect: { id: parseInt(colegioId) }
+                    }
+                }
+            });
+        } else if (tipoPerfil === 'apoderado') {
+            await prisma.apoderado.create({
+                data: {
+                  usuario: {
+                    connect: { id: newUsuario.id }
+                  }
+                }
+              });              
+        } else {
+            return res.status(400).json({ error: 'Tipo de perfil no válido' });
+        }
+
+        // Generar token para validación/cambio de rol
         const token = jwt.sign({ email: newUsuario.email }, process.env.JWT_SECRET, { expiresIn: '15m' });
 
-        // Envía el correo de actualización de rol
         await enviarCorreoActualizacionRol(newUsuario.email, token);
         console.log('Correo de actualización de rol enviado.');
 
-        // Redirige al usuario después de la creación
         res.redirect('/login');
     } catch (error) {
         console.error('Error al crear el usuario:', error);
@@ -149,10 +252,29 @@ exports.views_user = async (req, res) => {
 //Elimina un usuario
 exports.deleteUser = async (req, res) => {
     try {
-        console.log('ELIMINANDO USUARIO:', req.params);
         const { id } = req.params;
 
-        const user = await prisma.user.delete({
+        // Borrar las relaciones en las tablas dependientes
+        await prisma.estudiante.deleteMany({
+            where: {
+                usuarioId: parseInt(id, 10)
+            }
+        });
+
+        await prisma.docente.deleteMany({
+            where: {
+                usuarioId: parseInt(id, 10)
+            }
+        });
+
+        await prisma.apoderado.deleteMany({
+            where: {
+                usuarioId: parseInt(id, 10)
+            }
+        });
+
+        // Ahora eliminar el usuario
+        const usuario = await prisma.usuario.delete({
             where: {
                 id: parseInt(id, 10)
             }
@@ -170,18 +292,14 @@ exports.editUserRender = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Obtiene los roles y clubes disponibles
-        const roles = await prisma.roles.findMany();
-        const clubs = await prisma.clubes.findMany();
-
-        const user = await prisma.user.findUnique({
+        const user = await prisma.usuario.findUnique({
             where: {
                 id: parseInt(id, 10)
             }
         });
 
         // Renderiza la vista pasando tanto los datos del usuario, roles y clubes
-        res.render('edit_user.ejs', { user, roles, clubs });
+        res.render('edit_user.ejs', { user });
     } catch (error) {
         console.error('Error al mostrar el formulario de edición de usuario:', error);
         res.status(500).json({ error: 'Error al mostrar el formulario de edición de usuario' });
@@ -192,11 +310,10 @@ exports.editUserRender = async (req, res) => {
 exports.editUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const { nombre, apellido, email, fecha_nacimiento, edad, contrasena, rolGeneralId, clubId } = req.body;
+        const { nombre, apellido, fecha_nacimiento, edad, telefono, email, password, rolId } = req.body;
 
         // Muestra los valores recibidos del formulario
-        console.log('Valor de rolGeneralId:', rolGeneralId);
-        console.log('Valor de clubId:', clubId);  
+        console.log('Valor de rolId:', rolId);
 
         // Convierte edad a un número entero
         const edadInt = parseInt(edad, 10);
@@ -216,21 +333,20 @@ exports.editUser = async (req, res) => {
             apellido,
             fecha_nacimiento: fechaNacimiento,
             edad: edadInt,
+            telefono,
             email,
-            rolGeneral: {
-                connect: { id: parseInt(rolGeneralId, 10) }
-            },
-            club: clubId ? { connect: { id: parseInt(clubId, 10) } } : { disconnect: true }
+            password,
+            rolId: parseInt(rolId, 10)
         };
 
         // Si el campo de contraseña tiene un valor, encripta la nueva contraseña
-        if (contrasena && contrasena.trim() !== '') {
-            const hashedPassword = await bcrypt.hash(contrasena, 10);
-            updatedData.contrasena = hashedPassword;  // Solo actualiza la contraseña si es proporcionada
+        if (password && password.trim() !== '') {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            updatedData.password = hashedPassword;  // Solo actualiza la contraseña si es proporcionada
         }
 
         // Realiza la actualización
-        const user = await prisma.user.update({
+        const user = await prisma.usuario.update({
             where: { id: parseInt(id, 10) },
             data: updatedData
         });
@@ -248,62 +364,90 @@ exports.editUser = async (req, res) => {
 //Muestra el perfil del usuario
 exports.mostrarPerfil = async (req, res) => {
     try {
-        const userId = req.userId; // Obtener el userId del req (establecido por el middleware)
-        console.log('ID DEL USUARIO:', userId);
+        const userId = req.userId;
 
-        // Obtener los datos del usuario desde la base de datos, incluyendo el rol y el club
+        // Obtener los datos del usuario, incluyendo el rol
         const user = await prisma.usuario.findUnique({
             where: { id: userId },
+            include: {
+                rol: true, // Esto incluirá la información del rol asociado
+            },
         });
 
         if (!user) {
             return res.render('index.ejs', { errorMessage: 'Usuario no encontrado' });
         }
 
-        // Renderizar la vista de perfil con los datos del usuario, inscripciones, resultados y puntajes agrupados por año
-        res.render('perfil.ejs', { user });
+        // Pasamos el nombre del rol al renderizar la vista
+        res.render('perfil.ejs', { user, rol: user.rol.nombre });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Error en el servidor' });
     }
 };
 
-//Muestra la vista de roles
-exports.showRolsRender = async (req, res) => {
+exports.renderEditarPerfil = async (req, res) => {
     try {
-        const roles = await prisma.roles.findMany();
-        console.log("MOSTRANDO LOS ROLES:", roles);
-        res.render('show_rols.ejs', { roles });
-    } catch (error) {
-        console.error('Error al obtener los roles:', error);
-        res.status(500).json({ error: 'Error al obtener los roles' });
-    }
-};
+        const userId = req.userId;
 
-//Muestra la vista de crear rol
-exports.createRolRender = (req, res) => {
-    console.log('MOSTRANDO FORMULARIO DE CREACIÓN DE ROL');
-    res.render('create_rol.ejs');
-};
-
-//Crea un rol
-exports.createRol = async (req, res) => {
-    try {
-        console.log("CREANDO EL ROL:",req.body);
-
-        const { nombre, descripcion} = req.body;
-
-        const newRol = await prisma.roles.create({
-            data: {
-                nombre,
-                descripcion
+        // Buscar usuario en base de datos
+        const user = await prisma.usuario.findUnique({
+            where: {
+                id: userId
             }
         });
 
-        res.redirect('/show_rols_render');
+        if (!user) {
+            return res.status(404).send('Usuario no encontrado');
+        }
+
+        res.render('edit_perfil', { user });
     } catch (error) {
-        console.error('Error al crear el usuario:', error);
-        res.status(500).json({ error: 'Error al crear el usuario' });
+        console.error('Error al renderizar la vista de edición:', error);
+        res.status(500).send('Error al cargar la vista de edición');
+    }
+};
+
+exports.editarPerfil = async (req, res) => {
+    const userId = parseInt(req.params.id);
+    const { nombre, apellido, fecha_nacimiento, telefono, email, password, rolId } = req.body;
+    console.log('Valores recibidos:', req.body);
+
+    try {
+        const existingUser = await prisma.usuario.findUnique({
+            where: { id: userId },
+        });
+
+        if (!existingUser) {
+            return res.status(404).send('Usuario no encontrado');
+        }
+
+        const edadCalculada = calcularEdad(fecha_nacimiento);
+
+        let updatedData = {
+            nombre,
+            apellido,
+            fecha_nacimiento: new Date(fecha_nacimiento),
+            telefono,
+            email,
+            edad: edadCalculada,
+            rolId: parseInt(rolId),
+        };        
+
+        if (password && password.trim() !== '') {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            updatedData.password = hashedPassword;
+        }        
+
+        await prisma.usuario.update({
+            where: { id: userId },
+            data: updatedData,
+        });
+
+        res.redirect('/perfil'); // O la ruta que corresponda después de editar
+    } catch (error) {
+        console.error('Error al actualizar usuario:', error);
+        res.status(500).send('Error al actualizar el usuario');
     }
 };
 
@@ -381,26 +525,3 @@ exports.enviarCorreoCambioRol = async (req, res) => {
         });
     }
 };
-
-// Ruta para actualizar el rol basado en el token
-exports.actualizarRol = async (req, res) => {
-    const { token } = req.params;
-
-    try {
-        // Verifica y decodifica el token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const email = decoded.email;
-
-        // Actualiza el rol del usuario a 3
-        await prisma.user.update({
-            where: { email },
-            data: { rolGeneralId: 3 }
-        });
-
-        res.redirect('/');
-    } catch (error) {
-        console.error('Error al actualizar el rol:', error);
-        res.status(400).send('El enlace ha expirado o es inválido.');
-    }
-};
-

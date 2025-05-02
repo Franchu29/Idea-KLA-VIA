@@ -1,0 +1,9 @@
+COMANDOS DE PRISMA
+
+Ejecutar semilla para poblar BD: npx prisma db seed
+
+Borra los registros de la BD: npx prisma migrate reset
+
+COMANDOS DE IDEA KLA VIA
+
+Ejecutar IDEA KLA VIA: npm run dev

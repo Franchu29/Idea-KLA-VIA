@@ -1,0 +1,57 @@
+<%- include('./partials/header'); %>  
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Horario de <%= nombreEstudiante %></title>
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Horario de <%= nombreEstudiante %></h1>
+
+  <% const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes']; %>
+
+  <% horario.forEach(dia => { %>
+    <h2><%= diasSemana[dia.dia - 1] %></h2>
+    <% if (dia.clases.length > 0) { %>
+      <table>
+        <thead>
+          <tr>
+            <th>Hora Inicio</th>
+            <th>Hora Fin</th>
+            <th>Asignatura</th>
+            <th>Docente</th>
+            <th>Sala</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% dia.clases.forEach(clase => { %>
+            <tr>
+              <td><%= clase.horaInicio %></td>
+              <td><%= clase.horaFin %></td>
+              <td><%= clase.asignatura %></td>
+              <td><%= clase.docente %></td>
+              <td><%= clase.sala %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } else { %>
+      <p>No hay clases este día.</p>
+    <% } %>
+  <% }); %>
+</body>
+</html>
