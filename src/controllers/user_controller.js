@@ -170,18 +170,14 @@ exports.editUserRender = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Obtiene los roles y clubes disponibles
-        const roles = await prisma.roles.findMany();
-        const clubs = await prisma.clubes.findMany();
-
-        const user = await prisma.user.findUnique({
+        const user = await prisma.usuario.findUnique({
             where: {
                 id: parseInt(id, 10)
             }
         });
 
         // Renderiza la vista pasando tanto los datos del usuario, roles y clubes
-        res.render('edit_user.ejs', { user, roles, clubs });
+        res.render('edit_user.ejs', { user });
     } catch (error) {
         console.error('Error al mostrar el formulario de edición de usuario:', error);
         res.status(500).json({ error: 'Error al mostrar el formulario de edición de usuario' });
@@ -192,11 +188,10 @@ exports.editUserRender = async (req, res) => {
 exports.editUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const { nombre, apellido, email, fecha_nacimiento, edad, contrasena, rolGeneralId, clubId } = req.body;
+        const { nombre, apellido, fecha_nacimiento, edad, telefono, email, password, rolId } = req.body;
 
         // Muestra los valores recibidos del formulario
-        console.log('Valor de rolGeneralId:', rolGeneralId);
-        console.log('Valor de clubId:', clubId);  
+        console.log('Valor de rolId:', rolId);
 
         // Convierte edad a un número entero
         const edadInt = parseInt(edad, 10);
@@ -216,21 +211,20 @@ exports.editUser = async (req, res) => {
             apellido,
             fecha_nacimiento: fechaNacimiento,
             edad: edadInt,
+            telefono,
             email,
-            rolGeneral: {
-                connect: { id: parseInt(rolGeneralId, 10) }
-            },
-            club: clubId ? { connect: { id: parseInt(clubId, 10) } } : { disconnect: true }
+            password,
+            rolId: parseInt(rolId, 10)
         };
 
         // Si el campo de contraseña tiene un valor, encripta la nueva contraseña
-        if (contrasena && contrasena.trim() !== '') {
-            const hashedPassword = await bcrypt.hash(contrasena, 10);
-            updatedData.contrasena = hashedPassword;  // Solo actualiza la contraseña si es proporcionada
+        if (password && password.trim() !== '') {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            updatedData.password = hashedPassword;  // Solo actualiza la contraseña si es proporcionada
         }
 
         // Realiza la actualización
-        const user = await prisma.user.update({
+        const user = await prisma.usuario.update({
             where: { id: parseInt(id, 10) },
             data: updatedData
         });
@@ -265,45 +259,6 @@ exports.mostrarPerfil = async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Error en el servidor' });
-    }
-};
-
-//Muestra la vista de roles
-exports.showRolsRender = async (req, res) => {
-    try {
-        const roles = await prisma.roles.findMany();
-        console.log("MOSTRANDO LOS ROLES:", roles);
-        res.render('show_rols.ejs', { roles });
-    } catch (error) {
-        console.error('Error al obtener los roles:', error);
-        res.status(500).json({ error: 'Error al obtener los roles' });
-    }
-};
-
-//Muestra la vista de crear rol
-exports.createRolRender = (req, res) => {
-    console.log('MOSTRANDO FORMULARIO DE CREACIÓN DE ROL');
-    res.render('create_rol.ejs');
-};
-
-//Crea un rol
-exports.createRol = async (req, res) => {
-    try {
-        console.log("CREANDO EL ROL:",req.body);
-
-        const { nombre, descripcion} = req.body;
-
-        const newRol = await prisma.roles.create({
-            data: {
-                nombre,
-                descripcion
-            }
-        });
-
-        res.redirect('/show_rols_render');
-    } catch (error) {
-        console.error('Error al crear el usuario:', error);
-        res.status(500).json({ error: 'Error al crear el usuario' });
     }
 };
 
@@ -381,26 +336,3 @@ exports.enviarCorreoCambioRol = async (req, res) => {
         });
     }
 };
-
-// Ruta para actualizar el rol basado en el token
-exports.actualizarRol = async (req, res) => {
-    const { token } = req.params;
-
-    try {
-        // Verifica y decodifica el token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const email = decoded.email;
-
-        // Actualiza el rol del usuario a 3
-        await prisma.user.update({
-            where: { email },
-            data: { rolGeneralId: 3 }
-        });
-
-        res.redirect('/');
-    } catch (error) {
-        console.error('Error al actualizar el rol:', error);
-        res.status(400).send('El enlace ha expirado o es inválido.');
-    }
-};
-

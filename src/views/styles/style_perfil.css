@@ -1,58 +1,87 @@
-/* Estilos generales */
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
+/* Variables de color */
+:root {
+    --azul: #2f80ed;
+    --verde: #27ae60;
+    --blanco: #ffffff;
+    --gris-claro: #f4f6f8;
+    --gris-texto: #444;
+  }
+  
+  /* Reset básico */
+  * {
     margin: 0;
-}
-
-/* Contenedor principal */
-.profile-container {
-    max-width: 800px;
-    margin: 20px auto;
-    padding: 20px;
-}
-
-/* Secciones del perfil */
-.profile-section {
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    margin-bottom: 20px;
-}
-
-.profile-section h2 {
-    font-size: 24px;
-    color: #2c3e50;
-    margin-bottom: 15px;
-    text-align: center;
-}
-
-.profile-section p {
-    font-size: 16px;
-    color: #333;
-    margin: 8px 0;
-}
-
-.profile-section ul {
-    list-style-type: none;
     padding: 0;
-}
-
-.profile-section ul li {
-    background-color: #ecf0f1;
-    border-radius: 5px;
-    padding: 15px;
-    margin: 10px 0;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.profile-section ul li p {
-    margin: 4px 0;
-    font-size: 15px;
-    color: #34495e;
-}
-
-.profile-section ul li strong {
-    color: #2c3e50;
-}
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: var(--gris-claro);
+    color: var(--gris-texto);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Header */
+  header {
+    background-color: var(--azul);
+    color: var(--blanco);
+    padding: 1rem 2rem;
+    text-align: center;
+  }
+  
+  /* Main */
+  main {
+    flex: 1;
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  /* Secciones */
+  .perfil-info,
+  .perfil-actions {
+    background-color: var(--blanco);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+  
+  h2 {
+    color: var(--azul);
+    margin-bottom: 1rem;
+  }
+  
+  p {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Botones */
+  .btn {
+    display: inline-block;
+    text-decoration: none;
+    background-color: var(--verde);
+    color: var(--blanco);
+    padding: 0.75rem 1.5rem;
+    margin-right: 1rem;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+  }
+  
+  .btn:hover {
+    background-color: #219150;
+  }
+  
+  /* Footer */
+  footer {
+    background-color: var(--azul);
+    color: var(--blanco);
+    text-align: center;
+    padding: 1rem;
+    font-size: 0.9rem;
+  }
+  

@@ -1,0 +1,21 @@
+<%- include('./partials/header'); %>  
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form action="/asignatura/editAsignatura/<%= asignaturas.id %>" method="POST">
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" name="nombre" value="<%= asignaturas.nombre %>" required>
+    
+        <label for="descripcion">Apellido:</label>
+        <input type="text" id="descripcion" name="descripcion" value="<%= asignaturas.descripcion %>" required>
+
+        <button type="submit">Guardar cambios</button>
+    </form>   
+</body>
+</html> 
